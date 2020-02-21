@@ -239,7 +239,7 @@ class BasicLayout extends React.PureComponent {
             <GlobalHeader
               logo={logo}
               fetchingNotices={fetchingNotices}
-              collapsed={collapsed !== true}
+              collapsed={collapsed}
               datastoreConfig={datastoreConfig}
               savingSession={savingSession}
               sessionBannerVisible={sessionBannerVisible}

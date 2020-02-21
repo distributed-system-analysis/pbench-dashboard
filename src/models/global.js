@@ -7,7 +7,7 @@ export default {
     sessionBannerVisible: false,
     sessionDescription: '',
     sessionId: '',
-    collapsed: false,
+    collapsed: true,
     selectedIndices: [],
     selectedResults: [],
     selectedControllers: [],
