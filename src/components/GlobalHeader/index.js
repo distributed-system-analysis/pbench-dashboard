@@ -1,19 +1,43 @@
-import { PureComponent } from 'react';
+import { Component } from 'react';
 import { routerRedux, Link } from 'dva/router';
 import { Icon, Divider, Tooltip, Alert, Badge, Tag } from 'antd';
+import { Dropdown, DropdownItem, DropdownToggle, Avatar } from '@patternfly/react-core';
 import Debounce from 'lodash-decorators/debounce';
 import { connect } from 'dva';
 import styles from './index.less';
 import SessionModal from '../SessionModal';
 import packageJSON from '../../../package.json';
+import imgAvatar from '../../assets/avatar.svg';
 
-@connect(store => ({
+@connect(({ store, auth }) => ({
   store,
+  auth: auth.auth,
 }))
-class GlobalHeader extends PureComponent {
+class GlobalHeader extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isDropdownOpen: false,
+    };
+  }
+
   componentWillUnmount() {
     this.triggerResizeEvent.cancel();
   }
+
+  onDropdownToggle = isDropdownOpen => {
+    this.setState({
+      isDropdownOpen,
+    });
+  };
+
+  onDropdownSelect = () => {
+    const { isDropdownOpen } = this.state;
+    this.setState({
+      isDropdownOpen: !isDropdownOpen,
+    });
+  };
 
   toggle = () => {
     const { collapsed, onCollapse } = this.props;
@@ -44,6 +68,19 @@ class GlobalHeader extends PureComponent {
     dispatch(routerRedux.push('/'));
   };
 
+  logoutSession = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'auth/logoutUser',
+    });
+    window.location.reload();
+  };
+
+  navigateToProfile = () => {
+    const { dispatch } = this.props;
+    dispatch(routerRedux.push(`/profile`));
+  };
+
   render() {
     const {
       collapsed,
@@ -55,7 +92,25 @@ class GlobalHeader extends PureComponent {
       isMobile,
       logo,
       dispatch,
+      auth,
     } = this.props;
+
+    const userDropdownItems = [
+      <DropdownItem className={styles.dropedDiv} onClick={() => this.navigateToProfile()}>
+        Profile
+      </DropdownItem>,
+      <DropdownItem className={styles.dropedDiv} onClick={() => this.logoutSession()}>
+        Logout
+      </DropdownItem>,
+    ];
+
+    const { isDropdownOpen } = this.state;
+
+    const avatarIcon = (
+      <Tooltip className={styles.profileOpt}>
+        {<Avatar src={imgAvatar} alt="Avatar image" />}
+      </Tooltip>
+    );
 
     return (
       <div>
@@ -129,6 +184,19 @@ class GlobalHeader extends PureComponent {
                 <Icon type="message" />
               </a>
             </Tooltip>
+            <Tooltip className={styles.profileOpt}>
+              <Dropdown
+                isPlain
+                position="right"
+                onSelect={this.onDropdownSelect}
+                isOpen={isDropdownOpen}
+                toggle={
+                  <DropdownToggle onToggle={this.onDropdownToggle}>{auth.username}</DropdownToggle>
+                }
+                dropdownItems={userDropdownItems}
+              />
+            </Tooltip>
+            {auth.username === 'admin' ? <avatarIcon /> : 'Admin'}
           </div>
         </div>
       </div>

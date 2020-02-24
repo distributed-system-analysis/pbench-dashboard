@@ -24,6 +24,9 @@
   "dependencies": {
     "@antv/g2": "^3.4.10",
     "@babel/runtime": "^7.3.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.28",
+    "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@fortawesome/react-fontawesome": "^0.1.9",
     "@nivo/bar": "^0.36.0",
     "@patternfly/react-charts": "^5.3.19",
     "@patternfly/react-core": "^3.153.2",
@@ -56,6 +59,7 @@
     "react-dom": "^16.8.3",
     "react-fittext": "^1.0.0",
     "redux": "3.x",
+    "redux-mock-store": "^1.5.4",
     "redux-persist": "^6.0.0",
     "setprototypeof": "^1.1.0",
     "umi": "2.11.1",
