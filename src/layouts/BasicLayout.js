@@ -15,12 +15,10 @@ import deepEqual from 'lodash/isEqual';
 import GlobalFooter from 'ant-design-pro/lib/GlobalFooter';
 import GlobalHeader from '@/components/GlobalHeader';
 import SiderMenu from '../components/SiderMenu';
-import Authorized from '../utils/Authorized';
 import getMenuData from '../common/menu';
 import logo from '../assets/pbench_logo.png';
 
 const { Content, Header, Footer } = Layout;
-const { check } = Authorized;
 
 const redirectData = [];
 const getRedirect = item => {
@@ -147,26 +145,6 @@ class BasicLayout extends React.PureComponent {
     return `${currRouterData.name} - Pbench Dashboard`;
   };
 
-  getBaseRedirect = () => {
-    // According to the url parameter to redirect
-    const urlParams = new URL(window.location.href);
-
-    const redirect = urlParams.searchParams.get('redirect');
-    // Remove the parameters in the url
-    if (redirect) {
-      urlParams.searchParams.delete('redirect');
-      window.history.replaceState(null, 'redirect', urlParams.href);
-    } else {
-      const { routerData } = this.props;
-      // get the first authorized route path in routerData
-      const authorizedPath = Object.keys(routerData).find(
-        item => check(routerData[item].authority, item) && item !== '/'
-      );
-      return authorizedPath;
-    }
-    return redirect;
-  };
-
   handleMenuCollapse = collapsed => {
     const { dispatch } = this.props;
     dispatch({
@@ -219,14 +197,10 @@ class BasicLayout extends React.PureComponent {
       location: { pathname },
     } = this.props;
     const { isMobile: mb } = this.state;
-    // const baseRedirect = this.getBaseRedirect();
     const layout = (
       <Layout>
         <SiderMenu
           logo={logo}
-          // If you do not have the Authorized parameter
-          // you will be forced to jump to the 403 interface without permission
-          Authorized={Authorized}
           menuData={getMenuData()}
           collapsed={collapsed}
           // eslint-disable-next-line no-restricted-globals

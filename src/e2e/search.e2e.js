@@ -11,7 +11,25 @@ beforeAll(async () => {
     args: ['--no-sandbox'],
   });
   page = await browser.newPage();
+  await page.goto('http://localhost:8000/dashboard/#/');
+  // Login using dummy credentials
+  await page.waitForSelector(
+    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
+  );
+  await page.click(
+    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
+  );
+  await page.waitForSelector('.pf-l-grid #horizontal-form-name');
+  await page.click('.pf-l-grid #horizontal-form-name');
+  await page.type('.pf-l-grid #horizontal-form-name', 'admin');
+  await page.waitForSelector('.pf-l-grid #horizontal-form-password');
+  await page.click('.pf-l-grid #horizontal-form-password');
+  await page.type('.pf-l-grid #horizontal-form-password', 'admin');
+  await page.waitForSelector('#submitBtn');
+  await page.click('#submitBtn');
   await page.goto('http://localhost:8000/dashboard/#/search/');
+
+  // Intercept network requests
   await page.setRequestInterception(true);
   page.on('request', request => {
     if (request.method() === 'POST' && request.postData().includes('query_string')) {
