@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { connect } from 'dva';
 import {
   Grid,
   GridItem,
@@ -12,19 +13,23 @@ import {
 import { CaretDownIcon } from '@patternfly/react-icons';
 import LoginHandler from '../LoginHandler';
 
+@connect(user => ({
+  user: user.user,
+}))
 class PrivateRoute extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoggedIn: false,
       isOpen: false,
       currPage: '',
     };
   }
 
-  setLoggedIn = loggedIn => {
-    this.setState({
-      isLoggedIn: loggedIn,
+  setLoggedIn = payload => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'user/loadUser',
+      payload,
     });
   };
 
@@ -54,8 +59,8 @@ class PrivateRoute extends Component {
   };
 
   render() {
-    const { isLoggedIn, currPage, isOpen } = this.state;
-    const { children } = this.props;
+    const { currPage, isOpen } = this.state;
+    const { children, user } = this.props;
     // Basic Login methods
     const loginMethods = (
       <Grid gutter="md" style={{ padding: '10px' }}>
@@ -103,7 +108,8 @@ class PrivateRoute extends Component {
     // DropdownMenu items
     const dropdownItems = [];
 
-    if (isLoggedIn) {
+    // Check if empty user object
+    if (Object.entries(user.user).length !== 0) {
       return <Fragment>{children}</Fragment>;
     }
     return (
