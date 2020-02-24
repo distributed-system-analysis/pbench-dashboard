@@ -27,7 +27,7 @@ class PbenchLoginHandler extends Component {
     const { username, password } = this.state;
     const { setLoggedIn } = this.props;
     if (username === 'admin' && password === 'admin') {
-      setLoggedIn(true);
+      setLoggedIn({ username });
     } else {
       console.log('Wrong username/password pair');
     }
