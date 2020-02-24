@@ -107,7 +107,7 @@ class PrivateRoute extends Component {
       return <Fragment>{children}</Fragment>;
     }
     return (
-      <Grid style={{ marginTop: '200px' }}>
+      <Grid style={{ marginTop: '200px' }} className="login-form">
         <GridItem
           sm={8}
           md={4}
