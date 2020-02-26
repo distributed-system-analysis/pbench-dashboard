@@ -15,7 +15,6 @@ const mockProps = {
     protocol: ['tcp'],
     test_type: ['stream', 'maerts', 'bidirec', 'rr'],
   },
-  ports: ['client_hostname:1', 'client_hostname:2', 'client_hostname:all'],
 };
 
 const mockDispatch = jest.fn();
@@ -29,9 +28,9 @@ describe('test rendering of TableFilterSelection page component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('check rendering', () => {
-    expect(wrapper.find('Select').length).toEqual(8);
+    expect(wrapper.find('Select').length).toEqual(7);
     expect(wrapper.find('Form')).toHaveLength(1);
-    expect(wrapper.find('Row')).toHaveLength(3);
+    expect(wrapper.find('Row')).toHaveLength(2);
     expect(wrapper.find('Button')).toHaveLength(2);
   });
 });
@@ -73,21 +72,5 @@ describe('test interaction of TableFilterSelection page component', () => {
       .at(1)
       .simulate('change');
     expect(wrapper.state('selectedFilters')).toEqual(state);
-  });
-  it('Check change of Port', () => {
-    wrapper
-      .find('Select')
-      .last()
-      .simulate('change', 'client_hostname:3');
-    expect(wrapper.state('selectedPorts')).toEqual('client_hostname:3');
-  });
-});
-
-describe('test life cycle method update', () => {
-  it('should call filterDefaultPort when componentDidUpdate method is invoked', () => {
-    const spy = jest.spyOn(wrapper.instance(), 'filterDefaultPort');
-    wrapper.instance().forceUpdate();
-    wrapper.setProps({ ports: ['client_hostname:3'] });
-    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

@@ -11,7 +11,11 @@ const mockProps = {
   },
   selectedResults: ['test_result'],
   selectedControllers: ['test_controller'],
-  iterations: [{}],
+  iterations: {
+    test_result: {
+      iterations: {},
+    },
+  },
   iterationParams: {},
 };
 
