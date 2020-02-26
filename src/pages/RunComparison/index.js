@@ -1,88 +1,22 @@
 import React from 'react';
 import { connect } from 'dva';
-import {
-  Row,
-  Col,
-  Card,
-  Select,
-  Tabs,
-  Spin,
-  Tag,
-  Table,
-  Button,
-  Form,
-  Modal,
-  Input,
-  Switch,
-  message,
-  Collapse,
-  Icon,
-} from 'antd';
+import { Row, Col, Card, Tabs, Spin, Tag, Button, Form, Modal, Input, Switch, message } from 'antd';
 import { ResponsiveBar } from '@nivo/bar';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import moment from 'moment';
-import TimeseriesGraph from '@/components/TimeseriesGraph';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-import { generateIterationClusters, getComparisonColumn } from '../../utils/parse';
+import { generateClusters } from '../../utils/parse';
 
 const { Description } = DescriptionList;
 const { TabPane } = Tabs;
-const FormItem = Form.Item;
-const { Panel } = Collapse;
-
-const columns = [
-  {
-    title: 'Cluster ID',
-    dataIndex: 'clusterID',
-    key: 'clusterID',
-  },
-  {
-    title: 'Matched Configurations',
-    dataIndex: 'cluster',
-    render: text => {
-      const splitTags = text.split('-');
-      return splitTags.map(tag => (
-        <Tag color="#2db7f5" key={tag}>
-          {tag}
-        </Tag>
-      ));
-    },
-    key: 'cluster',
-  },
-  {
-    title: 'Iterations',
-    dataIndex: 'length',
-    key: 'length',
-  },
-];
-
-const legendColumns = [
-  {
-    title: 'Cluster ID',
-    dataIndex: 'clusterID',
-    key: 'clusterID',
-  },
-  {
-    title: 'Matched Configurations',
-    dataIndex: 'cluster',
-    render: text => {
-      const splitTags = text.split('-');
-      return splitTags.map(tag => (
-        <Tag color="#2db7f5" key={tag}>
-          {tag}
-        </Tag>
-      ));
-    },
-    key: 'cluster',
-  },
-];
 
 @connect(({ dashboard, global, datastore }) => ({
   iterationParams: dashboard.iterationParams,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
+  selectedIndices: global.selectedIndices,
   selectedIterations: global.selectedIterations,
   datastoreConfig: datastore.datastoreConfig,
 }))
@@ -91,14 +25,8 @@ class RunComparison extends React.Component {
     super(props);
 
     this.state = {
-      timeseriesData: [],
-      timeseriesDropdown: [],
-      timeseriesDropdownSelected: [],
-      clusteredIterations: [],
-      clusteredGraphData: [],
-      graphKeys: [],
-      tableData: [],
-      selectedConfig: [],
+      clusters: {},
+      clusterKeys: [],
       loadingClusters: false,
       loadingPdf: false,
       exportModalVisible: false,
@@ -106,42 +34,31 @@ class RunComparison extends React.Component {
       selectedComponents: [],
       pdfHeader: '',
       pdfName: '',
-      column: [],
     };
   }
 
-  componentDidMount = () => {
-    const { iterationParams, selectedIterations } = this.props;
+  componentDidMount() {
+    const {
+      iterationParams,
+      selectedIterations,
+      selectedResults,
+      selectedIndices,
+      datastoreConfig,
+      dispatch,
+    } = this.props;
 
-    this.onGenerateIterationClusters(Object.keys(iterationParams), selectedIterations);
-  };
-
-  onGenerateIterationClusters = (clusters, iterations) => {
-    const { datastoreConfig, dispatch } = this.props;
-
-    this.setState({ loadingClusters: true });
-    Promise.resolve(generateIterationClusters(clusters, iterations)).then(iterationClusters => {
-      this.setState({
-        ...iterationClusters,
-      });
-      dispatch({
-        type: 'dashboard/fetchTimeseriesData',
-        payload: {
-          clusteredIterations: iterationClusters.clusteredIterations,
-          datastoreConfig,
-        },
-      }).then(timeseriesData => {
-        this.setState({ loadingClusters: false });
-        this.setState({
-          ...timeseriesData,
-        });
-        const column = getComparisonColumn(iterationClusters.maxIterationLength);
-        this.setState({
-          column,
-        });
-      });
+    dispatch({
+      type: 'dashboard/fetchIterationData',
+      payload: { selectedResults, selectedIndices, datastoreConfig },
     });
-  };
+    const clusters = generateClusters(selectedIterations, iterationParams);
+    dispatch({
+      type: 'dashboard/fetchTimeseriesData',
+      payload: { selectedResults, selectedIndices, datastoreConfig },
+    });
+    this.setState({ clusters: clusters.data });
+    this.setState({ clusterKeys: [...clusters.keys] });
+  }
 
   onResetIterationClusters = () => {
     const { iterationParams, selectedIterations } = this.props;
@@ -258,63 +175,8 @@ class RunComparison extends React.Component {
   };
 
   render() {
-    const {
-      graphKeys,
-      tableData,
-      clusteredGraphData,
-      clusteredIterations,
-      selectedConfig,
-      timeseriesData,
-      timeseriesDropdown,
-      timeseriesDropdownSelected,
-      loadingPdf,
-      exportModalVisible,
-      loadingClusters,
-      column,
-    } = this.state;
-    const { selectedControllers, selectedResults, iterationParams } = this.props;
-
-    const expandedRowRender = cluster => {
-      const expandedColumns = [
-        {
-          title: 'iteration_name',
-          dataIndex: 'iteration_name',
-          key: 'iteration_name',
-        },
-        {
-          title: 'result_name',
-          dataIndex: 'result_name',
-          width: 250,
-          key: 'result_name',
-        },
-        {
-          title: 'iteration_number',
-          dataIndex: 'iteration_number',
-          key: 'iteration_number',
-        },
-      ];
-
-      Object.keys(iterationParams).forEach(config => {
-        expandedColumns.push({
-          title: iterationParams[config],
-          dataIndex: iterationParams[config],
-          key: iterationParams[config],
-        });
-      });
-      expandedColumns.push({
-        title: 'closestSample',
-        dataIndex: 'closestSample',
-        key: 'closestSample',
-      });
-
-      return (
-        <Table
-          columns={expandedColumns}
-          dataSource={clusteredIterations[cluster.primaryMetric][cluster.key]}
-          pagination={false}
-        />
-      );
-    };
+    const { clusters, clusterKeys, loadingPdf, exportModalVisible, loadingClusters } = this.state;
+    const { selectedControllers, selectedResults } = this.props;
 
     const description = (
       <DescriptionList size="small" col="1" gutter={16}>
@@ -327,27 +189,6 @@ class RunComparison extends React.Component {
           {selectedResults.map(result => (
             <Tag key={result}>{result['run.name']}</Tag>
           ))}
-        </Description>
-        <Description term="Clustering Config">
-          <div>
-            <Select
-              addonBefore="Cluster Parameters"
-              mode="tags"
-              placeholder="Select cluster config"
-              value={selectedConfig}
-              defaultValue={Object.keys(iterationParams)}
-              onChange={this.onChangeIterationClusters}
-            >
-              {Object.keys(iterationParams).map(category => (
-                <Select.Option value={category} key={category}>
-                  {category}
-                </Select.Option>
-              ))}
-            </Select>
-            <Button type="primary" onClick={this.resetIterationClusters} style={{ marginLeft: 8 }}>
-              Reset
-            </Button>
-          </div>
         </Description>
       </DescriptionList>
     );
@@ -425,14 +266,15 @@ class RunComparison extends React.Component {
           <Tabs size="large">
             <TabPane tab="Summary" key="summary" style={{ padding: 16 }}>
               <Spin spinning={loadingClusters}>
-                {Object.keys(clusteredGraphData).map(cluster => (
+                {Object.keys(clusters).map(cluster => (
                   <div>
                     <Row style={{ marginTop: 16 }}>
-                      <Col xl={16} lg={12} md={12} sm={24} xs={24} style={{ height: 500 }}>
+                      <Col xl={16} lg={12} md={12} sm={24} xs={24} style={{ height: 550 }}>
                         <h4 style={{ marginLeft: 16 }}>{cluster}</h4>
                         <ResponsiveBar
-                          data={clusteredGraphData[cluster]}
-                          keys={graphKeys[cluster]}
+                          data={clusters[cluster].map(iteration => iteration.cluster)}
+                          keys={clusterKeys}
+                          enableLabel={false}
                           indexBy="cluster"
                           groupMode="grouped"
                           padding={0.3}
@@ -442,28 +284,17 @@ class RunComparison extends React.Component {
                             <div style={{ backgroundColor: 'white', color: 'grey' }}>
                               <Row>
                                 <Col>Result</Col>
-                                <Col>{clusteredIterations[cluster][index][id].result_name}</Col>
+                                <Col>{clusters[cluster][index][id].run.name}</Col>
                               </Row>
                               <br />
                               <Row>
-                                <Col>Iteration</Col>
-                                <Col>{clusteredIterations[cluster][index][id].iteration_name}</Col>
+                                <Col>Sample</Col>
+                                <Col>{clusters[cluster][index][id].sample.name}</Col>
                               </Row>
                               <br />
                               <Row>
                                 <Col>Mean</Col>
                                 <Col>{value}</Col>
-                              </Row>
-                              <br />
-                              <Row>
-                                <Col>Matched Configurations</Col>
-                                <Col>
-                                  <div>
-                                    {tableData[cluster][index].cluster.split('-').map(tag => (
-                                      <Tag color="#2db7f5">{tag}</Tag>
-                                    ))}
-                                  </div>
-                                </Col>
                               </Row>
                             </div>
                           )}
@@ -474,139 +305,14 @@ class RunComparison extends React.Component {
                             bottom: 64,
                             right: 124,
                           }}
-                          axisLeft={{
-                            orient: 'left',
-                            tickSize: 5,
-                            tickPadding: 5,
-                            tickRotation: 0,
-                            legend: 'mean',
-                            legendPosition: 'center',
-                            legendOffset: -40,
-                          }}
-                          axisBottom={{
-                            orient: 'bottom',
-                            tickSize: 5,
-                            tickPadding: 5,
-                            tickRotation: 0,
-                            legend: 'cluster ID',
-                            legendPosition: 'center',
-                            legendOffset: 36,
-                          }}
-                          labelTextColor="inherit:darker(1.6)"
-                          theme={{
-                            tooltip: {
-                              container: {
-                                background: 'white',
-                                fontSize: '13px',
-                              },
-                            },
-                            labels: {
-                              textColor: '#555',
-                            },
-                          }}
-                        />
-                      </Col>
-                      <Col xl={8} lg={12} md={12} sm={24} xs={24}>
-                        <Table
-                          size="small"
-                          columns={legendColumns}
-                          dataSource={tableData[cluster]}
                         />
                       </Col>
                     </Row>
-                    <Collapse
-                      bordered
-                      defaultActiveKey={['1']}
-                      expandIcon={({ isActive }) => (
-                        <Icon type="caret-right" rotate={isActive ? 90 : 0} />
-                      )}
-                    >
-                      <Panel header="Percent Differences Table" key="1">
-                        <Table
-                          columns={column}
-                          dataSource={clusteredGraphData[cluster]}
-                          pagination={{ pageSize: 50 }}
-                          scroll={{ x: 1500, y: 240 }}
-                          bordered
-                        />
-                      </Panel>
-                    </Collapse>
-                    <br
-                      style={{
-                        borderTopWidth: 3,
-                        borderStyle: 'solid',
-                        borderColor: '#8c8b8b',
-                      }}
-                    />
                   </div>
                 ))}
               </Spin>
             </TabPane>
-            <TabPane forceRender tab="All" key="all" style={{ padding: 16 }}>
-              {Object.keys(timeseriesData).length > 0 &&
-                Object.keys(timeseriesDropdown).length > 0 && (
-                  <div id="timeseries">
-                    {Object.keys(tableData).map(table => (
-                      <Card
-                        type="inner"
-                        title={table}
-                        style={{ marginBottom: 16 }}
-                        extra={
-                          <Form layout="inline">
-                            <FormItem
-                              label="Selected Cluster"
-                              colon={false}
-                              style={{ marginLeft: 16, fontWeight: '500' }}
-                            >
-                              <Select
-                                defaultValue={`Cluster ${0}`}
-                                style={{ width: 120, marginLeft: 16 }}
-                                value={timeseriesDropdownSelected[table]}
-                                onChange={value => this.onTimeseriesClusterChange(value, table)}
-                              >
-                                {timeseriesDropdown[table].map(cluster => (
-                                  <Select.Option value={cluster}>
-                                    {`Cluster ${cluster}`}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            </FormItem>
-                          </Form>
-                        }
-                      >
-                        <TimeseriesGraph
-                          key={table}
-                          graphId={table}
-                          graphName={table}
-                          data={timeseriesData[table][timeseriesDropdownSelected[table]][0].data}
-                          dataSeriesNames={
-                            timeseriesData[table][timeseriesDropdownSelected[table]][0]
-                              .data_series_names
-                          }
-                          xAxisSeries={
-                            timeseriesData[table][timeseriesDropdownSelected[table]][0]
-                              .x_axis_series
-                          }
-                        />
-                      </Card>
-                    ))}
-                  </div>
-                )}
-            </TabPane>
           </Tabs>
-        </Card>
-        <br />
-        <Card title="Cluster Tables" id="table">
-          {Object.keys(tableData).map(table => (
-            <Table
-              bordered
-              title={() => <h4>{table}</h4>}
-              columns={columns}
-              dataSource={tableData[table]}
-              expandedRowRender={expandedRowRender}
-              pagination={{ pageSize: 20 }}
-            />
-          ))}
         </Card>
       </div>
     );

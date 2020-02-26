@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Spin, notification, Tag } from 'antd';
+import { Card, Spin, Tag } from 'antd';
 
 import TableFilterSelection from '@/components/TableFilterSelection';
 import Button from '@/components/Button';
@@ -12,14 +12,14 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 @connect(({ datastore, global, dashboard, loading }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
-  iterationPorts: dashboard.iterationPorts,
   results: dashboard.results,
   controllers: dashboard.controllers,
   datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
+  selectedIndices: global.selectedIndices,
   selectedIterationKeys: global.selectedIterationKeys,
-  loading: loading.effects['dashboard/fetchIterations'],
+  loading: loading.effects['dashboard/fetchIterationSamples'],
 }))
 class ComparisonSelect extends React.Component {
   constructor(props) {
@@ -28,18 +28,16 @@ class ComparisonSelect extends React.Component {
 
     this.state = {
       resultIterations: iterations,
-      selectedRows: [],
+      selectedRows: {},
     };
   }
 
   componentDidMount() {
-    const { selectedResults, datastoreConfig, dispatch } = this.props;
+    const { selectedResults, selectedIndices, datastoreConfig, dispatch } = this.props;
 
     dispatch({
-      type: 'dashboard/fetchIterations',
-      payload: { selectedResults, datastoreConfig },
-    }).catch(() => {
-      this.openNetworkErrorNotification('error');
+      type: 'dashboard/fetchIterationSamples',
+      payload: { selectedResults, selectedIndices, datastoreConfig },
     });
   }
 
@@ -51,31 +49,21 @@ class ComparisonSelect extends React.Component {
     }
   }
 
-  openNetworkErrorNotification = type => {
-    notification[type]({
-      message: 'Network Error',
-      description:
-        "The selected iteration's resources are too large to parse in the browser. Please try another result.",
-    });
-  };
-
   onCompareIterations = () => {
     const { selectedRows, resultIterations } = this.state;
 
-    if (selectedRows.length > 0) {
-      this.compareIterations(selectedRows.flat());
+    if (Object.keys(selectedRows).length > 0) {
+      this.compareIterations(selectedRows);
     } else {
-      let selectedIterations = [];
-      resultIterations.forEach(result => {
-        selectedIterations = selectedIterations.concat(result.iterations);
-      });
-      this.compareIterations(selectedIterations);
+      this.compareIterations(resultIterations);
     }
   };
 
-  onSelectChange = (selectedIterations, result) => {
+  onSelectChange = (iteration, run) => {
     const { selectedRows } = this.state;
-    selectedRows[result] = selectedIterations;
+    selectedRows[run.id] = { ...run };
+    selectedRows[run.id].iterations = {};
+    selectedRows[run.id].iterations[iteration.name] = iteration;
     this.setState({ selectedRows });
   };
 
@@ -103,7 +91,7 @@ class ComparisonSelect extends React.Component {
 
   render() {
     const { resultIterations } = this.state;
-    const { iterationParams, iterationPorts, selectedControllers, loading } = this.props;
+    const { iterationParams, selectedControllers, loading } = this.props;
     return (
       <PageHeaderLayout
         title={selectedControllers.join(', ')}
@@ -117,31 +105,25 @@ class ComparisonSelect extends React.Component {
               name="Compare Iterations"
               onClick={this.onCompareIterations}
             />
-            <TableFilterSelection
-              onFilterTable={this.onFilterTable}
-              filters={iterationParams}
-              ports={iterationPorts}
-            />
-            {resultIterations.map((iteration, result) => {
+            <TableFilterSelection onFilterTable={this.onFilterTable} filters={iterationParams} />
+            {Object.values(resultIterations).map(run => {
               const rowSelection = {
-                onSelect: (record, selected, selectedRows) =>
-                  this.onSelectChange(selectedRows, result),
-                onSelectAll: (selected, selectedRows) => this.onSelectChange(selectedRows, result),
+                hideDefaultSelections: true,
+                onSelect: record => this.onSelectChange(record, run),
               };
               return (
-                <div key={iteration.resultName} style={{ marginTop: 32 }}>
+                <div key={run.run_name} style={{ marginTop: 32 }}>
                   <div style={{ display: 'flex' }}>
-                    <h1>{iteration.resultName}</h1>
+                    <h1>{run.run_name}</h1>
                     <span style={{ marginLeft: 8 }}>
-                      <Tag color="blue">{iteration.controllerName}</Tag>
+                      <Tag color="blue">{run.run_controller}</Tag>
                     </span>
                   </div>
 
                   <Table
                     rowSelection={rowSelection}
-                    columns={iteration.columns}
-                    dataSource={iteration.iterations}
-                    hideDefaultSelections
+                    columns={run.columns}
+                    dataSource={Object.values(run.iterations)}
                     bordered
                   />
                 </div>

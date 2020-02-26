@@ -110,3 +110,236 @@ export const mockStore = {
   search: {},
   store: {},
 };
+
+export const mockDataSample = [
+  {
+    hits: {
+      hits: [
+        {
+          _source: {
+            run: {
+              id: 'test_run_id',
+              controller: 'test_controller',
+              name: 'test_run_name',
+              script: 'test_script',
+              config: 'test_config',
+            },
+            iteration: { name: 'test_iteration_1', number: 1 },
+            benchmark: {
+              instances: 1,
+              max_stddevpct: 1,
+              message_size_bytes: 1,
+              primary_metric: 'test_measurement_title',
+              test_type: 'stream',
+            },
+            sample: {
+              closest_sample: 1,
+              mean: 0.1,
+              stddev: 0.1,
+              stddevpct: 1,
+              uid: 'test_measurement_id',
+              measurement_type: 'test_measurement_type',
+              measurement_idx: 0,
+              measurement_title: 'test_measurement_title',
+              '@idx': 0,
+              name: 'sample1',
+            },
+          },
+        },
+      ],
+    },
+    aggregations: {
+      id: {
+        buckets: [
+          {
+            key: 'test_run_name',
+            type: {
+              buckets: [
+                {
+                  key: 'test_measurement_type',
+                  title: {
+                    buckets: [
+                      {
+                        key: 'test_measurement_title',
+                        uid: {
+                          buckets: [
+                            {
+                              key: 'test_measurement_id',
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      name: {
+        buckets: [
+          {
+            key: 'test_run_name',
+          },
+        ],
+      },
+      controller: {
+        buckets: [
+          {
+            key: 'test_controller',
+          },
+        ],
+      },
+    },
+  },
+];
+
+export const expectedSampleData = {
+  runs: {
+    test_run_name: {
+      columns: [
+        { title: 'Iteration Name', dataIndex: 'name', key: 'name' },
+        {
+          title: 'test_measurement_type',
+          children: [
+            {
+              title: 'test_measurement_title',
+              children: [
+                {
+                  title: 'test_measurement_type-test_measurement_title-test_measurement_id',
+                  children: [
+                    {
+                      title: 'mean',
+                      dataIndex:
+                        'test_measurement_type-test_measurement_title-test_measurement_id-mean',
+                      key: 'test_measurement_type-test_measurement_title-test_measurement_id-mean',
+                    },
+                    {
+                      title: 'stddevpct',
+                      dataIndex:
+                        'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct',
+                      key:
+                        'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct',
+                    },
+                    {
+                      title: 'closest_sample',
+                      dataIndex:
+                        'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample',
+                      key:
+                        'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      run_name: 'test_run_name',
+      run_controller: 'test_controller',
+      iterations: {
+        test_iteration_1: {
+          name: 'test_iteration_1',
+          number: 1,
+          closest_sample: 1,
+          'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample': 1,
+          'test_measurement_type-test_measurement_title-test_measurement_id-mean': 0.1,
+          'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct': 1,
+          samples: {
+            'test_measurement_title-sample1': {
+              sample: {
+                closest_sample: 1,
+                mean: 0.1,
+                stddev: 0.1,
+                stddevpct: 1,
+                uid: 'test_measurement_id',
+                measurement_type: 'test_measurement_type',
+                measurement_idx: 0,
+                measurement_title: 'test_measurement_title',
+                '@idx': 0,
+                name: 'sample1',
+              },
+              benchmark: {
+                instances: 1,
+                max_stddevpct: 1,
+                message_size_bytes: 1,
+                primary_metric: 'test_measurement_title',
+                test_type: 'stream',
+              },
+              run: {
+                id: 'test_run_id',
+                controller: 'test_controller',
+                name: 'test_run_name',
+                script: 'test_script',
+                config: 'test_config',
+              },
+            },
+          },
+        },
+      },
+      id: 'test_run_name',
+      primaryMetrics: {},
+    },
+  },
+  iterationParams: {
+    instances: [1],
+    message_size_bytes: [1],
+    primary_metric: ['test_measurement_title'],
+    test_type: ['stream'],
+    closest_sample: [1],
+    uid: ['test_measurement_id'],
+    measurement_type: ['test_measurement_type'],
+    measurement_title: ['test_measurement_title'],
+  },
+};
+
+export const expectedClusterData = {
+  data: {
+    test_measurement_title: [
+      {
+        instances: 1,
+        max_stddevpct: 1,
+        message_size_bytes: 1,
+        primary_metric: 'test_measurement_title',
+        test_type: 'stream',
+        cluster: {
+          test_run_name: 0.1,
+          name_test_run_name: 'sample1',
+          percent_test_run_name: 1,
+          cluster: 1,
+        },
+        test_run_name: {
+          sample: {
+            closest_sample: 1,
+            mean: 0.1,
+            stddev: 0.1,
+            stddevpct: 1,
+            uid: 'test_measurement_id',
+            measurement_type: 'test_measurement_type',
+            measurement_idx: 0,
+            measurement_title: 'test_measurement_title',
+            '@idx': 0,
+            name: 'sample1',
+          },
+          run: {
+            id: 'test_run_id',
+            controller: 'test_controller',
+            name: 'test_run_name',
+            script: 'test_script',
+            config: 'test_config',
+          },
+          benchmark: {
+            instances: 1,
+            max_stddevpct: 1,
+            message_size_bytes: 1,
+            primary_metric: 'test_measurement_title',
+            test_type: 'stream',
+          },
+        },
+      },
+    ],
+  },
+  keys: {},
+  params: {},
+};

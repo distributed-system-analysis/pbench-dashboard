@@ -3,11 +3,11 @@ import {
   queryResults,
   queryResult,
   queryTocResult,
-  queryIterations,
-  queryTimeseriesData,
+  queryIterationSamples,
 } from '../services/dashboard';
-import { parseIterationData } from '../utils/parse';
+
 import { insertTocTreeData } from '../utils/utils';
+import { generateSampleTable } from '../utils/parse';
 
 export default {
   namespace: 'dashboard',
@@ -16,11 +16,11 @@ export default {
     result: [],
     results: {},
     iterationParams: {},
-    iterationPorts: [],
     iterations: [],
     controllers: [],
     tocResult: [],
     loading: false,
+    clusters: {},
   },
 
   effects: {
@@ -165,28 +165,18 @@ export default {
         payload: tocTree,
       });
     },
-    *fetchIterations({ payload }, { call, put }) {
-      const response = yield call(queryIterations, payload);
-      const parsedIterationData = parseIterationData(response);
-      const { iterations, iterationParams, iterationPorts } = parsedIterationData;
+    *fetchIterationSamples({ payload }, { call, put }) {
+      const response = yield call(queryIterationSamples, payload);
+      const parsedSampleData = generateSampleTable(response);
 
+      yield put({
+        type: 'modifyConfigCategories',
+        payload: parsedSampleData.iterationParams,
+      });
       yield put({
         type: 'getIterations',
-        payload: {
-          iterations,
-          iterationParams,
-          iterationPorts,
-        },
+        payload: parsedSampleData.runs,
       });
-      yield put({
-        type: 'global/modifySelectedIterations',
-        payload: parsedIterationData.selectedIterationKeys,
-      });
-    },
-    *fetchTimeseriesData({ payload }, { call }) {
-      const response = yield call(queryTimeseriesData, payload);
-
-      return response;
     },
     *updateConfigCategories({ payload }, { put }) {
       yield put({
@@ -230,7 +220,7 @@ export default {
     getIterations(state, { payload }) {
       return {
         ...state,
-        ...payload,
+        iterations: payload,
       };
     },
     modifySelectedControllers(state, { payload }) {

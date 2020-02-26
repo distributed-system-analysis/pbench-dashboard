@@ -77,7 +77,8 @@ export default {
       "results": "http://results.example.com",
       "graphql": "http://graphql.example.com",
       "prefix": "example.prefix",
-      "run_index": "example.index"
+      "run_index": "example.index",
+      "result_index": "example.index"
   },
 }
 ```

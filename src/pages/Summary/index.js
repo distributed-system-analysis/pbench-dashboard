@@ -49,7 +49,6 @@ const tocColumns = [
 @connect(({ global, datastore, dashboard, loading }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
-  iterationPorts: dashboard.iterationPorts,
   result: dashboard.result,
   tocResult: dashboard.tocResult,
   datastoreConfig: datastore.datastoreConfig,
@@ -57,7 +56,7 @@ const tocColumns = [
   selectedResults: global.selectedResults,
   selectedIndices: global.selectedIndices,
   loadingSummary:
-    loading.effects['dashboard/fetchIterations'] ||
+    loading.effects['dashboard/fetchIterationSamples'] ||
     loading.effects['dashboard/fetchResult'] ||
     loading.effects['dashboard/fetchTocResult'],
 }))
@@ -68,7 +67,7 @@ class Summary extends React.Component {
 
     this.state = {
       activeSummaryTab: 'iterations',
-      resultIterations: iterations[0],
+      resultIterations: iterations,
     };
   }
 
@@ -76,8 +75,8 @@ class Summary extends React.Component {
     const { dispatch, datastoreConfig, selectedIndices, selectedResults } = this.props;
 
     dispatch({
-      type: 'dashboard/fetchIterations',
-      payload: { selectedResults, datastoreConfig },
+      type: 'dashboard/fetchIterationSamples',
+      payload: { selectedResults, selectedIndices, datastoreConfig },
     });
     dispatch({
       type: 'dashboard/fetchResult',
@@ -101,7 +100,7 @@ class Summary extends React.Component {
     const { iterations } = this.props;
 
     if (nextProps.iterations !== iterations) {
-      this.setState({ resultIterations: nextProps.iterations[0] });
+      this.setState({ resultIterations: nextProps.iterations });
     }
   }
 
@@ -109,7 +108,7 @@ class Summary extends React.Component {
     const { iterations } = this.props;
 
     const filteredIterations = filterIterations(iterations, selectedParams, selectedPorts);
-    this.setState({ resultIterations: filteredIterations[0] });
+    this.setState({ resultIterations: filteredIterations });
   };
 
   onTabChange = key => {
@@ -122,7 +121,6 @@ class Summary extends React.Component {
       selectedResults,
       loadingSummary,
       iterationParams,
-      iterationPorts,
       selectedControllers,
       tocResult,
       result,
@@ -132,15 +130,17 @@ class Summary extends React.Component {
       iterations: (
         <Card title="Result Iterations" style={{ marginTop: 32 }}>
           <Spin spinning={loadingSummary} tip="Loading Iterations...">
-            <TableFilterSelection
-              onFilterTable={this.onFilterTable}
-              filters={iterationParams}
-              ports={iterationPorts}
-            />
+            <TableFilterSelection onFilterTable={this.onFilterTable} filters={iterationParams} />
             <Table
               style={{ marginTop: 16 }}
-              columns={resultIterations ? resultIterations.columns : []}
-              dataSource={resultIterations ? resultIterations.iterations : []}
+              columns={
+                resultIterations[Object.keys(resultIterations)[0]] &&
+                resultIterations[Object.keys(resultIterations)[0]].columns
+              }
+              dataSource={
+                resultIterations[Object.keys(resultIterations)[0]] &&
+                Object.values(resultIterations[Object.keys(resultIterations)[0]].iterations)
+              }
               bordered
             />
           </Spin>
