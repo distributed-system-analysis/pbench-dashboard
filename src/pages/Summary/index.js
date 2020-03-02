@@ -1,11 +1,12 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Spin, Tag, Card, List, Typography, Divider } from 'antd';
+import { Spin, Tag, Card, List, Typography, Divider, Form } from 'antd';
+import { filterIterations } from '../../utils/parse';
+import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import Table from '@/components/Table';
 import TableFilterSelection from '@/components/TableFilterSelection';
-import { filterIterations } from '../../utils/parse';
-
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import SearchBar from '../../components/SearchBar';
+import TableTree from '@/components/TableTree';
 
 const tabList = [
   {
@@ -26,31 +27,11 @@ const tabList = [
   },
 ];
 
-const tocColumns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    width: '60%',
-  },
-  {
-    title: 'Size',
-    dataIndex: 'size',
-    key: 'size',
-    width: '20%',
-  },
-  {
-    title: 'Mode',
-    dataIndex: 'mode',
-    key: 'mode',
-  },
-];
-
 @connect(({ global, datastore, dashboard, loading }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
   result: dashboard.result,
-  tocResult: dashboard.tocResult,
+  summaryTocResult: dashboard.summaryTocResult,
   datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
@@ -68,11 +49,29 @@ class Summary extends React.Component {
     this.state = {
       activeSummaryTab: 'iterations',
       resultIterations: iterations,
+      selectedConfig: [],
+      tocTree: [],
+      originalTree: [],
+      urlConfig: {},
     };
   }
 
   componentDidMount() {
     const { dispatch, datastoreConfig, selectedIndices, selectedResults } = this.props;
+
+    const fileUrl = {
+      controller_name: selectedResults[0]['run.controller'],
+      run_name: selectedResults[0]['run.name'],
+      config: `${datastoreConfig.results}/results/`,
+    };
+    this.setState({ urlConfig: fileUrl });
+    if (!Array.isArray(selectedResults)) {
+      throw new Error('selectedResults is not an array!');
+    } else if (selectedResults.length <= 0) {
+      throw new Error('no selectedResults!');
+    } else if (selectedResults.length > 1) {
+      throw new Error('too many selectedResults!');
+    }
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
@@ -112,7 +111,48 @@ class Summary extends React.Component {
   };
 
   onTabChange = key => {
-    this.setState({ activeSummaryTab: key });
+    const { summaryTocResult } = this.props;
+    this.setState({
+      activeSummaryTab: key,
+      tocTree: summaryTocResult.tocResult,
+      originalTree: summaryTocResult.tocResult,
+    });
+  };
+
+  configChange = (value, category) => {
+    const { selectedConfig } = this.state;
+    if (value === undefined) {
+      delete selectedConfig[category];
+    } else {
+      selectedConfig[category] = value;
+    }
+    this.setState({ selectedConfig });
+  };
+
+  clearFilters = () => {
+    this.setState({
+      selectedConfig: [],
+    });
+  };
+
+  onload = tocTree => {
+    this.setState({
+      tocTree,
+    });
+  };
+
+  onSearchFile = value => {
+    const { summaryTocResult } = this.props;
+    const { originalTree } = this.state;
+    const abc = summaryTocResult.fileNames.filter(x => x.name === value);
+    this.setState({
+      tocTree: abc,
+    });
+    if (value === '') {
+      this.setState({
+        tocTree: originalTree,
+      });
+    }
   };
 
   render() {
@@ -122,10 +162,10 @@ class Summary extends React.Component {
       loadingSummary,
       iterationParams,
       selectedControllers,
-      tocResult,
+      summaryTocResult,
       result,
     } = this.props;
-
+    const { tocTree, urlConfig } = this.state;
     const contentList = {
       iterations: (
         <Card title="Result Iterations" style={{ marginTop: 32 }}>
@@ -144,11 +184,6 @@ class Summary extends React.Component {
               bordered
             />
           </Spin>
-        </Card>
-      ),
-      toc: (
-        <Card title="Table of Contents" style={{ marginTop: 32 }}>
-          <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
         </Card>
       ),
       metadata: (
@@ -195,6 +230,26 @@ class Summary extends React.Component {
                 )}
               />
             ))}
+        </Card>
+      ),
+      toc: (
+        <Card title="Table of Contents" style={{ marginTop: 32 }}>
+          <Form layout="inline" style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+            <Form.Item>
+              <SearchBar
+                style={{ marginRight: 12 }}
+                placeholder="Search files"
+                onSearch={this.onSearchFile}
+                onPressEnter={this.onSearchFile}
+              />
+            </Form.Item>
+          </Form>
+          <TableTree
+            id="toctable"
+            dataSource={tocTree}
+            extension={summaryTocResult.extension}
+            config={urlConfig}
+          />
         </Card>
       ),
     };
