@@ -17,6 +17,7 @@ const mockProps = {
     },
   },
   iterationParams: {},
+  summaryTocResult: [],
 };
 
 const mockDispatch = jest.fn();
