@@ -137,9 +137,38 @@ export async function queryTocResult(params) {
     datastoreConfig,
     datastoreConfig.run_index,
     selectedIndices
-  )}/_search?q=_parent:"${id}"`;
+  )}/_search?size=1000&q=_parent:"${id}"&scroll=10m`;
+  const endpointScroll = `${
+    datastoreConfig.elasticsearch
+  }/_search/scroll?size=1000&q=_parent:"${id}"&scroll=10m`;
 
-  return request.post(endpoint);
+  function call(scrollId, i) {
+    i += 1;
+    const laterResponse = request.post(`${endpointScroll}&scroll_id=${scrollId}`);
+    Promise.resolve(laterResponse).then(response => {
+      console.log(response);
+      if (response.hits.hits.length !== 0) {
+        console.log(i);
+        call(response._scroll_id, i);
+      }
+    });
+  }
+
+  const initResponse = request.post(endpoint, {
+    data: {
+      size: 10,
+      query: { match_all: {} },
+    },
+  });
+
+  Promise.resolve(initResponse).then(response => {
+    const i = 0;
+    console.log(response._scroll_id);
+    console.log(response.timed_out);
+    if (response.hits.hits.length !== 0) {
+      call(response._scroll_id, i);
+    }
+  });
 }
 
 export async function queryIterationSamples(params) {
