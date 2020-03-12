@@ -28,6 +28,7 @@ export const parseIterationData = results => {
     result.iterationData.forEach(iteration => {
       let iterationMetadata = {
         iteration_name: iteration.iteration_name,
+        iteration_name_format: iteration.iteration_name_format,
         iteration_number: iteration.iteration_number,
         result_name: result.resultName,
         controller_name: result.controllerName,
