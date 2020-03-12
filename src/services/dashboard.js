@@ -160,19 +160,29 @@ export async function queryTimeseriesData(params) {
   Object.keys(clusteredIterations).forEach(primaryMetric => {
     Object.keys(clusteredIterations[primaryMetric]).forEach(cluster => {
       Object.keys(clusteredIterations[primaryMetric][cluster]).forEach(iteration => {
+        const iterationMetadata = clusteredIterations[primaryMetric][cluster][iteration];
+        if (iterationMetadata.iteration_name_format !== undefined) {
+          iterationMetadata.iteration_name_format = iterationMetadata.iteration_name_format.replace(
+            '%d',
+            iterationMetadata.iteration_number
+          );
+          iterationMetadata.iteration_name_format = iterationMetadata.iteration_name_format.replace(
+            '%s',
+            iterationMetadata.iteration_name
+          );
+          iterationMetadata.name = iterationMetadata.iteration_name_format;
+        } else {
+          iterationMetadata.name = `${iterationMetadata.iteration_number}-${
+            iterationMetadata.iteration_name
+          }`;
+        }
         iterationRequests.push(
           request.get(
-            `${datastoreConfig.results}/incoming/${encodeURIComponent(
-              clusteredIterations[primaryMetric][cluster][iteration].controller_name
-            )}/${encodeURIComponent(
-              clusteredIterations[primaryMetric][cluster][iteration].result_name
-            )}/${encodeURIComponent(
-              clusteredIterations[primaryMetric][cluster][iteration].iteration_number
-            )}-${encodeURIComponent(
-              clusteredIterations[primaryMetric][cluster][iteration].iteration_name
-            )}/sample${encodeURIComponent(
-              clusteredIterations[primaryMetric][cluster][iteration].closest_sample
-            )}/result.json`
+            `${datastoreConfig.results}/incoming/${encodeURI(
+              iterationMetadata.controller_name
+            )}/${encodeURI(iterationMetadata.result_name)}/${encodeURI(
+              iterationMetadata.name
+            )}/sample${encodeURI(iterationMetadata.closest_sample)}/result.json`
           )
         );
       });
