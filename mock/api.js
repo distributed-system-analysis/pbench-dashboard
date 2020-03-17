@@ -24,14 +24,10 @@ export const generateMockControllerAggregation = {
 
 const datastoreConfig = config['/dev/datastoreConfig'];
 const prefix = datastoreConfig.prefix + datastoreConfig.run_index.slice(0, -1);
-export const mockIndices = [
-  {
-    index: `${prefix}.0000-00-00`,
-  },
-  {
-    index: `${prefix}.0000-00-01`,
-  },
-];
+export const mockIndices = {
+  [`${prefix}.0000-00-00`]: {},
+  [`${prefix}.0000-00-01`]: {},
+};
 
 export const mockResults = {
   hits: {

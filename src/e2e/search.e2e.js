@@ -20,7 +20,7 @@ beforeAll(async () => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(mockSearch),
       });
-    } else if (request.method() === 'GET' && request.url().includes('indices')) {
+    } else if (request.method() === 'GET' && request.url().includes('aliases')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
@@ -51,7 +51,11 @@ describe('search page component', () => {
       '.ant-select:nth-child(1) > .ant-select-selection > .ant-select-selection__rendered > ul > .ant-select-selection__choice',
       elem => elem.getAttribute('title')
     );
-    expect(testMonth).toBe(mockIndices[0].index.split('.').pop());
+    expect(testMonth).toBe(
+      Object.keys(mockIndices)[0]
+        .split('.')
+        .pop()
+    );
   });
 
   test('should load mappings', async () => {
