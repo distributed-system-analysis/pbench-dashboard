@@ -28,9 +28,9 @@ export default {
       const indices = [];
 
       const prefix = datastoreConfig.prefix + datastoreConfig.run_index.slice(0, -1);
-      response.forEach(index => {
-        if (index.index.includes(prefix)) {
-          indices.push(index.index.split('.').pop());
+      Object.keys(response).forEach(index => {
+        if (index.includes(prefix)) {
+          indices.push(index.split('.').pop());
         }
       });
 

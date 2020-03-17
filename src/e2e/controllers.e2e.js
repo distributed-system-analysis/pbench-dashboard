@@ -20,7 +20,7 @@ beforeAll(async () => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(generateMockControllerAggregation),
       });
-    } else if (request.method() === 'GET' && request.url().includes('indices')) {
+    } else if (request.method() === 'GET' && request.url().includes('aliases')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
