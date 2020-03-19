@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="author" content="">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<style>
+    .startBtn{
+        font-size: 30;
+        color :"blue";
+        background-color : "#fff";
+        margin-top: 20; 
+    }
+    .label {
+        width: 32;
+        align-self:'flex-end';
+    }
+    .card_header{
+        height:160;
+    }
+</style>
+
+<body>
+    
+    <div class="App pf-global--FontFamily--redhatfont--heading--sans-serif">
+        <header class="App-header">
+            <div>
+                <div class="title">
+                    <p class="hero_header">PBench</p>
+                    <p class="hero_subtitle">
+                        A benchmarking and performance </p>
+                        <p class="hero_subtitle">analysis framework</p> 
+                        <br>         
+                        <button class="pf-c-button pf-m-primary" id="startBtn" type="button" href="#cards">Get Started</button>
+                    </div>
+                    <ul>
+                        <li><a href="/start.html">Get Started</a></li>
+                        <li><a href="/learn.html" >Learn More</a></li>
+                        <li><a href="/contact.html" >Contact</a></li>
+                    </ul>
+                    <img class="logo" src="./homepage_hero.svg"></img>
+                </div>
+            </header>
+            <div class="section" id="cards">
+                <div class="pf-c-card card">
+                    <div class="pf-c-card__header pf-c-title pf-m-md">
+                        <h1 class="pf-c-title pf-m-2xl callout_header"> The code includes three sub-system. Learn about each one below</h1>
+                    </div>
+                    <div class="pf-c-card__body">
+                        <div class="pf-l-grid pf-m-all-6-col-on-sm pf-m-all-4-col-on-md pf-m-all-2-col-on-lg pf-m-all-1-col-on-xl">
+                            <div class="pf-l-grid__item pf-m-4-col-on-sm pf-m-4-col-on-lg pf-m-4-col-on-xl">
+                                <div class="card pf-c-card">
+                                    <div class="pf-c-card__header pf-c-title pf-m-md">
+                                        <p class="cardText">Colletion Agent</p> 
+                                        <img src='./homepage_hero.svg' alt="PatternFly Logo" style="height: '50px'" />
+                                        <hr style="height: 3;background-color:#000"></hr>
+                                    </div>
+                                    <div class="pf-c-card__body cardBody">
+                                        <p class="cardBody cardText">The collection agent or harness, pbench-agent, is responsible for providing commands for running
+                                            benchmarks across one or more systems, while properly collection the 
+                                            configuration of those systems, their logs, and specified telemetry from 
+                                            various tools (sar, vmstat, perf, etc).
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                            <div class="pf-l-grid__item pf-m-4-col-on-sm pf-m-4-col-on-lg pf-m-4-col-on-xl">
+                                <div class="pf-c-card card">
+                                    <div class="pf-c-card__header pf-c-title pf-m-md">
+                                        <p class="cardText">Background Tasks</p> 
+                                        <img src='./homepage_hero.svg' alt="PatternFly Logo" style="height: '50px'" />
+                                        <hr style="height: 3;background-color:#000"></hr>
+                                    </div>
+                                    <div class="pf-c-card__body cardBody">
+                                        <p class="cardBody cardText">The second sub-system included here is bgtasks, or "back-ground tasks", which
+                                            is responsible for achieving result tar balls, indexing them, and unpacking them 
+                                            for display.
+                                    </div>                                                                  
+                                </div>
+                            </div>
+                            <div class="pf-l-grid__item pf-m-4-col-on-sm pf-m-4-col-on-lg pf-m-4-col-on-xl">
+                                <div class="pf-c-card card">
+                                    <div class="pf-c-card__header pf-c-title pf-m-md">
+                                        <p class="cardText">Web Server</p> 
+                                        <img src='./homepage_hero.svg' alt="PatternFly Logo" style="height: '50px'" />
+                                        <hr style="height: 3;background-color:#000"></hr>
+                                    </div>
+                                    <div class="pf-c-card__body cardBody">
+                                        <p class="cardBody cardText">Lastly is the web server used to display various graphs and results, and any 
+                                            other content generated by the background tasks, or by the pbench-agent during
+                                            benchmark and tool post-processing steps.`
+                                    </div>                                                                         
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p className="info_text">
+                        PBench is a harness that allows data collection from a variety of tools while running a benchmark. 
+                        PBench has some built-in script that run some common benchmarks, but the data collection can be run separately 
+                        as well with a benchmark that is not built-in to pbench, or a pbench script can be written for the benchmark.
+                    </p>
+                    <button class="pf-c-button pf-m-link" type="button">
+                        <span class="pf-c-button__icon">
+                            <i class="fas fa-pencil-alt"></i>
+                        </span>
+                        <span class="pf-c-button__text">Contribute a PBench script</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <span class="footer">
+              <p class="darkFoot">2020 PBench | Privacy Statement</p>
+              <p class="lightFoot">Code licensed under a thing, site under a thing</p>
+            </span>
+        </div>    
+    </body>
+    <script src="/js/jquery.min.js"></script>
+    <script>
+        $("#startBtn").click(function() {
+            $('html,body').animate({
+                scrollTop: $("#cards").offset().top},
+                'slow');
+        });
+    </script>
+    </html>

@@ -1,0 +1,305 @@
+@import '/css/patternfly-base.css';
+@import '/css/layouts/Grid/grid.css';
+@import '/css/components/Button/button.css';
+@import '/css/layouts/Level/level.css';
+@import '/css/components/Accordion/accordion.css';
+@import '/css/components/Select/select.css';
+@import '/css/components/FormControl/form-control.css';
+@import '/css/components/Pagination/pagination.css';
+@import '/css/components/DataToolbar/data-toolbar.css';
+@import '/css/components/OptionsMenu/options-menu.css';
+@import '/css/layouts/Gallery/gallery.css';
+
+.App{
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.App-header {
+  background-image: linear-gradient(180deg, #0066CC 0%, #0280FF 100%);    
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.general-header {
+  background-image: linear-gradient(180deg, #0066CC 0%, #0280FF 100%);    
+  display: flex;
+  flex-direction: column;
+}
+
+.section { 
+  min-width: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+ul{
+  list-style-type: none;
+  float: right;
+  margin: 20px;
+}
+
+ul li{
+  display: inline-block;
+  margin: 32px;
+  font-size: var(--pf-global--FontSize--xl);
+}
+
+ul li a{
+  text-decoration: none;
+  color: white;
+  padding: 10px 25px;
+  border: 1px solid #fff;
+}
+
+.logo{
+  float: right;
+  width: 60%;
+  height: auto;
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+}
+
+.title{
+  position: absolute;
+  margin: 20px 20px 20px 40px;
+  min-width: 100vh;
+  top:25%;
+}
+
+.hero_header{
+  font-size: 47px;
+  font-weight: 400;
+  color: var( --pf-global--Color--light-100);
+}
+
+.hero_subtitle{
+  font-size: var(--pf-global--FontSize--3xl);
+  font-weight: 300;
+  color: var( --pf-global--Color--light-100);
+}
+
+
+.card,.next_card,.info_card,.accor_card,.gallery_card{
+  box-shadow: var(--pf-global--BoxShadow--md);
+}
+
+.card{
+  padding: var( --pf-global--spacer--xl );
+  text-align: center;
+  margin: var( --pf-global--spacer--xl );
+  min-width: 500;
+}
+
+.gallery_card{
+  padding: var( --pf-global--spacer--sm );
+  text-align: center;
+  margin: var( --pf-global--spacer--sm );
+}
+
+.info_card{
+  padding: var( --pf-global--spacer--xl );
+  text-align: center;
+  margin: 20px 160px
+}
+
+.next_card{
+  padding: var( --pf-global--spacer--xl );
+  text-align: justify  ;
+  margin: 20px 160px;
+  border-top: 3px solid var(--pf-global--primary-color--100);
+}
+
+.accor_card{
+  text-align: justify  ;
+  margin: 0px 160px 0px 160px;
+  border-top: 3px solid var(--pf-global--primary-color--100);
+}
+
+.pf-c-button.pf-m-primary {
+    background-color: var(--pf-global--BackgroundColor--light-100);
+    color: var(--pf-global--primary-color--100);
+    font-size: 30px;
+    border-radius: var(--pf-global--BorderRadius--sm);
+    box-shadow: var(--pf-global--BoxShadow--md);
+    padding: 4px;
+    padding-top: var(--pf-global--spacer--sm);
+    padding-left: var(--pf-global--spacer--md);
+    padding-bottom: var(--pf-global--spacer--sm);
+    padding-right: var(--pf-global--spacer--md);
+}
+
+.cardBody{
+  font-size: var(--pf-global--FontSize--xl);
+  padding-bottom: var( --pf-global--spacer--l );
+  min-height: 220px;
+}
+
+.cardText{
+  font-size: var(--pf-global--FontSize--xl);
+}
+
+.callout_header{
+  font-size: var(--pf-global--FontSize--2xl);
+  text-align: "center";
+  margin: 16px;
+  top: 100px;
+}
+
+.info_text{
+  margin: 16px;
+  text-align: center;
+  font-size: var(--pf-global--FontSize--md);
+  color: var( --pf-global--Color--100);
+}
+
+p.sub_info_text{
+  margin: 32px;
+  text-align: justify;
+  margin: 20px 160px;
+  font-size:var(--pf-global--FontSize--md);
+  color: var(--pf-global--Color--100);
+}
+
+.footer{
+  background-color: var(--pf-global--BackgroundColor--300);
+  padding: var( --pf-global--spacer--l );
+  margin: 10px;
+}
+
+.darkFoot{
+  font-size: var(--pf-global--FontSize—sm);
+  color: var(--pf-global--Color--100);
+}
+
+.lightFoot{
+  font-size: var(--pf-global--FontSize—sm);
+  color: var(--pf-global--Color--200);
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  margin: 32px;
+  align-self: center;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  font-size: var(--pf-global--FontSize—md);
+  color: var(--pf-global--Color-100);
+  background-color: var(--pf-global--BackgroundColor--300);
+  border: 1px solid var(--pf-color-black-300);
+  outline: none;
+  cursor: pointer;
+  padding: 16px 150px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color:var(--pf-global--BackgroundColor--light-100);
+  border-bottom: 3px solid var(--pf-global--primary-color--100);
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.c_snip{
+  font-size: var(--pf-global--FontSize—lg);
+  color: var(--pf-global--Color--100  );
+  background-color: var(--pf-global--BackgroundColor--300);
+  padding: var(--pf-global--spacer--md);
+  text-align: justify;
+}
+
+.c_snip_inline{
+  font-size: var(--pf-global--FontSize—lg);
+  color: var(--pf-global--Color--100  );
+  background-color: var(--pf-global--BackgroundColor--300);
+  padding: 0px var(--pf-global--spacer--xs) 0px var(--pf-global--spacer--xs);
+  text-align: justify;
+}
+
+.accordionBtn {
+  display: inline;
+  padding: 8px;
+  text-align: initial;
+  font-size: var(--pf-global--FontSize--md);
+}
+
+div.explanation{
+  border-left: 3px solid var(--pf-global--primary-color--100);
+}
+
+.arrowIcon{
+  margin: var(--pf-global--spacer--sm) var(--pf-global--spacer--sm) var(--pf-global--spacer--sm) var(--pf-global--spacer--lg);
+}
+
+div.explanation{
+  overflow: hidden;
+  height: 100%;
+  margin: var(--pf-global--spacer--sm) var(--pf-global--spacer--l) var(--pf-global--spacer--md) var(--pf-global--spacer--l);
+}
+
+.accordionCard{
+  border-bottom: 1px solid var(--pf-global--BorderColor--300);
+}
+
+.pf-c-select{
+  width: 100% !important;
+}
+
+.pf-c-input-group{
+  display: flex;
+}
+
+.contact_card_logo{
+  width: 64px;
+  height: 64px;
+  background-color: blue;
+  margin: 32px;
+}
+
+.contactCard{
+  margin: 32px;
+  width: 100%;
+  height: 150px;
+}
+.contact_card_item1{
+  width: 30%;
+  height: auto;
+  float: left;
+}
+.contact_card_item2{
+  width: 70%;
+  height: auto;
+  margin-left: 128px;
+}
+
+.contact_card_header{
+  text-align: justify;
+}
+
+.contactLink{
+  text-align: justify;
+  font-size: var(--pf-global--FontSize--md);
+  color: var(--pf-global--Color--100);
+  margin: 0px 0px 0px 90px;
+}
