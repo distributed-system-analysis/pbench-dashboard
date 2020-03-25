@@ -20,51 +20,84 @@ export const filterIterations = (results, selectedParams) => {
 
 export const generateClusters = results => {
   const iterations = {};
-  const clusterGraphKeys = new Set();
   const params = new Set();
+  const runNames = new Set();
 
   Object.entries(results).forEach(([runId, result]) => {
     Object.entries(result.iterations).forEach(([, iteration]) => {
+      runNames.add(result.run_name);
       Object.entries(iteration.samples).forEach(([sampleId, sample]) => {
+        if (
+          sample.sample.measurement_title !== sample.benchmark.primary_metric ||
+          sample.sample.closest_sample !== sample.sample['@idx'] + 1
+        ) {
+          return;
+        }
+
         Object.keys(sample.benchmark).forEach(param => params.add(param));
         const paramKey = Object.values(sample.benchmark).join('-');
         const primaryMetric = sampleId.split('-')[0];
+        const clusterId = `${runId}_${iteration.name}_${sample.sample.name}`;
 
         if (primaryMetric === sample.benchmark.primary_metric.toLowerCase()) {
           iterations[paramKey] = {
             ...iterations[paramKey],
             ...sample.benchmark,
+            clusterKeys: {
+              ...(iterations[paramKey] !== undefined && iterations[paramKey].clusterKeys),
+              [clusterId]: null,
+            },
+            iterations: {
+              ...(iterations[paramKey] !== undefined && iterations[paramKey].iterations),
+              [iteration.name]: sample.sample.name,
+            },
+            runIds: {
+              ...(iterations[paramKey] !== undefined && iterations[paramKey].runIds),
+              [runId]: sample.run.name,
+            },
             cluster: {
               ...(iterations[paramKey] !== undefined && iterations[paramKey].cluster),
-              [`${runId}`]: sample.sample.mean,
-              [`name_${runId}`]: sample.sample.name,
-              [`percent_${runId}`]: sample.sample.stddevpct,
-              cluster: paramKey,
+              [clusterId]: {
+                y: sample.sample.mean,
+                key: paramKey,
+                iteration_name: iteration.name,
+                run_name: sample.run.name,
+              },
             },
-            [runId]: {
+            [clusterId]: {
               sample: sample.sample,
               run: sample.run,
               benchmark: sample.benchmark,
             },
           };
-          clusterGraphKeys.add(`${runId}`);
         }
       });
     });
   });
 
   const clusters = _.groupBy(Object.values(iterations), 'primary_metric');
-  Object.entries(clusters).forEach(([, cluster]) => {
-    Object.entries(cluster).forEach(([clusterId, data]) => {
-      // eslint-disable-next-line no-param-reassign
-      data.cluster.cluster = Number.parseInt(clusterId, 10) + 1;
+  const clusterKeys = new Set();
+  Object.entries(clusters).forEach(([, primaryMetricCluster]) => {
+    Object.entries(primaryMetricCluster).forEach(([index, cluster]) => {
+      const clusterId = (parseInt(index, 10) + 1).toString();
+      clusterKeys.add(clusterId);
+      Object.entries(cluster.cluster).forEach(([, clusterKey]) => {
+        // eslint-disable-next-line no-param-reassign
+        clusterKey.x = clusterId;
+      });
+    });
+  });
+
+  const legendData = [];
+  runNames.forEach(key => {
+    legendData.push({
+      name: key,
     });
   });
 
   return {
     data: clusters,
-    keys: clusterGraphKeys,
-    params,
+    paramKeys: legendData,
   };
 };
 
@@ -89,8 +122,12 @@ export const generateSampleTable = response => {
 
   response.forEach(run => {
     const iterations = {};
-    const id = run.aggregations.id.buckets[0].key;
     const primaryMetrics = new Set();
+
+    if (run.hits.hits.length === 0) {
+      return;
+    }
+
     run.hits.hits.forEach(sample => {
       // eslint-disable-next-line no-underscore-dangle
       const source = sample._source;
@@ -132,7 +169,7 @@ export const generateSampleTable = response => {
         samples: {
           ...(iterations[source.iteration.name] !== undefined &&
             iterations[source.iteration.name].samples),
-          ...(sampleFields.closest_sample === sampleFields['@idx'] + 1 && {
+          ...(sampleFields.role === 'aggregate' && {
             [`${primaryMetric}-${sampleFields.name}`]: {
               sample: { ...sampleFields },
               benchmark: _.omit({ ...benchmarkFields }, benchmarkBlacklist),
@@ -142,6 +179,8 @@ export const generateSampleTable = response => {
         },
       };
     });
+
+    const id = run.aggregations.id.buckets[0].key;
 
     run.aggregations.id.buckets.forEach(runId => {
       const iterationColumnsData = [

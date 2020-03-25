@@ -142,6 +142,37 @@ export const mockDataSample = [
             },
           },
         },
+        {
+          _source: {
+            run: {
+              id: 'test_run_id',
+              controller: 'test_controller',
+              name: 'test_run_name',
+              script: 'test_script',
+              config: 'test_config',
+            },
+            iteration: { name: 'test_iteration_2', number: 2 },
+            benchmark: {
+              instances: 1,
+              max_stddevpct: 1,
+              message_size_bytes: 1,
+              primary_metric: 'test_measurement_title',
+              test_type: 'stream',
+            },
+            sample: {
+              closest_sample: 1,
+              mean: 0.1,
+              stddev: 0.1,
+              stddevpct: 1,
+              uid: 'test_measurement_id',
+              measurement_type: 'test_measurement_type',
+              measurement_idx: 0,
+              measurement_title: 'diff_measurement_title',
+              '@idx': 1,
+              name: 'sample2',
+            },
+          },
+        },
       ],
     },
     aggregations: {

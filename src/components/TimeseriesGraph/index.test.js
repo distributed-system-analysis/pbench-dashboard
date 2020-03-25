@@ -19,7 +19,7 @@ jest.mock('jschart', () => ({
   create_jschart: jest.fn(() => {
     return 'true';
   }),
-  chart_reload: jest.fn(() => {
+  chart_reload_options: jest.fn(() => {
     return 'true';
   }),
 }));

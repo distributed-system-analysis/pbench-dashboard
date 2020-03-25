@@ -1,3 +1,6 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-underscore-dangle */
 import request from '../utils/request';
 
 function parseMonths(datastoreConfig, index, selectedIndices) {
@@ -12,6 +15,22 @@ function parseMonths(datastoreConfig, index, selectedIndices) {
   });
 
   return indices;
+}
+
+function scrollUntilEmpty(datastoreConfig, data) {
+  const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
+  const allData = data;
+
+  if (allData.hits.total !== allData.hits.hits.length) {
+    const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
+    scroll.then(response => {
+      allData._scroll_id = response._scroll_id;
+      allData.hits.total = response.hits.total;
+      allData.hits.hits = [...allData.hits.hits, ...response.hits.hits];
+      return scrollUntilEmpty(datastoreConfig, allData);
+    });
+  }
+  return allData;
 }
 
 export async function queryControllers(params) {
@@ -137,6 +156,7 @@ export async function queryIterationSamples(params) {
     iterationSampleRequests.push(
       request.post(endpoint, {
         data: {
+          size: 1000,
           query: {
             filtered: {
               query: {
@@ -190,7 +210,6 @@ export async function queryIterationSamples(params) {
               },
             },
           },
-          size: 10000,
           sort: [
             {
               'iteration.number': {
@@ -204,13 +223,19 @@ export async function queryIterationSamples(params) {
     );
   });
 
-  return Promise.all(iterationSampleRequests).then(iterations => {
-    return iterations;
+  return Promise.all(iterationSampleRequests).then(async iterations => {
+    return Promise.all(
+      iterations.map(async iteration => {
+        iteration = await scrollUntilEmpty(datastoreConfig, iteration);
+      })
+    ).then(() => {
+      return iterations;
+    });
   });
 }
 
-export async function queryTimeseriesData(params) {
-  const { datastoreConfig, selectedIndices, selectedResults } = params;
+export async function queryTimeseriesData(payload) {
+  const { datastoreConfig, selectedIndices, selectedIterations } = payload;
 
   const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
     datastoreConfig,
@@ -218,77 +243,56 @@ export async function queryTimeseriesData(params) {
     selectedIndices
   )}/_search?scroll=1m`;
 
-  const iterationSampleRequests = [];
-  selectedResults.forEach(run => {
-    iterationSampleRequests.push(
-      request.post(endpoint, {
-        data: {
-          query: {
-            filtered: {
-              query: {
-                multi_match: {
-                  query: run.id,
-                  fields: ['run.id'],
+  const timeseriesRequests = [];
+  Object.entries(selectedIterations).forEach(([runId, run]) => {
+    Object.entries(run.iterations).forEach(([, iteration]) => {
+      Object.entries(iteration.samples).forEach(([, sample]) => {
+        if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
+          timeseriesRequests.push(
+            request.post(endpoint, {
+              data: {
+                size: 1000,
+                query: {
+                  filtered: {
+                    query: {
+                      query_string: {
+                        query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
+                          iteration.name
+                        } AND sample.measurement_type:${
+                          sample.sample.measurement_type
+                        } AND sample.measurement_title:${
+                          sample.sample.measurement_title
+                        } AND sample.measurement_idx:${
+                          sample.sample.measurement_idx
+                        } AND sample.name:${sample.sample.name}`,
+                        analyze_wildcard: true,
+                      },
+                    },
+                  },
                 },
+                sort: [
+                  {
+                    '@timestamp_original': {
+                      order: 'asc',
+                      unmapped_type: 'boolean',
+                    },
+                  },
+                ],
               },
-              filter: {
-                term: {
-                  _type: 'pbench-result-data',
-                },
-              },
-            },
-          },
-          size: 10000,
-          sort: [
-            {
-              '@timestamp_original': {
-                order: 'asc',
-                unmapped_type: 'boolean',
-              },
-            },
-          ],
-        },
-      })
-    );
-  });
-
-  return Promise.all(iterationSampleRequests).then(iterations => {
-    return iterations;
-  });
-}
-
-export async function queryIterations(params) {
-  const { datastoreConfig, selectedResults } = params;
-
-  const iterationRequests = [];
-  selectedResults.forEach(result => {
-    let controllerDir = result['@metadata.controller_dir'];
-    if (controllerDir === undefined) {
-      controllerDir = result['run.controller'];
-      controllerDir = controllerDir.includes('.')
-        ? controllerDir.slice(0, controllerDir.indexOf('.'))
-        : controllerDir;
-    }
-    iterationRequests.push(
-      request.get(
-        `${datastoreConfig.results}/incoming/${encodeURI(controllerDir)}/${encodeURI(
-          result['run.name']
-        )}/result.json`,
-        { getResponse: true }
-      )
-    );
-  });
-
-  return Promise.all(iterationRequests).then(response => {
-    const iterations = [];
-    response.forEach((iteration, index) => {
-      iterations.push({
-        iterationData: iteration.data,
-        controllerName: iteration.response.url.split('/')[4],
-        resultName: iteration.response.url.split('/')[5],
-        tableId: index,
+            })
+          );
+        }
       });
     });
-    return iterations;
+  });
+
+  return Promise.all(timeseriesRequests).then(timeseries => {
+    return Promise.all(
+      timeseries.map(async timeseriesSet => {
+        timeseriesSet = await scrollUntilEmpty(datastoreConfig, timeseriesSet);
+      })
+    ).then(() => {
+      return timeseries;
+    });
   });
 }
