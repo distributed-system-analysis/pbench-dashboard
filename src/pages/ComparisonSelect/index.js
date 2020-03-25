@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import { Card, Spin, Tag } from 'antd';
+import { Title, EmptyState, EmptyStateIcon, EmptyStateBody } from '@patternfly/react-core';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import TableFilterSelection from '@/components/TableFilterSelection';
 import Button from '@/components/Button';
@@ -104,31 +106,42 @@ class ComparisonSelect extends React.Component {
               style={{ marginBottom: 16 }}
               name="Compare Iterations"
               onClick={this.onCompareIterations}
+              disabled={Object.values(resultIterations).length === 0}
             />
             <TableFilterSelection onFilterTable={this.onFilterTable} filters={iterationParams} />
-            {Object.values(resultIterations).map(run => {
-              const rowSelection = {
-                hideDefaultSelections: true,
-                onSelect: record => this.onSelectChange(record, run),
-              };
-              return (
-                <div key={run.run_name} style={{ marginTop: 32 }}>
-                  <div style={{ display: 'flex' }}>
-                    <h1>{run.run_name}</h1>
-                    <span style={{ marginLeft: 8 }}>
-                      <Tag color="blue">{run.run_controller}</Tag>
-                    </span>
-                  </div>
+            {Object.values(resultIterations).length > 0 ? (
+              Object.values(resultIterations).map(run => {
+                const rowSelection = {
+                  hideDefaultSelections: true,
+                  onSelect: record => this.onSelectChange(record, run),
+                };
+                return (
+                  <div key={run.run_name} style={{ marginTop: 32 }}>
+                    <div style={{ display: 'flex' }}>
+                      <h1>{run.run_name}</h1>
+                      <span style={{ marginLeft: 8 }}>
+                        <Tag color="blue">{run.run_controller}</Tag>
+                      </span>
+                    </div>
 
-                  <Table
-                    rowSelection={rowSelection}
-                    columns={run.columns}
-                    dataSource={Object.values(run.iterations)}
-                    bordered
-                  />
-                </div>
-              );
-            })}
+                    <Table
+                      rowSelection={rowSelection}
+                      columns={run.columns}
+                      dataSource={Object.values(run.iterations)}
+                      bordered
+                    />
+                  </div>
+                );
+              })
+            ) : (
+              <EmptyState>
+                <EmptyStateIcon icon={SearchIcon} />
+                <Title size="lg">No iterations found</Title>
+                <EmptyStateBody>
+                  Unable to find iterations for the selected runs. Please try a different run set.
+                </EmptyStateBody>
+              </EmptyState>
+            )}
           </Spin>
         </Card>
       </PageHeaderLayout>

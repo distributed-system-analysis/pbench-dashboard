@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import jschart from 'jschart';
 
+import Select from '@/components/Select';
+
 export default class TimeseriesGraph extends PureComponent {
   static propTypes = {
     dataSeriesNames: PropTypes.array.isRequired,
@@ -21,6 +23,14 @@ export default class TimeseriesGraph extends PureComponent {
     yAxisTitle: null,
   };
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selectedValue: 1,
+    };
+  }
+
   componentDidMount = () => {
     const {
       xAxisSeries,
@@ -32,39 +42,59 @@ export default class TimeseriesGraph extends PureComponent {
       yAxisTitle,
       graphOptions,
     } = this.props;
+    let { selectedValue } = this.state;
+    selectedValue -= 1;
 
     jschart.create_jschart(0, 'timeseries', graphId, graphName, xAxisTitle, yAxisTitle, {
       dynamic_chart: true,
       json_object: {
         x_axis_series: xAxisSeries,
-        data_series_names: dataSeriesNames,
-        data,
+        data_series_names: data.length > 0 ? data[selectedValue].timeseriesLabels : dataSeriesNames,
+        data: data.length > 0 ? data[selectedValue].timeseriesAggregation : data,
       },
       ...graphOptions,
     });
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps, prevState) => {
     const { data, dataSeriesNames, xAxisSeries, graphId } = this.props;
+    let { selectedValue } = this.state;
+    selectedValue -= 1;
 
     if (
       JSON.stringify(prevProps.data) !== JSON.stringify(data) ||
       JSON.stringify(prevProps.dataSeriesNames) !== JSON.stringify(dataSeriesNames) ||
-      prevProps.xAxisSeries !== xAxisSeries
+      prevProps.xAxisSeries !== xAxisSeries ||
+      prevState.selectedValue !== selectedValue
     ) {
-      jschart.chart_reload(graphId, {
+      jschart.chart_reload_options(graphId, {
         json_object: {
           x_axis_series: xAxisSeries,
-          data_series_names: dataSeriesNames,
-          data,
+          data_series_names:
+            data.length > 0 ? data[selectedValue].timeseriesLabels : dataSeriesNames,
+          data: data.length > 0 ? data[selectedValue].timeseriesAggregation : data,
         },
       });
     }
   };
 
-  render() {
-    const { graphId } = this.props;
+  onSelect = (event, selection) => {
+    this.setState({
+      selectedValue: selection,
+    });
+  };
 
-    return <div id={graphId} />;
+  render() {
+    const { graphId, options } = this.props;
+    const { selectedValue } = this.state;
+
+    return (
+      <div>
+        {options && (
+          <Select onSelect={this.onSelect} options={options} selected={selectedValue.toString()} />
+        )}
+        <div id={graphId} />
+      </div>
+    );
   }
 }

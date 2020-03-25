@@ -1,9 +1,12 @@
+/* eslint-disable no-underscore-dangle */
+import _ from 'lodash';
 import {
   queryControllers,
   queryResults,
   queryResult,
   queryTocResult,
   queryIterationSamples,
+  queryTimeseriesData,
 } from '../services/dashboard';
 
 import { insertTocTreeData } from '../utils/utils';
@@ -177,6 +180,58 @@ export default {
         type: 'getIterations',
         payload: parsedSampleData.runs,
       });
+    },
+    *fetchTimeseriesData({ payload }, { call }) {
+      const response = yield call(queryTimeseriesData, payload);
+      const clusteredIterations = payload.clusters.data;
+
+      response.forEach(timeseriesResponse => {
+        const timeseriesCollection = [];
+        const firstResponse = timeseriesResponse.hits.hits[0]._source;
+        const runId = firstResponse.run.id;
+        const primaryMetric = firstResponse.sample.measurement_title;
+        const iterationName = firstResponse.iteration.name;
+        const sampleName = firstResponse.sample.name;
+        timeseriesResponse.hits.hits.forEach(timeseries => {
+          timeseriesCollection.push({
+            x: timeseries._source['@timestamp_original'],
+            [`y-${runId}_${iterationName}_${sampleName}`]: timeseries._source.result.value,
+          });
+        });
+
+        Object.entries(clusteredIterations[primaryMetric]).forEach(([clusterId, cluster]) => {
+          const clusterKey = `${runId}_${iterationName}_${sampleName}`;
+          if (clusterKey in cluster) {
+            clusteredIterations[primaryMetric][clusterId][
+              clusterKey
+            ].timeseries = timeseriesCollection;
+          }
+        });
+      });
+
+      Object.entries(clusteredIterations).forEach(([primaryMetric, clusters]) => {
+        Object.entries(clusters).forEach(([clusterKey, cluster]) => {
+          let timeseriesAggregation = {};
+          const timeseriesLabels = ['time'];
+          Object.entries(cluster.clusterKeys).forEach(([keyIndex]) => {
+            timeseriesAggregation =
+              Object.keys(timeseriesAggregation).length > 0
+                ? (timeseriesAggregation = _.merge(
+                    timeseriesAggregation,
+                    clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries
+                  ))
+                : clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries;
+            timeseriesLabels.push(keyIndex);
+          });
+          timeseriesAggregation = timeseriesAggregation.map(item => Object.values(item));
+          clusteredIterations[primaryMetric][
+            clusterKey
+          ].timeseriesAggregation = timeseriesAggregation;
+          clusteredIterations[primaryMetric][clusterKey].timeseriesLabels = timeseriesLabels;
+        });
+      });
+
+      return clusteredIterations;
     },
     *updateConfigCategories({ payload }, { put }) {
       yield put({
