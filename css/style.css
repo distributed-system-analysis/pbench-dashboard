@@ -9,6 +9,7 @@
 @import '/css/components/DataToolbar/data-toolbar.css';
 @import '/css/components/OptionsMenu/options-menu.css';
 @import '/css/layouts/Gallery/gallery.css';
+@import '/css/components/Nav/nav.css';
 
 .App{
   margin: 0;
@@ -24,7 +25,6 @@
 }
 
 .general-header {
-  background-image: linear-gradient(180deg, #0066CC 0%, #0280FF 100%);    
   display: flex;
   flex-direction: column;
 }
@@ -259,7 +259,7 @@ div.explanation{
 }
 
 .accordionCard{
-  border-bottom: 1px solid var(--pf-global--BorderColor--300);
+  border-bottom: 1px solid var(--pf-global--BorderColor--dark--300);
 }
 
 .pf-c-select{
@@ -303,3 +303,21 @@ div.explanation{
   color: var(--pf-global--Color--100);
   margin: 0px 0px 0px 90px;
 }
+
+.pf-c-page__header{
+  background-color: var(--pf-global--BackgroundColor--dark-200);
+}
+
+.pf-c-nav__link {
+  border: none;
+}
+
+#navlogo{
+  width: 4%;
+  height: auto;
+  margin: 0.5%;
+}
+
+
+
+

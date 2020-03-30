@@ -24,16 +24,24 @@
 	
 	<div class="App pf-global--FontFamily--redhatfont--heading--sans-serif">
 		<header class="general-header">
-			<div class="pf-l-level">
-				<div class="pf-l-level__item">
-					<h1 class="pf-c-title pf-m-4xl hero_header">PBench</h1>
-				</div>
-				<div class="pf-l-level__item">
-					<ul>
-						<li><a href="/start.html">Get Started</a></li>
-						<li><a href="/learn.html" >Learn More</a></li>
-						<li><a href="/contact.html" >Contact</a></li>
+			<div class="pf-c-page__header">
+				<div class="pf-c-page__header-nav">
+				  <nav class="pf-c-nav" aria-label="Global">
+					<a href="/index.html">
+						<img src="white.svg" alt="pbench-logo" id=navlogo>
+					</a>
+					<ul class="pf-c-nav__horizontal-list" id=navLinks>
+					  <li class="pf-c-nav__item">
+						<a href="/start.html" class="pf-c-nav__link pf-m-current" aria-current="page" >Get Started</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/learn.html" class="pf-c-nav__link">Learn More</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/contact.html" class="pf-c-nav__link">Contact</a>
+					  </li>
 					</ul>
+				  </nav>
 				</div>
 			</div>
 		</header>  
@@ -440,6 +448,18 @@
 <script src="/js/jquery.min.js"></script>
 <script src="/js/accordion.js"></script>
 <script>
+	window.onload = function(){
+		var header = document.getElementById("navLinks");
+		var btns = header.getElementsByClassName("pf-c-nav__link");
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].addEventListener("click", function() {
+				var current=document.getElementsByClassName("pf-m-current");
+				console.log(current)
+				current[0].className = current[0].className.replace("pf-m-current", "");
+				this.className += " pf-m-current";
+			});
+		}
+	}
 	function openTab(evt, cityName){
 		var i, tabcontent, tablinks;
 		tabcontent = document.getElementsByClassName("tabcontent");

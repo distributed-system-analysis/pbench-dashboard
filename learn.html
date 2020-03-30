@@ -8,6 +8,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="css/style.css" rel="stylesheet">
+    <link href="/css/fontawesome.min.css">
 </head>
 <style>
    
@@ -17,19 +18,27 @@
     
     <div class="App pf-global--FontFamily--redhatfont--heading--sans-serif">
         <header class="general-header">
-			<div class="pf-l-level">
-				<div class="pf-l-level__item">
-					<h1 class="pf-c-title pf-m-4xl hero_header">PBench</h1>
-				</div>
-				<div class="pf-l-level__item">
-					<ul>
-						<li><a href="/start.html">Get Started</a></li>
-						<li><a href="/learn.html" >Learn More</a></li>
-						<li><a href="/contact.html" >Contact</a></li>
+			<div class="pf-c-page__header">
+				<div class="pf-c-page__header-nav">
+				  <nav class="pf-c-nav" aria-label="Global">
+					<a href="/index.html">
+						<img src="white.svg" alt="pbench-logo" id=navlogo>
+					</a>
+					<ul class="pf-c-nav__horizontal-list">
+					  <li class="pf-c-nav__item">
+						<a href="/start.html" class="pf-c-nav__link" aria-current="page" >Get Started</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/learn.html" class="pf-c-nav__link pf-m-current">Learn More</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/contact.html" class="pf-c-nav__link">Contact</a>
+					  </li>
 					</ul>
+				  </nav>
 				</div>
 			</div>
-        </header>  
+		</header>   
         <div class="section"> 
 			<div class="tab">
 				<button class="tablinks active" onClick="openTab(event, 'demos')">Demo</button>

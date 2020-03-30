@@ -8,6 +8,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel=“stylesheet”>
 </head>
 <style>
    
@@ -17,19 +18,27 @@
     
     <div class="App pf-global--FontFamily--redhatfont--heading--sans-serif">
         <header class="general-header">
-			<div class="pf-l-level">
-				<div class="pf-l-level__item">
-					<h1 class="pf-c-title pf-m-4xl hero_header">PBench</h1>
-				</div>
-				<div class="pf-l-level__item">
-					<ul>
-						<li><a href="/start.html">Get Started</a></li>
-						<li><a href="/learn.html" >Learn More</a></li>
-						<li><a href="/contact.html" >Contact</a></li>
+			<div class="pf-c-page__header">
+				<div class="pf-c-page__header-nav">
+				  <nav class="pf-c-nav" aria-label="Global">
+					<a href="/index.html">
+						<img src="white.svg" alt="pbench-logo" id=navlogo>
+					</a>
+					<ul class="pf-c-nav__horizontal-list" id="navLinks">
+					  <li class="pf-c-nav__item">
+						<a href="/start.html" class="pf-c-nav__link" aria-current="page" >Get Started</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/learn.html" class="pf-c-nav__link">Learn More</a>
+					  </li>
+					  <li class="pf-c-nav__item">
+						<a href="/contact.html" class="pf-c-nav__link pf-m-current">Contact</a>
+					  </li>
 					</ul>
+				  </nav>
 				</div>
 			</div>
-        </header>  
+		</header>   
         <div class="section">
             <div class="pf-c-card info_card">
                 <div class="pf-c-card__body">
@@ -71,7 +80,9 @@
                                 <div class="pf-c-card__body">
                                     <div class="contactCard">
                                         <div class="contact_card_item1">
-                                            <div class="contact_card_logo"></div>
+                                            <div class="contact_card_logo">
+                                                <i class="fab fa-google"></i>
+                                            </div>
                                         </div>
                                         <div class="contact_card_item2">
                                             <p class="cardText contact_card_header">Google Groups</p>
@@ -96,8 +107,8 @@
                                         </div>
                                         <div class="contact_card_item2">
                                             <p class="cardText contact_card_header">Mailing List</p>
-                                            <p class="sub_info_text" style="margin:8px 0px 32px 0px">Open and follow issues, track current work, and see what's on the road map
-                                                for PBench.
+                                            <p class="sub_info_text" style="margin:8px 0px 32px 0px">
+                                                Subscribe to the pbench mailing list to hear about news, upcoming changes and more.
                                             </p>
                                             <p class="contactLink" >
                                                 <a href="#">Subscribe to the mailing list</a>
