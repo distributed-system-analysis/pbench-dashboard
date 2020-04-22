@@ -1,11 +1,21 @@
 module.exports = [
   {
+    path: '/login',
+    name: 'login',
+    component: './LoginHandler',
+  },
+  {
+    path: '/signup',
+    name: 'signup',
+    component: './SignupHandler',
+  },
+  {
     path: '/',
     component: '../layouts/BasicLayout',
     Routes: ['./src/pages/PrivateRoute/index.js'],
     routes: [
       {
-        path: '/',
+        path: '/dashboard',
         name: 'dashboard',
         icon: 'dashboard',
         component: './Controllers',

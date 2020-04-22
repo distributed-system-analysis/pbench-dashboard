@@ -9,6 +9,7 @@ export default {
 
   effects: {
     *loadUser({ payload }, { put }) {
+      console.log(payload);
       yield put({
         type: 'modifyUser',
         payload,

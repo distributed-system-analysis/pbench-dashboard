@@ -7,7 +7,7 @@ import { connect } from 'dva';
 @connect(user => ({
   user: user.user,
 }))
-class LoginHandler extends React.Component {
+class SignupHandler extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -15,15 +15,6 @@ class LoginHandler extends React.Component {
       password: '',
     };
   }
-
-  setLoggedIn = payload => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'user/loadUser',
-      payload,
-    });
-    dispatch(routerRedux.push(`/dashboard/dashboard`));
-  };
 
   handleUserNameInputChange = username => {
     this.setState({
@@ -37,14 +28,11 @@ class LoginHandler extends React.Component {
     });
   };
 
-  handleLoginSubmit = () => {
-    // validate from the backend
+  handleSignupSubmit = () => {
+    const { dispatch } = this.props;
     const { username, password } = this.state;
-    if (username === 'admin' && password === 'admin') {
-      this.setLoggedIn({ username });
-    } else {
-      console.log('Wrong username/password pair');
-    }
+    console.log(username, password);
+    dispatch(routerRedux.push(`/login`));
   };
 
   render() {
@@ -78,14 +66,14 @@ class LoginHandler extends React.Component {
           <Checkbox label="Remeber me" id="alt-form-checkbox-1" name="alt-form-checkbox-1" />
         </FormGroup>
         <ActionGroup>
-          <Button isBlock variant="primary" onClick={() => this.handleLoginSubmit()}>
+          <Button isBlock variant="primary" onClick={() => this.handleSignupSubmit()}>
             Submit
           </Button>
         </ActionGroup>
       </Form>
     );
-    return <AuthLayout toPreview={form} action="Login" signOptHidden="false" />;
+    return <AuthLayout toPreview={form} action="Signup" signOptHidden="true" />;
   }
 }
 
-export default LoginHandler;
+export default SignupHandler;

@@ -14,7 +14,7 @@ const persistConfig = {
   throttle: 1000,
   key: getAppPath(),
   storage,
-  whitelist: ['global', 'user'],
+  whitelist: ['global'],
 };
 
 const persistEnhancer = () => createStore => (reducer, initialState, enhancer) => {
