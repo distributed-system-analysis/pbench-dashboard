@@ -1,8 +1,17 @@
 import React from 'react';
-import { Form, FormGroup, TextInput, Checkbox, ActionGroup, Button } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  TextInput,
+  Checkbox,
+  ActionGroup,
+  Button,
+  Title,
+} from '@patternfly/react-core';
 import AuthLayout from '@/components/AuthLayout';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
+import styles from './index.less';
 
 @connect(user => ({
   user: user.user,
@@ -13,6 +22,8 @@ class LoginHandler extends React.Component {
     this.state = {
       username: '',
       password: '',
+      variantVal: 'tertiary',
+      btnColor: 'black',
     };
   }
 
@@ -26,15 +37,29 @@ class LoginHandler extends React.Component {
   };
 
   handleUserNameInputChange = username => {
-    this.setState({
-      username,
-    });
+    const password = document.getElementById('horizontal-form-password').value;
+    if (password !== '') {
+      this.setState({
+        username,
+        variantVal: 'primary',
+        btnColor: 'white',
+      });
+      const btn = document.getElementById('submitBtn');
+      btn.removeAttribute('disabled');
+    }
   };
 
   handlePassWordInputChange = password => {
-    this.setState({
-      password,
-    });
+    const username = document.getElementById('horizontal-form-name').value;
+    if (username !== '') {
+      this.setState({
+        password,
+        variantVal: 'primary',
+        btnColor: 'white',
+      });
+      const btn = document.getElementById('submitBtn');
+      btn.removeAttribute('disabled');
+    }
   };
 
   handleLoginSubmit = () => {
@@ -48,43 +73,55 @@ class LoginHandler extends React.Component {
   };
 
   render() {
+    const { variantVal, btnColor } = this.state;
     const form = (
-      <Form style={{ padding: '10px' }}>
-        <FormGroup
-          label="Name"
-          isRequired
-          fieldId="horizontal-form-name"
-          helperText="Please provide your username"
-        >
-          <TextInput
-            isRequired
-            type="text"
-            id="horizontal-form-name"
-            aria-describedby="horizontal-form-name-helper"
-            name="horizontal-form-name"
-            onChange={this.handleUserNameInputChange}
-          />
-        </FormGroup>
-        <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
-          <TextInput
-            isRequired
-            type="password"
-            id="horizontal-form-password"
-            name="horizontal-form-password"
-            onChange={this.handlePassWordInputChange}
-          />
-        </FormGroup>
-        <FormGroup fieldId="remember-me">
-          <Checkbox label="Remeber me" id="alt-form-checkbox-1" name="alt-form-checkbox-1" />
-        </FormGroup>
-        <ActionGroup>
-          <Button isBlock variant="primary" onClick={() => this.handleLoginSubmit()}>
-            Submit
-          </Button>
-        </ActionGroup>
-      </Form>
+      <div className={styles.section}>
+        <Form>
+          <FormGroup label="Email address" isRequired fieldId="horizontal-form-name">
+            <TextInput
+              isRequired
+              type="text"
+              id="horizontal-form-name"
+              aria-describedby="horizontal-form-name-helper"
+              name="horizontal-form-name"
+              onChange={this.handleUserNameInputChange}
+            />
+          </FormGroup>
+          <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
+            <TextInput
+              isRequired
+              type="password"
+              id="horizontal-form-password"
+              name="horizontal-form-password"
+              onChange={this.handlePassWordInputChange}
+            />
+          </FormGroup>
+          <FormGroup fieldId="remember-me">
+            <Checkbox
+              label="Keep me logged in"
+              id="alt-form-checkbox-1"
+              name="alt-form-checkbox-1"
+              className={styles.check}
+            />
+          </FormGroup>
+          <ActionGroup>
+            <Button
+              isBlock
+              variant={variantVal}
+              onClick={() => this.handleLoginSubmit()}
+              className={styles.btn}
+              id="submitBtn"
+              isDisabled
+            >
+              <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
+                Submit
+              </Title>
+            </Button>
+          </ActionGroup>
+        </Form>
+      </div>
     );
-    return <AuthLayout toPreview={form} action="Login" signOptHidden="false" />;
+    return <AuthLayout toPreview={form} heading="Log into your Pbench Acount" backOpt="true" />;
   }
 }
 

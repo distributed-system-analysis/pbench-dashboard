@@ -2,16 +2,20 @@ import React, { Component, Fragment } from 'react';
 import {
   Grid,
   GridItem,
-  TextContent,
-  Text,
-  TextVariants,
-  Button,
+  Title,
+  Flex,
+  FlexItem,
   Dropdown,
   DropdownToggle,
+  Button,
 } from '@patternfly/react-core';
-import { CaretDownIcon } from '@patternfly/react-icons';
-import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
+import { CaretDownIcon } from '@patternfly/react-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { routerRedux } from 'dva/router';
+import styles from './index.less';
+import logo from '../../assets/white.svg';
 
 @connect(user => ({
   user: user.user,
@@ -24,11 +28,6 @@ class AuthLayout extends Component {
       isOpen: false,
     };
   }
-
-  navigateToSignup = page => {
-    const { dispatch } = this.props;
-    dispatch(routerRedux.push(`/${page}`));
-  };
 
   onToggle = isOpen => {
     this.setState({
@@ -43,74 +42,119 @@ class AuthLayout extends Component {
     });
   };
 
+  navigateToHome = () => {
+    const { dispatch } = this.props;
+    dispatch(routerRedux.push(`/`));
+  };
+
   render() {
-    const { toPreview, action, signOptHidden } = this.props;
+    const { toPreview, heading, backOpt } = this.props;
     const { isOpen } = this.state;
-    // DropdownMenu items
-    const dropdownItems = [];
-    const signupOption = (
-      <Text component={TextVariants.h2}>
-        Need an account?
-        <Button variant="link" onClick={() => this.navigateToSignup('signup')}>
-          <u>Sign up.</u>
-        </Button>
-      </Text>
-    );
 
-    // Action handlers for register and forgot password
-    const restLoginHandlers = (
-      <Grid
-        gutter="md"
-        style={{ borderTop: '2px solid black', padding: '10px', textAlign: 'center' }}
+    const back = (
+      <Button
+        variant="link"
+        icon={<FontAwesomeIcon icon={faAngleLeft} />}
+        className={styles.inlineLink}
+        style={{ padding: '0 0 20px 5px' }}
+        onClick={() => this.navigateToHome()}
       >
-        <GridItem>
-          <TextContent style={{ padding: '10px' }}>
-            {signOptHidden === 'true' ? <Fragment /> : signupOption}
-            <Text component={TextVariants.h2}>
-              <Button variant="link">
-                <u>Forgot username or password?</u>
-              </Button>
-            </Text>
-          </TextContent>
-        </GridItem>
-      </Grid>
+        Back
+      </Button>
     );
-
+    const Heading = (
+      <div>
+        <Title headingLevel="h2" size="3xl" className={styles.section}>
+          {backOpt === 'true' ? back : <Fragment />}
+          <br />
+          {heading}
+          <Dropdown
+            style={{ float: 'right' }}
+            onSelect={this.onSelect}
+            toggle={
+              <DropdownToggle
+                id="toggle-id"
+                onToggle={this.onToggle}
+                iconComponent={CaretDownIcon}
+                style={{ padding: '5px' }}
+              >
+                English
+              </DropdownToggle>
+            }
+            isOpen={isOpen}
+            dropdownItems={['English']}
+          />
+        </Title>
+      </div>
+    );
     return (
-      <Grid style={{ marginTop: '200px' }}>
-        <GridItem
-          sm={8}
-          md={4}
-          lg={4}
-          smOffset={2}
-          mdOffset={2}
-          lgOffset={2}
-          style={{ border: '2px solid black' }}
-        >
-          <TextContent style={{ padding: '10px' }}>
-            <Text component={TextVariants.h2}>
-              {action} with...
-              <Dropdown
-                style={{ float: 'right' }}
-                onSelect={this.onSelect}
-                toggle={
-                  <DropdownToggle
-                    id="toggle-id"
-                    onToggle={this.onToggle}
-                    iconComponent={CaretDownIcon}
-                  >
-                    English
-                  </DropdownToggle>
-                }
-                isOpen={isOpen}
-                dropdownItems={dropdownItems}
-              />
-            </Text>
-          </TextContent>
-          {toPreview}
-          {restLoginHandlers}
-        </GridItem>
-      </Grid>
+      <div className={styles.mainDiv}>
+        <div className="pf-c-background-image">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="pf-c-background-image__filter"
+            width="0"
+            height="0"
+          >
+            <filter id="image_overlay">
+              <feColorMatrix type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 1 0" />
+              <feComponentTransfer colorInterpolationFilters="sRGB" result="duotone">
+                <feFuncR type="table" tableValues="0.086274509803922 0.43921568627451" />
+                <feFuncG type="table" tableValues="0.086274509803922 0.43921568627451" />
+                <feFuncB type="table" tableValues="0.086274509803922 0.43921568627451" />
+                <feFuncA type="table" tableValues="0 1" />
+              </feComponentTransfer>
+            </filter>
+          </svg>
+        </div>
+        <Grid style={{ marginTop: '75px' }}>
+          <GridItem
+            sm={8}
+            md={4}
+            lg={4}
+            smOffset={1}
+            mdOffset={1}
+            lgOffset={1}
+            className={styles.form}
+          >
+            {Heading}
+            {toPreview}
+          </GridItem>
+          <GridItem
+            sm={11}
+            md={5}
+            lg={5}
+            smOffset={9}
+            mdOffset={6}
+            lgOffset={6}
+            className={styles.sideGrid}
+          >
+            <div>
+              <img src={logo} alt="pbench_logo" className={styles.logo} />
+            </div>
+            <div className={styles.sideGridItem}>
+              <Title headingLevel="h4" size="xl">
+                PBench is a harness that allows data collection from a variety of tools while
+                running a benchmark. PBench has some built-in script that run some common
+                benchmarks.
+              </Title>
+            </div>
+            <div className={styles.sideGridItem}>
+              <Flex>
+                <FlexItem>
+                  <h4>Terms of Use</h4>
+                </FlexItem>
+                <FlexItem>
+                  <h4>Help</h4>
+                </FlexItem>
+                <FlexItem>
+                  <h4>Privancy Policy</h4>
+                </FlexItem>
+              </Flex>
+            </div>
+          </GridItem>
+        </Grid>
+      </div>
     );
   }
 }
