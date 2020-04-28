@@ -36,29 +36,39 @@ class LoginHandler extends React.Component {
     dispatch(routerRedux.push(`/dashboard/dashboard`));
   };
 
+  enableSubmitBtn = () => {
+    this.setState({
+      variantVal: 'primary',
+      btnColor: 'white',
+    });
+    const btn = document.getElementById('submitBtn');
+    btn.removeAttribute('disabled');
+  };
+
+  disableSubmitBtn = () => {
+    this.setState({
+      variantVal: 'tertiary',
+      btnColor: 'black',
+    });
+    const btn = document.getElementById('submitBtn');
+    btn.setAttribute('disabled', '');
+  };
+
   handleUserNameInputChange = username => {
     const password = document.getElementById('horizontal-form-password').value;
-    if (password !== '') {
-      this.setState({
-        username,
-        variantVal: 'primary',
-        btnColor: 'white',
-      });
-      const btn = document.getElementById('submitBtn');
-      btn.removeAttribute('disabled');
+    if (password !== '' && username !== '') {
+      this.enableSubmitBtn();
+    } else {
+      this.disableSubmitBtn();
     }
   };
 
   handlePassWordInputChange = password => {
     const username = document.getElementById('horizontal-form-name').value;
-    if (username !== '') {
-      this.setState({
-        password,
-        variantVal: 'primary',
-        btnColor: 'white',
-      });
-      const btn = document.getElementById('submitBtn');
-      btn.removeAttribute('disabled');
+    if (username !== '' && password !== '') {
+      this.enableSubmitBtn();
+    } else {
+      this.disableSubmitBtn();
     }
   };
 
