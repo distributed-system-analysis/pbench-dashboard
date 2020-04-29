@@ -14,12 +14,7 @@ class PrivateRoute extends Component {
     this.state = {};
   }
 
-  navigateToLogin = page => {
-    const { dispatch } = this.props;
-    dispatch(routerRedux.push(`/${page}`));
-  };
-
-  navigateToSignup = page => {
+  navigate = page => {
     const { dispatch } = this.props;
     dispatch(routerRedux.push(`/${page}`));
   };
@@ -33,7 +28,7 @@ class PrivateRoute extends Component {
           <Button
             isBlock
             variant="primary"
-            onClick={() => this.navigateToLogin('login')}
+            onClick={() => this.navigate('login')}
             className={styles.btn}
           >
             <Title headingLevel="h4" size="xl" style={{ color: 'white' }}>
@@ -51,7 +46,7 @@ class PrivateRoute extends Component {
             Need an account?
             <Button
               variant="link"
-              onClick={() => this.navigateToSignup('signup')}
+              onClick={() => this.navigate('signup')}
               className={styles.inlineLink}
             >
               signup
@@ -60,7 +55,11 @@ class PrivateRoute extends Component {
         </GridItem>
         <GridItem>
           <Title headingLevel="h4" size="xl">
-            <Button variant="link" className={styles.inlineLink}>
+            <Button
+              variant="link"
+              className={styles.inlineLink}
+              onClick={() => this.navigate('password')}
+            >
               Forgot your password?
             </Button>
           </Title>
@@ -77,7 +76,7 @@ class PrivateRoute extends Component {
           <Button
             isBlock
             variant="secondary"
-            onClick={() => this.navigateToLogin('ssoLogin')}
+            onClick={() => this.navigate('ssoLogin')}
             className={styles.btn}
           >
             <p className={styles.inlineLink}>Red Hat SSO</p>
@@ -87,7 +86,7 @@ class PrivateRoute extends Component {
           <Button
             isBlock
             variant="secondary"
-            onClick={() => this.navigateToLogin('githubLogin')}
+            onClick={() => this.navigate('githubLogin')}
             className={styles.btn}
           >
             <p className={styles.inlineLink}>GitHub</p>
@@ -97,7 +96,7 @@ class PrivateRoute extends Component {
           <Button
             isBlock
             variant="secondary"
-            onClick={() => this.navigateToLogin('gmailLogin')}
+            onClick={() => this.navigate('gmailLogin')}
             className={styles.btn}
           >
             <p className={styles.inlineLink}>Gmail</p>

@@ -31,6 +31,10 @@ class SignupHandler extends React.Component {
     };
   }
 
+  componentDidMount = () => {
+    this.disableSubmitBtn();
+  };
+
   enableSubmitBtn = () => {
     this.setState({
       variantVal: 'primary',
@@ -133,10 +137,11 @@ class SignupHandler extends React.Component {
 
   handleSignupSubmit = () => {
     const { dispatch } = this.props;
-    const { username, password } = this.state;
+    const { username, password, email } = this.state;
     this.setState({
       password,
       username,
+      email,
     });
     dispatch(routerRedux.push(`/login`));
   };
@@ -247,7 +252,6 @@ class SignupHandler extends React.Component {
             onClick={() => this.handleSignupSubmit()}
             className={styles.btn}
             id="submitBtn"
-            isDisabled
           >
             <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
               Create account

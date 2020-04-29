@@ -10,6 +10,11 @@ module.exports = [
     component: './SignupHandler',
   },
   {
+    path: '/password',
+    name: 'password',
+    component: './PasswordHandler',
+  },
+  {
     path: '/',
     component: '../layouts/BasicLayout',
     Routes: ['./src/pages/PrivateRoute/index.js'],

@@ -27,13 +27,17 @@ class LoginHandler extends React.Component {
     };
   }
 
+  componentDidMount = () => {
+    this.disableSubmitBtn();
+  };
+
   setLoggedIn = payload => {
     const { dispatch } = this.props;
     dispatch({
       type: 'user/loadUser',
       payload,
     });
-    dispatch(routerRedux.push(`/dashboard/dashboard`));
+    dispatch(routerRedux.push(`/dashboard`));
   };
 
   enableSubmitBtn = () => {
@@ -55,6 +59,9 @@ class LoginHandler extends React.Component {
   };
 
   handleUserNameInputChange = username => {
+    this.setState({
+      username,
+    });
     const password = document.getElementById('horizontal-form-password').value;
     if (password !== '' && username !== '') {
       this.enableSubmitBtn();
@@ -64,6 +71,9 @@ class LoginHandler extends React.Component {
   };
 
   handlePassWordInputChange = password => {
+    this.setState({
+      password,
+    });
     const username = document.getElementById('horizontal-form-name').value;
     if (username !== '' && password !== '') {
       this.enableSubmitBtn();
@@ -73,7 +83,6 @@ class LoginHandler extends React.Component {
   };
 
   handleLoginSubmit = () => {
-    // validate from the backend
     const { username, password } = this.state;
     if (username === 'admin' && password === 'admin') {
       this.setLoggedIn({ username });
@@ -121,7 +130,6 @@ class LoginHandler extends React.Component {
               onClick={() => this.handleLoginSubmit()}
               className={styles.btn}
               id="submitBtn"
-              isDisabled
             >
               <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
                 Submit
