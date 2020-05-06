@@ -142,10 +142,10 @@ export default {
     },
     *fetchTocResult({ payload }, { call, put }) {
       const response = yield call(queryTocResult, payload);
+      console.log(response);
       const tocResult = [];
       const extension = [];
       const fileNames = [];
-      console.log(response);
       response.hits.hits.map(result => {
         // eslint-disable-next-line no-underscore-dangle
         const source = result._source;
