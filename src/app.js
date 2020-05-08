@@ -1,6 +1,7 @@
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
+import { version } from '../package.json';
 import { getAppPath } from './utils/utils';
 
 /*
@@ -18,8 +19,15 @@ const persistConfig = {
 };
 
 const persistEnhancer = () => createStore => (reducer, initialState, enhancer) => {
+  const cachedVersionId = window.localStorage.getItem('versionId');
+  if (cachedVersionId && cachedVersionId !== version && process.env.NODE_ENV === 'production') {
+    window.localStorage.clear();
+  }
+  window.localStorage.setItem('versionId', version);
+
   const store = createStore(persistReducer(persistConfig, reducer), initialState, enhancer);
   const persist = persistStore(store, null);
+
   return {
     persist,
     ...store,
