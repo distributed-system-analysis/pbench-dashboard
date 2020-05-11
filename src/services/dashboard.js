@@ -2,12 +2,11 @@ import request from '../utils/request';
 
 function parseMonths(datastoreConfig, index, selectedIndices) {
   let indices = '';
-
   selectedIndices.forEach(value => {
     if (index === datastoreConfig.result_index) {
       indices += `${datastoreConfig.prefix + index + value}-*,`;
     } else {
-      indices += `${datastoreConfig.prefix + index + value},`;
+      indices += `${datastoreConfig.prefix + datastoreConfig.run_index + value},`;
     }
   });
 
@@ -112,14 +111,19 @@ export async function queryResult(params) {
 }
 
 export async function queryTocResult(params) {
-  const { datastoreConfig, selectedIndices, id } = params;
-
+  const { datastoreConfig, selectedIndices, id, parent } = params;
   const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
     datastoreConfig,
+    '',
     selectedIndices
   )}/_search?q=_parent:"${id}"`;
-
-  return request.post(endpoint);
+  return request.post(endpoint, {
+    data: {
+      query: {
+        match_all: { parent: parent },
+      },
+    },
+  });
 }
 
 export async function queryIterationSamples(params) {

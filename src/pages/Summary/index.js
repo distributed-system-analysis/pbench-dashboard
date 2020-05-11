@@ -91,6 +91,7 @@ class Summary extends React.Component {
         datastoreConfig,
         selectedIndices,
         id: selectedResults[0].id,
+        parent: '/',
       },
     });
   }
