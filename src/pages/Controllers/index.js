@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import { Card, Form, Icon, Tabs } from 'antd';
+import moment from 'moment';
 
 import SearchBar from '@/components/SearchBar';
 import MonthSelect from '@/components/MonthSelect';
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import DatePicker from '@/components/DatePicker';
 
 const { TabPane } = Tabs;
 
@@ -27,6 +29,8 @@ class Controllers extends Component {
 
     this.state = {
       controllers: props.controllers,
+      startDate: moment(),
+      endDate: moment(),
     };
   }
 
@@ -147,8 +151,13 @@ class Controllers extends Component {
     });
   };
 
+  updateDate = (s, e) => {
+    this.setState({ startDate: s, endDate: e });
+  };
+
   render() {
-    const { controllers } = this.state;
+    const { controllers, startDate, endDate } = this.state;
+    console.log(startDate, endDate);
     const { loadingControllers, selectedIndices, indices, favoriteControllers } = this.props;
     const columns = [
       {
@@ -209,6 +218,7 @@ class Controllers extends Component {
               onChange={this.updateSelectedIndices}
               value={selectedIndices}
             />
+            <DatePicker updateDate={(s, e) => this.updateDate(s, e)} />
           </Form>
           <Tabs type="card">
             <TabPane tab="Controllers" key="controllers">
