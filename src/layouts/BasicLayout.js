@@ -280,7 +280,10 @@ class BasicLayout extends React.PureComponent {
                 {
                   key: 'Pbench Dashboard',
                   title: 'Pbench Dashboard',
-                  href: 'http://pbench.perf.lab.eng.bos.redhat.com/dashboard/',
+                  href:
+                    process.env.NODE_ENV === 'development'
+                      ? `http://${window.location.hostname}:${window.location.port}`
+                      : `${datastoreConfig.results}/dashboard`,
                   blankTarget: true,
                 },
                 {
