@@ -280,19 +280,19 @@ class BasicLayout extends React.PureComponent {
                 {
                   key: 'Pbench Dashboard',
                   title: 'Pbench Dashboard',
-                  href: 'https://example.com',
+                  href: 'http://pbench.perf.lab.eng.bos.redhat.com/dashboard/',
                   blankTarget: true,
                 },
                 {
                   key: 'github',
                   title: <Icon type="github" />,
-                  href: 'https://example.com',
+                  href: 'https://github.com/distributed-system-analysis/pbench-dashboard/',
                   blankTarget: true,
                 },
                 {
                   key: 'PBench',
                   title: 'PBench',
-                  href: 'http://example.com/',
+                  href: 'https://github.com/distributed-system-analysis/pbench/',
                   blankTarget: true,
                 },
               ]}
