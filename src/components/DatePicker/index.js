@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Badge, DropdownPosition } from '@patternfly/react-core';
+import { Badge, DropdownItem, DropdownPosition } from '@patternfly/react-core';
+import { CaretDownIcon } from '@patternfly/react-icons';
 import moment from 'moment';
 
 import Calendar from '../Calendar/index';
@@ -37,6 +38,28 @@ export default class DatePicker extends Component {
     this.setState({ startDate: s, endDate: e });
   };
 
+  // Sets the aggregated date range.
+  setAggregatedTimeRange = message => {
+    let newStartDate;
+    let newEndDate;
+    switch (message) {
+      case 'day':
+        newStartDate = moment();
+        newEndDate = moment();
+        break;
+      default:
+        newStartDate = moment().subtract(1, message);
+        newEndDate = moment();
+        break;
+    }
+    // Update the parent component.
+    const { updateDate } = this.props;
+    // updates the current state.
+    this.updateDropDown(newStartDate, newEndDate);
+    // update the parent state.
+    updateDate(newStartDate, newEndDate);
+  };
+
   render() {
     const { startDate, endDate } = this.state;
     const { updateDate } = this.props;
@@ -46,6 +69,17 @@ export default class DatePicker extends Component {
         updateDate={updateDate}
         updateDropDown={(s, e) => this.updateDropDown(s, e)}
       />,
+    ];
+    const aggregatedChoices = [
+      <DropdownItem key="day" onClick={() => this.setAggregatedTimeRange('day')}>
+        Last day
+      </DropdownItem>,
+      <DropdownItem key="week" onClick={() => this.setAggregatedTimeRange('week')}>
+        Last week
+      </DropdownItem>,
+      <DropdownItem key="month" onClick={() => this.setAggregatedTimeRange('month')}>
+        Last month
+      </DropdownItem>,
     ];
     const selectedTimeRange = (
       <Fragment>
@@ -58,6 +92,11 @@ export default class DatePicker extends Component {
         <PFDropdown
           dropdownItems={calendar}
           dropDownElement={selectedTimeRange}
+          position={DropdownPosition.right}
+        />
+        <PFDropdown
+          dropdownItems={aggregatedChoices}
+          dropDownElement={<CaretDownIcon />}
           position={DropdownPosition.right}
         />
       </Fragment>
