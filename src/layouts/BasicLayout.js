@@ -278,15 +278,6 @@ class BasicLayout extends React.PureComponent {
             <GlobalFooter
               links={[
                 {
-                  key: 'Pbench Dashboard',
-                  title: 'Pbench Dashboard',
-                  href:
-                    process.env.NODE_ENV === 'development'
-                      ? `http://${window.location.hostname}:${window.location.port}`
-                      : `${datastoreConfig.results}/dashboard`,
-                  blankTarget: true,
-                },
-                {
                   key: 'github',
                   title: <Icon type="github" />,
                   href: 'https://github.com/distributed-system-analysis/pbench-dashboard/',
