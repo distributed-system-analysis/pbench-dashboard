@@ -114,6 +114,17 @@ class GlobalHeader extends PureComponent {
                 <Icon type="question-circle-o" />
               </a>
             </Tooltip>
+            <Tooltip title="Feedback">
+              <a
+                target="_blank"
+                className={styles.action}
+                style={{ paddingRight: '30px' }}
+                //padding to keep the tooltip pointing towards top. Otherwise the tooltip top rotates to opposite side.
+                href="https://github.com/distributed-system-analysis/pbench-dashboard/issues/new"
+              >
+                <Icon type="message" />
+              </a>
+            </Tooltip>
           </div>
         </div>
       </div>
