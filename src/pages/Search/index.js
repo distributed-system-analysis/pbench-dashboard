@@ -6,16 +6,16 @@ import _ from 'lodash';
 
 import Button from '@/components/Button';
 import RowSelection from '@/components/RowSelection';
-import MonthSelect from '@/components/MonthSelect';
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import AntdDatePicker from '@/components/DatePicker';
 
 @connect(({ search, global, datastore, loading }) => ({
   mapping: search.mapping,
   searchResults: search.searchResults,
   fields: search.fields,
   selectedFields: global.selectedFields,
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   selectedResults: global.selectedResults,
   indices: datastore.indices,
   datastoreConfig: datastore.datastoreConfig,
@@ -34,21 +34,26 @@ class SearchList extends Component {
   }
 
   componentDidMount() {
-    const { indices, mapping, selectedIndices } = this.props;
+    const { indices, mapping, selectedDateRange } = this.props;
 
-    if (indices.length === 0 || Object.keys(mapping).length === 0 || selectedIndices.length === 0) {
+    if (
+      indices.length === 0 ||
+      Object.keys(mapping).length === 0 ||
+      selectedDateRange.start === '' ||
+      selectedDateRange.end === ''
+    ) {
       this.queryDatastoreConfig();
     }
   }
 
   componentDidUpdate(prevProps) {
-    const { selectedResults, selectedIndices, selectedFields } = this.props;
+    const { selectedResults, selectedDateRange, selectedFields } = this.props;
 
     if (prevProps.selectedResults !== selectedResults) {
       this.setState({ selectedRuns: selectedResults });
     }
     if (
-      prevProps.selectedIndices !== selectedIndices ||
+      prevProps.selectedDateRange !== selectedDateRange ||
       prevProps.selectedFields !== selectedFields
     ) {
       this.setState({ updateFiltersDisabled: false });
@@ -119,15 +124,6 @@ class SearchList extends Component {
     });
   };
 
-  updateSelectedIndices = value => {
-    const { dispatch } = this.props;
-
-    dispatch({
-      type: 'global/updateSelectedIndices',
-      payload: value,
-    });
-  };
-
   updateSelectedFields = field => {
     const { dispatch, selectedFields } = this.props;
     const newSelectedFields = selectedFields.slice();
@@ -171,14 +167,14 @@ class SearchList extends Component {
 
   fetchSearchQuery = () => {
     const { searchQuery } = this.state;
-    const { dispatch, datastoreConfig, selectedFields, selectedIndices } = this.props;
+    const { dispatch, datastoreConfig, selectedFields, selectedDateRange } = this.props;
 
     this.commitRunSelections().then(() => {
       dispatch({
         type: 'search/fetchSearchResults',
         payload: {
           datastoreConfig,
-          selectedIndices,
+          selectedDateRange,
           selectedFields,
           query: searchQuery,
         },
@@ -222,8 +218,6 @@ class SearchList extends Component {
   render() {
     const { selectedRuns, updateFiltersDisabled } = this.state;
     const {
-      selectedIndices,
-      indices,
       mapping,
       selectedFields,
       searchResults,
@@ -272,13 +266,7 @@ class SearchList extends Component {
                 <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
                   <div style={{ marginRight: 16 }}>
                     <p style={{ marginBottom: 0, fontSize: 12, fontWeight: 600 }}>months</p>
-                    <MonthSelect
-                      indices={indices}
-                      updateButtonVisible={false}
-                      onChange={this.updateSelectedIndices}
-                      value={selectedIndices}
-                      style={{ width: 160 }}
-                    />
+                    <AntdDatePicker />
                   </div>
                   {Object.keys(mapping).map(field => (
                     <div key={field}>

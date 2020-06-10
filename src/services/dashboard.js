@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
 import request from '../utils/request';
+import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
 function parseMonths(datastoreConfig, index, selectedIndices) {
   let indices = '';
@@ -34,91 +35,116 @@ function scrollUntilEmpty(datastoreConfig, data) {
 }
 
 export async function queryControllers(params) {
-  const { datastoreConfig, selectedIndices } = params;
+  try {
+    const { datastoreConfig, selectedDateRange } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
-    datastoreConfig,
-    datastoreConfig.run_index,
-    selectedIndices
-  )}/_search`;
+    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  return request.post(endpoint, {
-    data: {
-      aggs: {
-        controllers: {
-          terms: {
-            field: 'controller',
-            size: 0,
-            order: [{ runs: 'desc' }, { runs_preV1: 'desc' }],
-          },
-          aggs: {
-            runs_preV1: {
-              max: {
-                field: 'run.start_run',
-              },
+    return request.post(endpoint, {
+      params: {
+        ignore_unavailable: true,
+      },
+      data: {
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: selectedDateRange.start,
+              lte: selectedDateRange.end,
             },
-            runs: {
-              max: {
-                field: 'run.start',
+          },
+        },
+        aggs: {
+          controllers: {
+            terms: {
+              field: 'controller',
+              size: 0,
+              order: [{ runs: 'desc' }, { runs_preV1: 'desc' }],
+            },
+            aggs: {
+              runs_preV1: {
+                max: {
+                  field: 'run.start_run',
+                },
+              },
+              runs: {
+                max: {
+                  field: 'run.start',
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function queryResults(params) {
-  const { datastoreConfig, selectedIndices, controller } = params;
+  try {
+    const { datastoreConfig, selectedDateRange, controller } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
-    datastoreConfig,
-    datastoreConfig.run_index,
-    selectedIndices
-  )}/_search`;
+    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  return request.post(endpoint, {
-    data: {
-      fields: [
-        '@metadata.controller_dir',
-        '@metadata.satellite',
-        'run.controller',
-        'run.start',
-        'run.start_run', // For pre-v1 run mapping version
-        'run.end',
-        'run.end_run', // For pre-v1 run mapping version
-        'run.name',
-        'run.config',
-        'run.prefix',
-        'run.id',
-      ],
-      sort: {
-        'run.end': {
-          order: 'desc',
-          ignore_unmapped: true,
-        },
+    return request.post(endpoint, {
+      params: {
+        ignore_unavailable: true,
       },
-      query: {
-        term: {
-          'run.controller': controller[0],
+      data: {
+        fields: [
+          '@metadata.controller_dir',
+          '@metadata.satellite',
+          'run.controller',
+          'run.start',
+          'run.start_run', // For pre-v1 run mapping version
+          'run.end',
+          'run.end_run', // For pre-v1 run mapping version
+          'run.name',
+          'run.config',
+          'run.prefix',
+          'run.id',
+        ],
+        sort: {
+          'run.end': {
+            order: 'desc',
+            ignore_unmapped: true,
+          },
         },
+        query: {
+          term: {
+            'run.controller': controller[0],
+          },
+        },
+        size: 5000,
       },
-      size: 5000,
-    },
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function queryResult(params) {
-  const { datastoreConfig, selectedIndices, result } = params;
+  const { datastoreConfig, selectedDateRange, result } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?source=`;
 
   return request.post(endpoint, {
+    params: {
+      ignore_unavailable: true,
+    },
     data: {
       query: {
         match: {
@@ -131,30 +157,37 @@ export async function queryResult(params) {
 }
 
 export async function queryTocResult(params) {
-  const { datastoreConfig, selectedIndices, id } = params;
+  const { datastoreConfig, selectedDateRange, id } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?q=_parent:"${id}"`;
 
-  return request.post(endpoint);
+  return request.post(endpoint, {
+    params: {
+      ignore_unavailable: true,
+    },
+  });
 }
 
 export async function queryIterationSamples(params) {
-  const { datastoreConfig, selectedIndices, selectedResults } = params;
+  const { datastoreConfig, selectedDateRange, selectedResults } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.result_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?scroll=1m`;
 
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
       request.post(endpoint, {
+        params: {
+          ignore_unavailable: true,
+        },
         data: {
           size: 1000,
           query: {
@@ -235,12 +268,12 @@ export async function queryIterationSamples(params) {
 }
 
 export async function queryTimeseriesData(payload) {
-  const { datastoreConfig, selectedIndices, selectedIterations } = payload;
+  const { datastoreConfig, selectedDateRange, selectedIterations } = payload;
 
   const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
     datastoreConfig,
     datastoreConfig.result_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?scroll=1m`;
 
   const timeseriesRequests = [];
@@ -250,6 +283,9 @@ export async function queryTimeseriesData(payload) {
         if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
           timeseriesRequests.push(
             request.post(endpoint, {
+              params: {
+                ignore_unavailable: true,
+              },
               data: {
                 size: 1000,
                 query: {

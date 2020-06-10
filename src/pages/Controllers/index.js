@@ -4,7 +4,7 @@ import { routerRedux } from 'dva/router';
 import { Card, Form, Icon, Tabs } from 'antd';
 
 import SearchBar from '@/components/SearchBar';
-import MonthSelect from '@/components/MonthSelect';
+import AntdDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -13,7 +13,7 @@ const { TabPane } = Tabs;
 @connect(({ datastore, global, dashboard, loading, user }) => ({
   controllers: dashboard.controllers,
   indices: datastore.indices,
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   datastoreConfig: datastore.datastoreConfig,
   favoriteControllers: user.favoriteControllers,
   loadingControllers:
@@ -32,9 +32,14 @@ class Controllers extends Component {
 
   componentDidMount() {
     const { controllers } = this.state;
-    const { indices, selectedIndices } = this.props;
+    const { indices, selectedDateRange } = this.props;
 
-    if (controllers.length === 0 || indices.length === 0 || selectedIndices.length === 0) {
+    if (
+      controllers.length === 0 ||
+      indices.length === 0 ||
+      selectedDateRange.start === '' ||
+      selectedDateRange.end === ''
+    ) {
       this.queryDatastoreConfig();
     }
   }
@@ -69,20 +74,10 @@ class Controllers extends Component {
   };
 
   fetchControllers = () => {
-    const { dispatch, datastoreConfig, selectedIndices } = this.props;
-
+    const { dispatch, datastoreConfig, selectedDateRange } = this.props;
     dispatch({
       type: 'dashboard/fetchControllers',
-      payload: { datastoreConfig, selectedIndices },
-    });
-  };
-
-  updateSelectedIndices = value => {
-    const { dispatch } = this.props;
-
-    dispatch({
-      type: 'global/updateSelectedIndices',
-      payload: value,
+      payload: { datastoreConfig, selectedDateRange },
     });
   };
 
@@ -149,7 +144,7 @@ class Controllers extends Component {
 
   render() {
     const { controllers } = this.state;
-    const { loadingControllers, selectedIndices, indices, favoriteControllers } = this.props;
+    const { loadingControllers, favoriteControllers } = this.props;
     const columns = [
       {
         title: 'Controller',
@@ -203,12 +198,7 @@ class Controllers extends Component {
               placeholder="Search controllers"
               onSearch={this.onSearch}
             />
-            <MonthSelect
-              indices={indices}
-              reFetch={this.fetchControllers}
-              onChange={this.updateSelectedIndices}
-              value={selectedIndices}
-            />
+            <AntdDatePicker onChangeCallback={this.fetchControllers} />
           </Form>
           <Tabs type="card">
             <TabPane tab="Controllers" key="controllers">

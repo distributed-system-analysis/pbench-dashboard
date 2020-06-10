@@ -1,3 +1,4 @@
+import getDefaultDateRange from '../utils/moment_constants';
 import { queryDatastoreConfig, queryMonthIndices } from '../services/datastore';
 
 export default {
@@ -41,11 +42,8 @@ export default {
         payload: indices,
       });
       yield put({
-        type: 'global/updateSelectedIndices',
-        payload: {
-          indices: [indices[0]],
-          type: 'fetch',
-        },
+        type: 'global/updateSelectedDateRange',
+        payload: getDefaultDateRange(indices[0]),
       });
     },
   },

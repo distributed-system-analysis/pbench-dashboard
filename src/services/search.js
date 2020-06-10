@@ -1,3 +1,4 @@
+import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
 export async function queryIndexMapping(params) {
@@ -11,37 +12,51 @@ export async function queryIndexMapping(params) {
 }
 
 export async function searchQuery(params) {
-  const { datastoreConfig, selectedFields, selectedIndices, query } = params;
+  try {
+    const { datastoreConfig, selectedFields, selectedDateRange, query } = params;
 
-  let indices = '';
-  selectedIndices.forEach(value => {
-    indices += `${datastoreConfig.prefix + datastoreConfig.run_index + value},`;
-  });
+    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${indices}/_search`;
-
-  return request.post(endpoint, {
-    data: {
-      size: 10000,
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-            unmapped_type: 'boolean',
-          },
-        },
-      ],
-      query: {
-        filtered: {
-          query: {
-            query_string: {
-              query: `*${query}*`,
-              analyze_wildcard: true,
+    return request.post(endpoint, {
+      params: {
+        ignore_unavailable: true,
+      },
+      data: {
+        size: 10000,
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: selectedDateRange.start,
+              lte: selectedDateRange.end,
             },
           },
         },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+              unmapped_type: 'boolean',
+            },
+          },
+        ],
+        query: {
+          filtered: {
+            query: {
+              query_string: {
+                query: `*${query}*`,
+                analyze_wildcard: true,
+              },
+            },
+          },
+        },
+        fields: selectedFields,
       },
-      fields: selectedFields,
-    },
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 }

@@ -4,12 +4,11 @@ import Adapter from 'enzyme-adapter-react-16';
 
 import Table from '@/components/Table';
 import SearchBar from '@/components/SearchBar';
-import MonthSelect from '@/components/MonthSelect';
 import Controllers from './index';
+import AntdDatePicker from '@/components/DatePicker';
 
 const mockProps = {
   controllers: [],
-  selectedIndices: [],
   indices: [],
 };
 
@@ -32,7 +31,7 @@ describe('test Controllers page component', () => {
     expect(wrapper.find(SearchBar).length).toBe(1);
   });
 
-  it('render MonthSelect component', () => {
-    expect(wrapper.find(MonthSelect).length).toBe(1);
+  it('render DatePicker component', () => {
+    expect(wrapper.find(AntdDatePicker).length).toBe(1);
   });
 });
