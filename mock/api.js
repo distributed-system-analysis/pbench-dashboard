@@ -25,8 +25,8 @@ export const generateMockControllerAggregation = {
 const datastoreConfig = config['/dev/datastoreConfig'];
 const prefix = datastoreConfig.prefix + datastoreConfig.run_index.slice(0, -1);
 export const mockIndices = {
-  [`${prefix}.0000-00-00`]: {},
-  [`${prefix}.0000-00-01`]: {},
+  [`${prefix}.2019-08-01`]: {},
+  [`${prefix}.2019-09-01`]: {},
 };
 
 export const mockResults = {
@@ -59,7 +59,7 @@ export const mockResults = {
 };
 
 export const mockMappings = {
-  [`${prefix}.0000-00-00`]: {
+  [`${prefix}.2019-09-01`]: {
     mappings: {
       'pbench-run': {
         properties: {

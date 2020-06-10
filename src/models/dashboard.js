@@ -37,26 +37,28 @@ export default {
       const response = yield call(queryControllers, payload);
       const controllers = [];
 
-      response.aggregations.controllers.buckets.forEach(controller => {
-        let lastModVal;
-        let lastModStr;
-        if (controller.runs.value) {
-          // Look for v1 data
-          lastModVal = controller.runs.value;
-          lastModStr = controller.runs.value_as_string;
-        } else {
-          // Fall back to pre-v1 data
-          lastModVal = controller.runs_preV1.value;
-          lastModStr = controller.runs_preV1.value_as_string;
-        }
-        controllers.push({
-          key: controller.key,
-          controller: controller.key,
-          results: controller.doc_count,
-          last_modified_value: lastModVal,
-          last_modified_string: lastModStr,
+      if (response.aggregations) {
+        response.aggregations.controllers.buckets.forEach(controller => {
+          let lastModVal;
+          let lastModStr;
+          if (controller.runs.value) {
+            // Look for v1 data
+            lastModVal = controller.runs.value;
+            lastModStr = controller.runs.value_as_string;
+          } else {
+            // Fall back to pre-v1 data
+            lastModVal = controller.runs_preV1.value;
+            lastModStr = controller.runs_preV1.value_as_string;
+          }
+          controllers.push({
+            key: controller.key,
+            controller: controller.key,
+            results: controller.doc_count,
+            last_modified_value: lastModVal,
+            last_modified_string: lastModStr,
+          });
         });
-      });
+      }
 
       yield put({
         type: 'getControllers',

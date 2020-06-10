@@ -54,7 +54,7 @@ const tocColumns = [
   datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   loadingSummary:
     loading.effects['dashboard/fetchIterationSamples'] ||
     loading.effects['dashboard/fetchResult'] ||
@@ -72,17 +72,17 @@ class Summary extends React.Component {
   }
 
   componentDidMount() {
-    const { dispatch, datastoreConfig, selectedIndices, selectedResults } = this.props;
+    const { dispatch, datastoreConfig, selectedDateRange, selectedResults } = this.props;
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
-      payload: { selectedResults, selectedIndices, datastoreConfig },
+      payload: { selectedResults, selectedDateRange, datastoreConfig },
     });
     dispatch({
       type: 'dashboard/fetchResult',
       payload: {
         datastoreConfig,
-        selectedIndices,
+        selectedDateRange,
         result: selectedResults[0]['run.name'],
       },
     });
@@ -90,7 +90,7 @@ class Summary extends React.Component {
       type: 'dashboard/fetchTocResult',
       payload: {
         datastoreConfig,
-        selectedIndices,
+        selectedDateRange,
         id: selectedResults[0].id,
       },
     });

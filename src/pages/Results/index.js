@@ -11,7 +11,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 const { TabPane } = Tabs;
 
 @connect(({ datastore, global, dashboard, loading, user }) => ({
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   results: dashboard.results[global.selectedControllers[0]]
     ? dashboard.results[global.selectedControllers[0]]
     : [],
@@ -31,14 +31,20 @@ class Results extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, results, datastoreConfig, selectedIndices, selectedControllers } = this.props;
+    const {
+      dispatch,
+      results,
+      datastoreConfig,
+      selectedDateRange,
+      selectedControllers,
+    } = this.props;
 
     if (results.length === 0) {
       dispatch({
         type: 'dashboard/fetchResults',
         payload: {
           datastoreConfig,
-          selectedIndices,
+          selectedDateRange,
           controller: selectedControllers,
         },
       });
