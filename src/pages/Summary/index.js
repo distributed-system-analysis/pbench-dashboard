@@ -105,8 +105,7 @@ class Summary extends React.Component {
     }
   }
 
-  getMoreToCresult = name => {
-    console.log(name);
+  getMoreToCResult = name => {
     const { dispatch, datastoreConfig, selectedIndices, selectedResults } = this.props;
     dispatch({
       type: 'dashboard/fetchTocResult',
@@ -140,7 +139,6 @@ class Summary extends React.Component {
       tocResult,
       result,
     } = this.props;
-    console.log(tocResult);
 
     const contentList = {
       iterations: (
@@ -168,7 +166,7 @@ class Summary extends React.Component {
             columns={tocColumns}
             dataSource={tocResult}
             onRow={r => ({
-              onClick: () => this.getMoreToCresult(`/${r.name}`),
+              onClick: () => this.getMoreToCResult(`/${r.name}`),
             })}
           />
         </Card>
