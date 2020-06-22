@@ -1,10 +1,11 @@
 import { PureComponent } from 'react';
 import { routerRedux, Link } from 'dva/router';
-import { Icon, Divider, Tooltip, Alert, Badge } from 'antd';
+import { Icon, Divider, Tooltip, Alert, Badge, Tag } from 'antd';
 import Debounce from 'lodash-decorators/debounce';
 import { connect } from 'dva';
 import styles from './index.less';
 import SessionModal from '../SessionModal';
+import packageJSON from '../../../package.json';
 
 @connect(store => ({
   store,
@@ -84,6 +85,9 @@ class GlobalHeader extends PureComponent {
             />
           </div>
           <div className={styles.right}>
+            <Tooltip title="Version">
+              <Tag>{packageJSON.version}</Tag>
+            </Tooltip>
             <SessionModal
               datastoreConfig={datastoreConfig}
               savingSession={savingSession}
