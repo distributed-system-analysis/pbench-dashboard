@@ -80,6 +80,11 @@ module.exports = [
         name: 'share',
         component: './SessionPlaceholder',
       },
+      {
+        path: '/system-comparisions',
+        name: 'system-comparisons',
+        component: './SystemComparisions',
+      },
     ],
   },
 ];

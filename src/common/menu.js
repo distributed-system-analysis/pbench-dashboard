@@ -38,6 +38,11 @@ const menuData = [
     icon: 'global',
     path: '/explore',
   },
+  {
+    name: 'System Comparisions',
+    icon: 'control',
+    path: '/system-comparisions',
+  },
 ];
 
 function formatter(data, parentPath = '', parentAuthority) {
