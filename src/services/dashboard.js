@@ -132,13 +132,12 @@ export async function queryResult(params) {
 
 export async function queryTocResult(params) {
   const { datastoreConfig, selectedIndices, id, parent } = params;
-
   const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
     datastoreConfig,
     datastoreConfig.run_index,
     selectedIndices
   )}/_search?q=_parent:"${id}" AND parent:"${parent}"`;
-
+  console.log(endpoint);
   return request.post(endpoint);
 }
 

@@ -115,7 +115,7 @@ class Summary extends React.Component {
         id: selectedResults[0].id,
         parent: name,
       },
-    }).then(console.log('dispatched'));
+    });
   };
 
   onFilterTable = (selectedParams, selectedPorts) => {

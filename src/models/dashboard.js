@@ -144,7 +144,6 @@ export default {
       });
     },
     *fetchTocResult({ payload }, { call, put }) {
-      console.log('called');
       const response = yield call(queryTocResult, payload);
       const tocResult = {};
       console.log(response.hits.hits);
