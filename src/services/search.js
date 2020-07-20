@@ -3,11 +3,17 @@ import request from '../utils/request';
 export async function queryIndexMapping(params) {
   const { datastoreConfig, indices } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${datastoreConfig.prefix}${
+  const url = `${datastoreConfig.elasticsearch}/${datastoreConfig.prefix}${
     datastoreConfig.run_index
   }${indices[0]}/_mappings`;
 
-  return request.get(endpoint);
+  const endpoint = `${datastoreConfig.test_server}/download`;
+
+  return request.post(endpoint, {
+    data: {
+      url,
+    },
+  });
 }
 
 export async function searchQuery(params) {
@@ -18,30 +24,35 @@ export async function searchQuery(params) {
     indices += `${datastoreConfig.prefix + datastoreConfig.run_index + value},`;
   });
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${indices}/_search`;
+  const url = `${datastoreConfig.elasticsearch}/${indices}/_search`;
+
+  const endpoint = `${datastoreConfig.test_server}/download`;
 
   return request.post(endpoint, {
     data: {
-      size: 10000,
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-            unmapped_type: 'boolean',
+      url,
+      payload: {
+        size: 10000,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+              unmapped_type: 'boolean',
+            },
           },
-        },
-      ],
-      query: {
-        filtered: {
-          query: {
-            query_string: {
-              query: `*${query}*`,
-              analyze_wildcard: true,
+        ],
+        query: {
+          filtered: {
+            query: {
+              query_string: {
+                query: `*${query}*`,
+                analyze_wildcard: true,
+              },
             },
           },
         },
+        fields: selectedFields,
       },
-      fields: selectedFields,
     },
   });
 }

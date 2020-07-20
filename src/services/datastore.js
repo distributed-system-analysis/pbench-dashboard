@@ -29,7 +29,13 @@ export async function queryDatastoreConfig() {
 export async function queryMonthIndices(params) {
   const { datastoreConfig } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/_aliases`;
+  const url = `${datastoreConfig.elasticsearch}/_aliases`;
 
-  return request.get(endpoint);
+  const endpoint = `${datastoreConfig.test_server}/download`;
+
+  return request.post(endpoint, {
+    data: {
+      url,
+    },
+  });
 }
