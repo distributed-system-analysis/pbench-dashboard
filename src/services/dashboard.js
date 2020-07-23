@@ -19,11 +19,14 @@ function parseMonths(datastoreConfig, index, selectedIndices) {
 }
 
 function scrollUntilEmpty(datastoreConfig, data) {
-  const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
+  const url = `/_search/scroll?scroll=1m`;
+  const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
   const allData = data;
 
   if (allData.hits.total !== allData.hits.hits.length) {
-    const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
+    const scroll = request.post(endpoint, {
+      data: { url: `${endpoint}&scroll_id=${allData._scroll_id}` },
+    });
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
@@ -38,41 +41,46 @@ export async function queryControllers(params) {
   try {
     const { datastoreConfig, selectedDateRange } = params;
 
-    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+    const indices = `/${getAllMonthsWithinRange(
       datastoreConfig,
       datastoreConfig.run_index,
       selectedDateRange
     )}/_search`;
 
+    const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
+
     return request.post(endpoint, {
-      params: {
-        ignore_unavailable: true,
-      },
       data: {
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: selectedDateRange.start,
-              lte: selectedDateRange.end,
+        indices,
+        params: {
+          ignore_unavailable: true,
+        },
+        payload: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: selectedDateRange.start,
+                lte: selectedDateRange.end,
+              },
             },
           },
-        },
-        aggs: {
-          controllers: {
-            terms: {
-              field: 'controller',
-              size: 0,
-              order: [{ runs: 'desc' }, { runs_preV1: 'desc' }],
-            },
-            aggs: {
-              runs_preV1: {
-                max: {
-                  field: 'run.start_run',
-                },
+          aggs: {
+            controllers: {
+              terms: {
+                field: 'controller',
+                size: 0,
+                order: [{ runs: 'desc' }, { runs_preV1: 'desc' }],
               },
-              runs: {
-                max: {
-                  field: 'run.start',
+              aggs: {
+                runs_preV1: {
+                  max: {
+                    field: 'run.start_run',
+                  },
+                },
+                runs: {
+                  max: {
+                    field: 'run.start',
+                  },
                 },
               },
             },
@@ -89,42 +97,47 @@ export async function queryResults(params) {
   try {
     const { datastoreConfig, selectedDateRange, controller } = params;
 
-    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+    const indices = `/${getAllMonthsWithinRange(
       datastoreConfig,
       datastoreConfig.run_index,
       selectedDateRange
     )}/_search`;
 
+    const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
+
     return request.post(endpoint, {
-      params: {
-        ignore_unavailable: true,
-      },
       data: {
-        fields: [
-          '@metadata.controller_dir',
-          '@metadata.satellite',
-          'run.controller',
-          'run.start',
-          'run.start_run', // For pre-v1 run mapping version
-          'run.end',
-          'run.end_run', // For pre-v1 run mapping version
-          'run.name',
-          'run.config',
-          'run.prefix',
-          'run.id',
-        ],
-        sort: {
-          'run.end': {
-            order: 'desc',
-            ignore_unmapped: true,
-          },
+        indices,
+        params: {
+          ignore_unavailable: true,
         },
-        query: {
-          term: {
-            'run.controller': controller[0],
+        payload: {
+          fields: [
+            '@metadata.controller_dir',
+            '@metadata.satellite',
+            'run.controller',
+            'run.start',
+            'run.start_run', // For pre-v1 run mapping version
+            'run.end',
+            'run.end_run', // For pre-v1 run mapping version
+            'run.name',
+            'run.config',
+            'run.prefix',
+            'run.id',
+          ],
+          sort: {
+            'run.end': {
+              order: 'desc',
+              ignore_unmapped: true,
+            },
           },
+          query: {
+            term: {
+              'run.controller': controller[0],
+            },
+          },
+          size: 5000,
         },
-        size: 5000,
       },
     });
   } catch (error) {
@@ -135,23 +148,28 @@ export async function queryResults(params) {
 export async function queryResult(params) {
   const { datastoreConfig, selectedDateRange, result } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
     selectedDateRange
   )}/_search?source=`;
 
+  const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
+
   return request.post(endpoint, {
-    params: {
-      ignore_unavailable: true,
-    },
     data: {
-      query: {
-        match: {
-          'run.name': result,
-        },
+      indices,
+      params: {
+        ignore_unavailable: true,
       },
-      sort: '_index',
+      data: {
+        query: {
+          match: {
+            'run.name': result,
+          },
+        },
+        sort: '_index',
+      },
     },
   });
 }
@@ -159,15 +177,20 @@ export async function queryResult(params) {
 export async function queryTocResult(params) {
   const { datastoreConfig, selectedDateRange, id } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
     selectedDateRange
   )}/_search?q=_parent:"${id}"`;
 
+  const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
+
   return request.post(endpoint, {
-    params: {
-      ignore_unavailable: true,
+    data: {
+      indices,
+      params: {
+        ignore_unavailable: true,
+      },
     },
   });
 }
@@ -175,55 +198,60 @@ export async function queryTocResult(params) {
 export async function queryIterationSamples(params) {
   const { datastoreConfig, selectedDateRange, selectedResults } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
+  const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
+
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
       request.post(endpoint, {
-        params: {
-          ignore_unavailable: true,
-        },
         data: {
-          size: 1000,
-          query: {
-            filtered: {
-              query: {
-                multi_match: {
-                  query: run.id,
-                  fields: ['run.id'],
+          indices,
+          params: {
+            ignore_unavailable: true,
+          },
+          data: {
+            size: 1000,
+            query: {
+              filtered: {
+                query: {
+                  multi_match: {
+                    query: run.id,
+                    fields: ['run.id'],
+                  },
                 },
-              },
-              filter: {
-                term: {
-                  _type: 'pbench-result-data-sample',
+                filter: {
+                  term: {
+                    _type: 'pbench-result-data-sample',
+                  },
                 },
               },
             },
-          },
-          aggs: {
-            id: {
-              terms: {
-                field: 'run.id',
-              },
-              aggs: {
-                type: {
-                  terms: {
-                    field: 'sample.measurement_type',
-                  },
-                  aggs: {
-                    title: {
-                      terms: {
-                        field: 'sample.measurement_title',
-                      },
-                      aggs: {
-                        uid: {
-                          terms: {
-                            field: 'sample.uid',
+            aggs: {
+              id: {
+                terms: {
+                  field: 'run.id',
+                },
+                aggs: {
+                  type: {
+                    terms: {
+                      field: 'sample.measurement_type',
+                    },
+                    aggs: {
+                      title: {
+                        terms: {
+                          field: 'sample.measurement_title',
+                        },
+                        aggs: {
+                          uid: {
+                            terms: {
+                              field: 'sample.uid',
+                            },
                           },
                         },
                       },
@@ -231,26 +259,26 @@ export async function queryIterationSamples(params) {
                   },
                 },
               },
-            },
-            name: {
-              terms: {
-                field: 'run.name',
+              name: {
+                terms: {
+                  field: 'run.name',
+                },
+              },
+              controller: {
+                terms: {
+                  field: 'run.controller',
+                },
               },
             },
-            controller: {
-              terms: {
-                field: 'run.controller',
+            sort: [
+              {
+                'iteration.number': {
+                  order: 'asc',
+                  unmapped_type: 'boolean',
+                },
               },
-            },
+            ],
           },
-          sort: [
-            {
-              'iteration.number': {
-                order: 'asc',
-                unmapped_type: 'boolean',
-              },
-            },
-          ],
         },
       })
     );
@@ -270,11 +298,13 @@ export async function queryIterationSamples(params) {
 export async function queryTimeseriesData(payload) {
   const { datastoreConfig, selectedDateRange, selectedIterations } = payload;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const indices = `/${parseMonths(
     datastoreConfig,
     datastoreConfig.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
+
+  const endpoint = `${datastoreConfig.pbench_server}/elasticsearch`;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {
@@ -283,37 +313,40 @@ export async function queryTimeseriesData(payload) {
         if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
           timeseriesRequests.push(
             request.post(endpoint, {
-              params: {
-                ignore_unavailable: true,
-              },
               data: {
-                size: 1000,
-                query: {
-                  filtered: {
-                    query: {
-                      query_string: {
-                        query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
-                          iteration.name
-                        } AND sample.measurement_type:${
-                          sample.sample.measurement_type
-                        } AND sample.measurement_title:${
-                          sample.sample.measurement_title
-                        } AND sample.measurement_idx:${
-                          sample.sample.measurement_idx
-                        } AND sample.name:${sample.sample.name}`,
-                        analyze_wildcard: true,
+                indices,
+                params: {
+                  ignore_unavailable: true,
+                },
+                payload: {
+                  size: 1000,
+                  query: {
+                    filtered: {
+                      query: {
+                        query_string: {
+                          query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
+                            iteration.name
+                          } AND sample.measurement_type:${
+                            sample.sample.measurement_type
+                          } AND sample.measurement_title:${
+                            sample.sample.measurement_title
+                          } AND sample.measurement_idx:${
+                            sample.sample.measurement_idx
+                          } AND sample.name:${sample.sample.name}`,
+                          analyze_wildcard: true,
+                        },
                       },
                     },
                   },
-                },
-                sort: [
-                  {
-                    '@timestamp_original': {
-                      order: 'asc',
-                      unmapped_type: 'boolean',
+                  sort: [
+                    {
+                      '@timestamp_original': {
+                        order: 'asc',
+                        unmapped_type: 'boolean',
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             })
           );

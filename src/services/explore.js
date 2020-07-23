@@ -4,7 +4,7 @@ import request from '../utils/request';
 export async function querySharedSessions(params) {
   const { datastoreConfig } = params;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+  const endpoint = `${datastoreConfig.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {
@@ -25,7 +25,7 @@ export async function querySharedSessions(params) {
 export async function updateDescription(params) {
   const { datastoreConfig, id, value } = params;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+  const endpoint = `${datastoreConfig.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {
@@ -52,7 +52,7 @@ export async function updateDescription(params) {
 export async function deleteSharedSessions(params) {
   const { datastoreConfig, id } = params;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+  const endpoint = `${datastoreConfig.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {
