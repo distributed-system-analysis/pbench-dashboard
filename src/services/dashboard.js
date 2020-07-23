@@ -7,11 +7,15 @@ import { getAllMonthsWithinRange } from '../utils/moment_constants';
 const { endpoints } = window;
 
 function scrollUntilEmpty(data) {
-  const endpoint = `${endpoints.elasticsearch}/_search/scroll?scroll=1m`;
+  const url = `/_search/scroll?scroll=1m`;
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
   const allData = data;
+  const indices = `_search/scroll?scroll=1m&scroll_id=${allData._scroll_id}`;
 
   if (allData.hits.total.value !== allData.hits.hits.length && allData._scroll_id) {
-    const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
+    const scroll = request.post(endpoint, {
+      data: { indices },
+    });
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
@@ -45,41 +49,46 @@ export async function queryResults(params) {
   try {
     const { selectedDateRange, controller } = params;
 
-    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    const indices = `${getAllMonthsWithinRange(
       endpoints,
       endpoints.run_index,
       selectedDateRange
     )}/_search`;
 
+    const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
     return request.post(endpoint, {
-      params: {
-        ignore_unavailable: true,
-      },
       data: {
-        _source: {
-          includes: [
-            '@metadata.controller_dir',
-            '@metadata.satellite',
-            'run.controller',
-            'run.start',
-            'run.end',
-            'run.name',
-            'run.config',
-            'run.prefix',
-            'run.id',
-          ],
+        indices,
+        params: {
+          ignore_unavailable: true,
         },
-        sort: {
-          'run.end': {
-            order: 'desc',
+        payload: {
+          _source: {
+            includes: [
+                '@metadata.controller_dir',
+                '@metadata.satellite',
+                'run.controller',
+                'run.start',
+                'run.end',
+                'run.name',
+                'run.config',
+                'run.prefix',
+                'run.id',
+            ],
           },
-        },
-        query: {
-          match: {
-            'run.controller': controller[0],
+          sort: {
+            'run.end': {
+              order: 'desc',
+            },
           },
+          query: {
+            match: {
+              'run.controller': controller[0],
+            },
+          },
+          size: 5000,
         },
-        size: 5000,
       },
     });
   } catch (error) {
@@ -90,23 +99,28 @@ export async function queryResults(params) {
 export async function queryResult(params) {
   const { selectedDateRange, result } = params;
 
-  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `${getAllMonthsWithinRange(
     endpoints,
     endpoints.run_index,
     selectedDateRange
   )}/_search`;
 
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
   return request.post(endpoint, {
-    params: {
-      ignore_unavailable: true,
-    },
     data: {
-      query: {
-        match: {
-          'run.name': result,
-        },
+      indices,
+      params: {
+        ignore_unavailable: true,
       },
-      sort: '_index',
+      data: {
+        query: {
+          match: {
+            'run.name': result,
+          },
+        },
+        sort: '_index',
+      },
     },
   });
 }
@@ -114,15 +128,20 @@ export async function queryResult(params) {
 export async function queryTocResult(params) {
   const { selectedDateRange, id } = params;
 
-  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `${getAllMonthsWithinRange(
     endpoints,
     endpoints.run_toc_index,
     selectedDateRange
   )}/_search?q=run_data_parent:"${id}"`;
 
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
   return request.post(endpoint, {
-    params: {
-      ignore_unavailable: true,
+    data: {
+      indices,
+      params: {
+        ignore_unavailable: true,
+      },
     },
   });
 }
@@ -130,45 +149,50 @@ export async function queryTocResult(params) {
 export async function queryIterationSamples(params) {
   const { selectedDateRange, selectedResults } = params;
 
-  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `${getAllMonthsWithinRange(
     endpoints,
     endpoints.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
       request.post(endpoint, {
-        params: {
-          ignore_unavailable: true,
-        },
         data: {
-          size: 1000,
-          query: {
-            match: {
-              'run.id': run.id,
-            },
+          indices,
+          params: {
+            ignore_unavailable: true,
           },
-          aggs: {
-            id: {
-              terms: {
-                field: 'run.id',
+          data: {
+            size: 1000,
+            query: {
+              match: {
+                'run.id': run.id,
               },
-              aggs: {
-                type: {
-                  terms: {
-                    field: 'sample.measurement_type',
-                  },
-                  aggs: {
-                    title: {
-                      terms: {
-                        field: 'sample.measurement_title.raw',
-                      },
-                      aggs: {
-                        uid: {
-                          terms: {
-                            field: 'sample.uid',
+            },
+            aggs: {
+              id: {
+                terms: {
+                  field: 'run.id',
+                },
+                aggs: {
+                  type: {
+                    terms: {
+                      field: 'sample.measurement_type',
+                    },
+                    aggs: {
+                      title: {
+                        terms: {
+                          field: 'sample.measurement_title',
+                        },
+                        aggs: {
+                          uid: {
+                            terms: {
+                              field: 'sample.uid',
+                            },
                           },
                         },
                       },
@@ -176,26 +200,26 @@ export async function queryIterationSamples(params) {
                   },
                 },
               },
-            },
-            name: {
-              terms: {
-                field: 'run.name',
+              name: {
+                terms: {
+                  field: 'run.name',
+                },
+              },
+              controller: {
+                terms: {
+                  field: 'run.controller',
+                },
               },
             },
-            controller: {
-              terms: {
-                field: 'run.controller',
+            sort: [
+              {
+                'iteration.number': {
+                  order: 'asc',
+                  unmapped_type: 'boolean',
+                },
               },
-            },
+            ],
           },
-          sort: [
-            {
-              'iteration.number': {
-                order: 'asc',
-                unmapped_type: 'boolean',
-              },
-            },
-          ],
         },
       })
     );
@@ -215,11 +239,13 @@ export async function queryIterationSamples(params) {
 export async function queryTimeseriesData(payload) {
   const { selectedDateRange, selectedIterations } = payload;
 
-  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+  const indices = `${parseMonths(
     endpoints,
     endpoints.result_data_index,
     selectedDateRange
   )}/_search?scroll=1m`;
+
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {
@@ -228,33 +254,36 @@ export async function queryTimeseriesData(payload) {
         if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
           timeseriesRequests.push(
             request.post(endpoint, {
-              params: {
-                ignore_unavailable: true,
-              },
               data: {
-                size: 1000,
-                query: {
-                  query_string: {
-                    query: `run.id:${runId} AND iteration.name:${
-                      iteration.name
-                    } AND sample.measurement_type:${
-                      sample.sample.measurement_type
-                    } AND sample.measurement_title:${
-                      sample.sample.measurement_title
-                    } AND sample.measurement_idx:${sample.sample.measurement_idx} AND sample.name:${
-                      sample.sample.name
-                    }`,
-                    analyze_wildcard: true,
-                  },
+                indices,
+                params: {
+                  ignore_unavailable: true,
                 },
-                sort: [
-                  {
-                    '@timestamp_original': {
-                      order: 'asc',
-                      unmapped_type: 'boolean',
+                payload: {
+                  size: 1000,
+                  query: {
+                    query_string: {
+                      query: `run.id:${runId} AND iteration.name:${
+                        iteration.name
+                      } AND sample.measurement_type:${
+                        sample.sample.measurement_type
+                      } AND sample.measurement_title:${
+                        sample.sample.measurement_title
+                      } AND sample.measurement_idx:${sample.sample.measurement_idx} AND sample.name:${
+                        sample.sample.name
+                      }`,
+                      analyze_wildcard: true,
                     },
                   },
-                ],
+                  sort: [
+                    {
+                      '@timestamp_original': {
+                        order: 'asc',
+                        unmapped_type: 'boolean',
+                      },
+                    },
+                  ],
+                },
               },
             })
           );

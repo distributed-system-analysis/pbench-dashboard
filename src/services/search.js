@@ -6,55 +6,61 @@ const { endpoints } = window;
 export async function queryIndexMapping(params) {
   const { indices } = params;
 
-  const endpoint = `${endpoints.elasticsearch}/${endpoints.prefix}${endpoints.run_index}${
-    indices[0]
-  }/_mappings`;
-  return request.get(endpoint);
+  const mappings = `${endpoints.prefix}${endpoints.run_index}${indices[0]}/_mappings`;
+
+  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
+  return request.post(endpoint, { data: { indices: mappings } });
 }
 
 export async function searchQuery(params) {
   try {
     const { selectedFields, selectedDateRange, query } = params;
 
-    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    const indices = `${getAllMonthsWithinRange(
       endpoints,
       endpoints.run_index,
       selectedDateRange
     )}/_search`;
 
+    const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+
     return request.post(endpoint, {
-      params: {
-        ignore_unavailable: true,
-      },
       data: {
-        size: 10000,
-        query: {
-          bool: {
-            filter: {
-              range: {
-                '@timestamp': {
-                  gte: selectedDateRange.start,
-                  lte: selectedDateRange.end,
+        indices,
+        params: {
+          ignore_unavailable: true,
+        },
+        payload: {
+            size: 10000,
+            query: {
+              bool: {
+                filter: {
+                  range: {
+                    '@timestamp': {
+                      gte: selectedDateRange.start,
+                      lte: selectedDateRange.end,
+                    },
+                  },
+                },
+                must: {
+                  query_string: {
+                    query: `*${query}*`,
+                    analyze_wildcard: true,
+                  },
                 },
               },
             },
-            must: {
-              query_string: {
-                query: `*${query}*`,
-                analyze_wildcard: true,
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                  unmapped_type: 'boolean',
+                },
               },
-            },
+            ],
+            _source: { include: selectedFields },
           },
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-              unmapped_type: 'boolean',
-            },
-          },
-        ],
-        _source: { include: selectedFields },
       },
     });
   } catch (error) {
