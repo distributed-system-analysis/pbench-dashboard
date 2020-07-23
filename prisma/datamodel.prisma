@@ -1,3 +1,11 @@
+type User {
+  id: ID! @id
+  firstName: String!
+  lastName: String!
+  username: String! @unique
+  password: String!
+}
+
 type Url {
   id: ID! @id
   createdAt: DateTime! @createdAt
@@ -5,4 +13,3 @@ type Url {
   config: String!
   description: String
 }
-

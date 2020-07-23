@@ -19,7 +19,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
   datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   selectedIterationKeys: global.selectedIterationKeys,
   loading: loading.effects['dashboard/fetchIterationSamples'],
 }))
@@ -35,11 +35,11 @@ class ComparisonSelect extends React.Component {
   }
 
   componentDidMount() {
-    const { selectedResults, selectedIndices, datastoreConfig, dispatch } = this.props;
+    const { selectedResults, selectedDateRange, datastoreConfig, dispatch } = this.props;
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
-      payload: { selectedResults, selectedIndices, datastoreConfig },
+      payload: { selectedResults, selectedDateRange, datastoreConfig },
     });
   }
 

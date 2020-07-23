@@ -29,7 +29,7 @@ import { generateClusters } from '../../utils/parse';
   iterationParams: dashboard.iterationParams,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
-  selectedIndices: global.selectedIndices,
+  selectedDateRange: global.selectedDateRange,
   selectedIterations: global.selectedIterations,
   datastoreConfig: datastore.datastoreConfig,
 }))
@@ -48,7 +48,7 @@ class RunComparison extends React.Component {
     const {
       iterationParams,
       selectedIterations,
-      selectedIndices,
+      selectedDateRange,
       datastoreConfig,
       dispatch,
     } = this.props;
@@ -58,7 +58,7 @@ class RunComparison extends React.Component {
 
     dispatch({
       type: 'dashboard/fetchTimeseriesData',
-      payload: { selectedIterations, selectedIndices, clusters, datastoreConfig },
+      payload: { selectedIterations, selectedDateRange, clusters, datastoreConfig },
     }).then(timeseriesClusters => {
       this.setState({
         clusters: timeseriesClusters,

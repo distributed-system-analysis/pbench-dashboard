@@ -13,7 +13,6 @@ const mockProps = {
     results: [],
   },
   selectedFields: [],
-  selectedIndices: [],
 };
 
 const mockDispatch = jest.fn();

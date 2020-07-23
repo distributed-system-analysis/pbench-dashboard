@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import moment from 'moment';
 import { mockIndices, mockMappings, mockSearch } from '../../mock/api';
 
 let browser;
@@ -45,19 +46,6 @@ afterAll(() => {
 });
 
 describe('search page component', () => {
-  test('should load month indices', async () => {
-    await page.waitForSelector('.ant-select:nth-child(1) > .ant-select-selection');
-    const testMonth = await page.$eval(
-      '.ant-select:nth-child(1) > .ant-select-selection > .ant-select-selection__rendered > ul > .ant-select-selection__choice',
-      elem => elem.getAttribute('title')
-    );
-    expect(testMonth).toBe(
-      Object.keys(mockIndices)[0]
-        .split('.')
-        .pop()
-    );
-  });
-
   test('should load mappings', async () => {
     await page.waitForSelector('.ant-select:nth-child(2) > .ant-select-selection');
     const testField = await page.$eval(
@@ -67,20 +55,12 @@ describe('search page component', () => {
     expect(testField).toBe('run.name');
   });
 
-  test('should select month index', async () => {
-    await page.waitForSelector('.ant-select:nth-child(1) > .ant-select-selection', {
-      visible: true,
-    });
-    await page.click('.ant-select:nth-child(1) > .ant-select-selection');
-    await page.click('.ant-select-dropdown-menu-item');
-    await page.click('.ant-select-dropdown-menu-item[aria-selected="false"]');
-  });
-
   test('should select field tag', async () => {
     await page.waitForSelector('.ant-select:nth-child(2) > .ant-select-selection', {
       visible: true,
     });
-    await page.click('.ant-select:nth-child(2) > .ant-select-selection');
+    const elementToClickHandle = await page.$('.ant-select:nth-child(2) > .ant-select-selection');
+    await page.evaluate(el => el.click(), elementToClickHandle);
     await page.waitForSelector(
       '.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active',
       {
@@ -90,6 +70,40 @@ describe('search page component', () => {
     await page.click('.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active');
     await page.click(
       '.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active[aria-selected="false"]'
+    );
+  });
+
+  test('should display the date picker component on click', async () => {
+    await page.waitForSelector(
+      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input'
+    );
+    await page.click(
+      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input'
+    );
+    await page.waitForSelector('.ant-calendar-picker-container', { visible: true });
+    await page.click('.ant-row > div > p');
+  });
+
+  test('should change the selected dates after picking them from the calendar', async () => {
+    await page.waitForSelector(
+      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input'
+    );
+    await page.click(
+      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input'
+    );
+    await page.click(
+      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)'
+    );
+    const startDate = await page.$eval(
+      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)',
+      elem => {
+        return elem.defaultValue.slice(0, -3);
+      }
+    );
+    expect(startDate).toBe(
+      moment()
+        .subtract(1, 'month')
+        .format('YYYY-MM')
     );
   });
 
@@ -114,6 +128,7 @@ describe('search page component', () => {
   test('should execute search query', async () => {
     await page.waitForSelector('.ant-input-search-button', { visible: true });
     await page.click('.ant-input-search-button');
+    await page.waitForSelector('.ant-table-tbody > tr > td:nth-child(2)', { visible: true });
     const testResult = await page.$eval(
       '.ant-table-tbody > tr > td:nth-child(2)',
       elem => elem.innerHTML

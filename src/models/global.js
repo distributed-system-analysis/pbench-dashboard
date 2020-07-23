@@ -9,6 +9,10 @@ export default {
     sessionId: '',
     collapsed: true,
     selectedIndices: [],
+    selectedDateRange: {
+      start: '',
+      end: '',
+    },
     selectedResults: [],
     selectedControllers: [],
     selectedFields: [],
@@ -30,9 +34,9 @@ export default {
         payload: payload.global,
       });
     },
-    *updateSelectedIndices({ payload }, { put }) {
+    *updateSelectedDateRange({ payload }, { put }) {
       yield put({
-        type: 'modifySelectedIndices',
+        type: 'modifySelectedDateRange',
         payload,
       });
     },
@@ -104,17 +108,10 @@ export default {
         sessionId: '',
       };
     },
-    modifySelectedIndices(state, { payload }) {
-      if (payload.type) {
-        return {
-          ...state,
-          selectedIndices:
-            state.selectedIndices.length === 0 ? payload.indices : state.selectedIndices,
-        };
-      }
+    modifySelectedDateRange(state, { payload }) {
       return {
         ...state,
-        selectedIndices: payload,
+        selectedDateRange: payload,
       };
     },
     modifySelectedControllers(state, { payload }) {

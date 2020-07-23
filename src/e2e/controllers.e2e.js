@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import moment from 'moment';
 import { generateMockControllerAggregation, mockIndices } from '../../mock/api';
 
 let browser;
@@ -154,23 +155,14 @@ describe('controller page component', () => {
     expect(testController).toBe('controller_100');
   });
 
-  test('should select month index', async () => {
-    await page.click('.ant-select-selection');
-    await page.click('.ant-select-dropdown-menu-item');
-    await page.click('.ant-select-dropdown-menu-item[aria-selected="false"]');
-  });
-
-  test(
-    'should update controllers for selected month index',
-    async done => {
-      await page.click('.ant-btn-primary');
-      await page.waitForSelector('.ant-table-tbody', { visible: true });
-      done();
-    },
-    30000
-  );
-
-  test('should display 10 controllers in the table by default', async () => {
+  test('should display 10 controllers in the table', async () => {
+    await page.waitForSelector(
+      '.ant-pagination-options > .ant-pagination-options-size-changer > .ant-select-selection > .ant-select-selection__rendered > .ant-select-selection-selected-value'
+    );
+    await page.click('.ant-select-selection-selected-value');
+    await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)');
+    const elementToClick = await page.$('.ant-select-dropdown-menu-item:nth-child(1)');
+    await page.evaluate(el => el.click(), elementToClick);
     const rows = await page.$$('.ant-table-row');
     expect(rows.length).toBe(10);
   });
@@ -210,4 +202,68 @@ describe('controller page component', () => {
     const rows = await page.$$('.ant-table-row');
     expect(rows.length).toBe(100);
   });
+
+  test('should display the date picker component on click', async () => {
+    await page.waitForSelector(
+      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+    );
+    await page.click(
+      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+    );
+    await page.waitForSelector('.ant-calendar-picker-container', { visible: true });
+  });
+
+  test('should change the selected dates after picking them from the calendar', async () => {
+    await page.waitForSelector(
+      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)'
+    );
+    await page.click(
+      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)'
+    );
+
+    await page.waitForSelector(
+      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(3)'
+    );
+    await page.click(
+      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(3)'
+    );
+
+    await page.click(
+      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)'
+    );
+    const startDate = await page.$eval(
+      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)',
+      elem => {
+        console.log(elem);
+        return elem.defaultValue.slice(0, -3);
+      }
+    );
+    expect(startDate).toBe(
+      moment()
+        .subtract(1, 'month')
+        .format('YYYY-MM')
+    );
+  });
+
+  test(
+    'should update controllers on selection of a date range',
+    async done => {
+      await page.waitForSelector(
+        '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+      );
+      await page.click(
+        '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+      );
+
+      await page.waitForSelector(
+        '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(2)'
+      );
+      await page.click(
+        '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(2)'
+      );
+      await page.waitForSelector('.ant-table-tbody', { visible: true });
+      done();
+    },
+    30000
+  );
 });
