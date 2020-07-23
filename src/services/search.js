@@ -1,3 +1,4 @@
+import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
 export async function queryIndexMapping(params) {
@@ -17,42 +18,58 @@ export async function queryIndexMapping(params) {
 }
 
 export async function searchQuery(params) {
-  const { datastoreConfig, selectedFields, selectedIndices, query } = params;
+  try {
+    const { datastoreConfig, selectedFields, selectedDateRange, query } = params;
 
-  let indices = '';
-  selectedIndices.forEach(value => {
-    indices += `${datastoreConfig.prefix + datastoreConfig.run_index + value},`;
-  });
+    const url = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  const url = `${datastoreConfig.elasticsearch}/${indices}/_search`;
+    const endpoint = `${datastoreConfig.test_server}/download`;
 
-  const endpoint = `${datastoreConfig.test_server}/download`;
-
-  return request.post(endpoint, {
-    data: {
-      url,
-      payload: {
-        size: 10000,
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-              unmapped_type: 'boolean',
-            },
+    return request.post(endpoint, {
+      data: {
+        url,
+        payload: {
+          params: {
+            ignore_unavailable: true,
           },
-        ],
-        query: {
-          filtered: {
-            query: {
-              query_string: {
-                query: `*${query}*`,
-                analyze_wildcard: true,
+          data: {
+            size: 10000,
+            filter: {
+              range: {
+                '@timestamp': {
+                  gte: selectedDateRange.start,
+                  lte: selectedDateRange.end,
+                },
               },
             },
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                  unmapped_type: 'boolean',
+                },
+              },
+            ],
+            query: {
+              filtered: {
+                query: {
+                  query_string: {
+                    query: `*${query}*`,
+                    analyze_wildcard: true,
+                  },
+                },
+              },
+            },
+            fields: selectedFields,
           },
         },
-        fields: selectedFields,
       },
-    },
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 }

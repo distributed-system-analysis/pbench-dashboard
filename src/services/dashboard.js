@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
 import request from '../utils/request';
+import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
 function parseMonths(datastoreConfig, index, selectedIndices) {
   let indices = '';
@@ -18,14 +19,11 @@ function parseMonths(datastoreConfig, index, selectedIndices) {
 }
 
 function scrollUntilEmpty(datastoreConfig, data) {
-  const url = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
-  const endpoint = `${datastoreConfig.test_server}/download`;
+  const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
 
   if (allData.hits.total !== allData.hits.hits.length) {
-    const scroll = request.post(endpoint, {
-      data: { url: `${endpoint}&scroll_id=${allData._scroll_id}` },
-    });
+    const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
@@ -37,20 +35,28 @@ function scrollUntilEmpty(datastoreConfig, data) {
 }
 
 export async function queryControllers(params) {
-  const { datastoreConfig, selectedIndices } = params;
+  try {
+    const { datastoreConfig, selectedDateRange } = params;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
-    datastoreConfig,
-    datastoreConfig.run_index,
-    selectedIndices
-  )}/_search`;
+    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  const endpoint = `${datastoreConfig.test_server}/download`;
-
-  return request.post(endpoint, {
-    data: {
-      url,
-      payload: {
+    return request.post(endpoint, {
+      params: {
+        ignore_unavailable: true,
+      },
+      data: {
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: selectedDateRange.start,
+              lte: selectedDateRange.end,
+            },
+          },
+        },
         aggs: {
           controllers: {
             terms: {
@@ -73,25 +79,27 @@ export async function queryControllers(params) {
           },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function queryResults(params) {
-  const { datastoreConfig, selectedIndices, controller } = params;
+  try {
+    const { datastoreConfig, selectedDateRange, controller } = params;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
-    datastoreConfig,
-    datastoreConfig.run_index,
-    selectedIndices
-  )}/_search`;
+    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
+      datastoreConfig,
+      datastoreConfig.run_index,
+      selectedDateRange
+    )}/_search`;
 
-  const endpoint = `${datastoreConfig.test_server}/download`;
-
-  return request.post(endpoint, {
-    data: {
-      url,
-      payload: {
+    return request.post(endpoint, {
+      params: {
+        ignore_unavailable: true,
+      },
+      data: {
         fields: [
           '@metadata.controller_dir',
           '@metadata.satellite',
@@ -118,108 +126,104 @@ export async function queryResults(params) {
         },
         size: 5000,
       },
-    },
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function queryResult(params) {
-  const { datastoreConfig, selectedIndices, result } = params;
+  const { datastoreConfig, selectedDateRange, result } = params;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?source=`;
 
-  const endpoint = `${datastoreConfig.test_server}/download`;
-
   return request.post(endpoint, {
+    params: {
+      ignore_unavailable: true,
+    },
     data: {
-      url,
-      payload: {
-        query: {
-          match: {
-            'run.name': result,
-          },
+      query: {
+        match: {
+          'run.name': result,
         },
-        sort: '_index',
       },
+      sort: '_index',
     },
   });
 }
 
 export async function queryTocResult(params) {
-  const { datastoreConfig, selectedIndices, id } = params;
+  const { datastoreConfig, selectedDateRange, id } = params;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.run_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?q=_parent:"${id}"`;
 
-  const endpoint = `${datastoreConfig.test_server}/download`;
-
   return request.post(endpoint, {
-    data: {
-      url,
+    params: {
+      ignore_unavailable: true,
     },
   });
 }
 
 export async function queryIterationSamples(params) {
-  const { datastoreConfig, selectedIndices, selectedResults } = params;
+  const { datastoreConfig, selectedDateRange, selectedResults } = params;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.result_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?scroll=1m`;
-
-  const endpoint = `${datastoreConfig.test_server}/download`;
 
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
       request.post(endpoint, {
+        params: {
+          ignore_unavailable: true,
+        },
         data: {
-          url,
-          payload: {
-            size: 1000,
-            query: {
-              filtered: {
-                query: {
-                  multi_match: {
-                    query: run.id,
-                    fields: ['run.id'],
-                  },
+          size: 1000,
+          query: {
+            filtered: {
+              query: {
+                multi_match: {
+                  query: run.id,
+                  fields: ['run.id'],
                 },
-                filter: {
-                  term: {
-                    _type: 'pbench-result-data-sample',
-                  },
+              },
+              filter: {
+                term: {
+                  _type: 'pbench-result-data-sample',
                 },
               },
             },
-            aggs: {
-              id: {
-                terms: {
-                  field: 'run.id',
-                },
-                aggs: {
-                  type: {
-                    terms: {
-                      field: 'sample.measurement_type',
-                    },
-                    aggs: {
-                      title: {
-                        terms: {
-                          field: 'sample.measurement_title',
-                        },
-                        aggs: {
-                          uid: {
-                            terms: {
-                              field: 'sample.uid',
-                            },
+          },
+          aggs: {
+            id: {
+              terms: {
+                field: 'run.id',
+              },
+              aggs: {
+                type: {
+                  terms: {
+                    field: 'sample.measurement_type',
+                  },
+                  aggs: {
+                    title: {
+                      terms: {
+                        field: 'sample.measurement_title',
+                      },
+                      aggs: {
+                        uid: {
+                          terms: {
+                            field: 'sample.uid',
                           },
                         },
                       },
@@ -227,26 +231,26 @@ export async function queryIterationSamples(params) {
                   },
                 },
               },
-              name: {
-                terms: {
-                  field: 'run.name',
-                },
-              },
-              controller: {
-                terms: {
-                  field: 'run.controller',
-                },
+            },
+            name: {
+              terms: {
+                field: 'run.name',
               },
             },
-            sort: [
-              {
-                'iteration.number': {
-                  order: 'asc',
-                  unmapped_type: 'boolean',
-                },
+            controller: {
+              terms: {
+                field: 'run.controller',
               },
-            ],
+            },
           },
+          sort: [
+            {
+              'iteration.number': {
+                order: 'asc',
+                unmapped_type: 'boolean',
+              },
+            },
+          ],
         },
       })
     );
@@ -264,15 +268,13 @@ export async function queryIterationSamples(params) {
 }
 
 export async function queryTimeseriesData(payload) {
-  const { datastoreConfig, selectedIndices, selectedIterations } = payload;
+  const { datastoreConfig, selectedDateRange, selectedIterations } = payload;
 
-  const url = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
     datastoreConfig,
     datastoreConfig.result_index,
-    selectedIndices
+    selectedDateRange
   )}/_search?scroll=1m`;
-
-  const endpoint = `${datastoreConfig.test_server}/download`;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {
@@ -281,37 +283,37 @@ export async function queryTimeseriesData(payload) {
         if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
           timeseriesRequests.push(
             request.post(endpoint, {
+              params: {
+                ignore_unavailable: true,
+              },
               data: {
-                url,
-                payload: {
-                  size: 1000,
-                  query: {
-                    filtered: {
-                      query: {
-                        query_string: {
-                          query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
-                            iteration.name
-                          } AND sample.measurement_type:${
-                            sample.sample.measurement_type
-                          } AND sample.measurement_title:${
-                            sample.sample.measurement_title
-                          } AND sample.measurement_idx:${
-                            sample.sample.measurement_idx
-                          } AND sample.name:${sample.sample.name}`,
-                          analyze_wildcard: true,
-                        },
+                size: 1000,
+                query: {
+                  filtered: {
+                    query: {
+                      query_string: {
+                        query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
+                          iteration.name
+                        } AND sample.measurement_type:${
+                          sample.sample.measurement_type
+                        } AND sample.measurement_title:${
+                          sample.sample.measurement_title
+                        } AND sample.measurement_idx:${
+                          sample.sample.measurement_idx
+                        } AND sample.name:${sample.sample.name}`,
+                        analyze_wildcard: true,
                       },
                     },
                   },
-                  sort: [
-                    {
-                      '@timestamp_original': {
-                        order: 'asc',
-                        unmapped_type: 'boolean',
-                      },
-                    },
-                  ],
                 },
+                sort: [
+                  {
+                    '@timestamp_original': {
+                      order: 'asc',
+                      unmapped_type: 'boolean',
+                    },
+                  },
+                ],
               },
             })
           );
