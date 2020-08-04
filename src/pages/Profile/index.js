@@ -14,7 +14,6 @@ import { connect } from 'dva';
 import { SignOutAltIcon, PencilAltIcon, UndoIcon } from '@patternfly/react-icons';
 import styles from './index.less';
 import avatar from '../../assets/avatar.svg';
-import MonthSelect from '@/components/MonthSelect';
 
 @connect(({ datastore, global, user }) => ({
   user: user.user,
@@ -37,7 +36,7 @@ class Profile extends React.Component {
 
   render() {
     const { isChecked } = this.state;
-    const { selectedIndices, indices } = this.props;
+    // const { selectedIndices, indices } = this.props;
     return (
       <div>
         <Grid>
@@ -73,15 +72,6 @@ class Profile extends React.Component {
                 <Grid>
                   <GridItem span={3} offset={1}>
                     <p>Default Indices: </p>
-                  </GridItem>
-                  <GridItem span={5}>
-                    <MonthSelect
-                      indices={indices}
-                      reFetch={this.fetchControllers}
-                      onChange={this.updateSelectedIndices}
-                      value={selectedIndices}
-                      style={{ display: 'flex' }}
-                    />
                   </GridItem>
                 </Grid>
                 <Grid>
