@@ -42,7 +42,7 @@
     "html2canvas": "^1.0.0-alpha.12",
     "jschart": "^1.0.7",
     "jspdf": "^1.5.3",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.20",
     "lodash-decorators": "^6.0.0",
     "memoize-one": "^5.0.0",
     "moment": "^2.24.0",
