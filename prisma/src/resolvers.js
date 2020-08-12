@@ -31,9 +31,11 @@ const resolvers = {
         user,
       };
     },
-    register: async (parent, { username, password }, ctx) => {
+    register: async (parent, { firstName, lastName, username, password }, ctx) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await ctx.prisma.createUser({
+        firstName,
+        lastName,
         username,
         password: hashedPassword,
       });
