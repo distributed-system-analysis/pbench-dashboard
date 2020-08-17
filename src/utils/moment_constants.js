@@ -36,3 +36,7 @@ export function getAllMonthsWithinRange(datastoreConfig, index, selectedDateRang
   });
   return queryString;
 }
+
+export const getDiffDate = givenDate => {
+  return moment(givenDate).fromNow();
+};

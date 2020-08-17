@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Form, Icon, Tabs } from 'antd';
+import { Card, Form, Icon, Tabs, Tooltip } from 'antd';
 
 import SearchBar from '@/components/SearchBar';
 import AntdDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
 
@@ -157,6 +158,11 @@ class Controllers extends Component {
         dataIndex: 'last_modified_string',
         key: 'last_modified_string',
         sorter: (a, b) => a.last_modified_value - b.last_modified_value,
+        render: val => (
+          <Tooltip title={val}>
+            <span>{getDiffDate(val)}</span>
+          </Tooltip>
+        ),
       },
       {
         title: 'Results',

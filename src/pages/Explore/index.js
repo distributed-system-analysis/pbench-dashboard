@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Button, Popconfirm, Icon, Form, Modal, Input } from 'antd';
+import { Card, Button, Popconfirm, Icon, Form, Modal, Input, Tooltip } from 'antd';
 
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import { getDiffDate } from '@/utils/moment_constants';
 
 const { TextArea } = Input;
 
@@ -125,6 +126,11 @@ class Explore extends Component {
         key: 'createdAt',
         defaultSortOrder: 'descend',
         sorter: (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
+        render: val => (
+          <Tooltip title={val}>
+            <span>{getDiffDate(val)}</span>
+          </Tooltip>
+        ),
       },
       {
         title: 'Description',
