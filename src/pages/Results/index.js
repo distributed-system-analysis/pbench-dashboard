@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Form, Icon, Tabs } from 'antd';
+import { Card, Form, Icon, Tabs, Tooltip } from 'antd';
 
 import SearchBar from '@/components/SearchBar';
 import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
 
@@ -166,11 +167,21 @@ class Results extends Component {
         dataIndex: 'run.start',
         key: 'run.start',
         sorter: (a, b) => a.startUnixTimestamp - b.startUnixTimestamp,
+        render: val => (
+          <Tooltip title={val}>
+            <span>{getDiffDate(val)}</span>
+          </Tooltip>
+        ),
       },
       {
         title: 'End Time',
         dataIndex: 'run.end',
         key: 'run.end',
+        render: val => (
+          <Tooltip title={val}>
+            <span>{getDiffDate(val)}</span>
+          </Tooltip>
+        ),
       },
       {
         title: 'Actions',

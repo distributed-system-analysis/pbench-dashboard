@@ -245,8 +245,9 @@ describe('controller page component', () => {
       '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(3)'
     );
 
-    await page.click(
-      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)'
+    await page.$eval(
+      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)',
+      elem => elem.click()
     );
     const startDate = await page.$eval(
       '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)',
