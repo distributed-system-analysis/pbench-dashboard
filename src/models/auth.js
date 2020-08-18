@@ -1,35 +1,40 @@
+import registerUser from '../services/auth';
+
 export default {
   namespace: 'auth',
 
   state: {
-    auth: {},
+    username: '',
   },
 
   effects: {
-    *loadUser({ payload }, { put }) {
+    *registerUser({ payload }, { call }) {
+      const response = yield call(registerUser, payload);
+      return response;
+    },
+    *loginUser({ put }) {
       yield put({
-        type: 'modifyUser',
-        payload,
+        type: 'updateUserMetadata',
       });
     },
     *logoutUser({ put }) {
       yield put({
-        type: 'removeUser',
+        type: 'removeUserMetadata',
       });
     },
   },
 
   reducers: {
-    modifyUser(state, { payload }) {
+    updateUserMetadata(state, { payload }) {
       return {
         ...state,
-        auth: payload,
+        username: payload,
       };
     },
-    removeUser(state) {
+    removeUserMetadata(state) {
       return {
         ...state,
-        auth: {},
+        username: '',
       };
     },
   },

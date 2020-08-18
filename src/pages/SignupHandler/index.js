@@ -15,236 +15,269 @@ import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import styles from './index.less';
 
-@connect(auth => ({
-  auth: auth.auth,
+@connect(({ datastore }) => ({
+  datastoreConfig: datastore.datastoreConfig,
 }))
 class SignupHandler extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      firstName: '',
+      lastName: '',
       username: '',
       password: '',
-      confPassword: '',
-      email: '',
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
-      charLength: ['block', 'none'],
-      specialChar: ['block', 'none'],
-      number: ['block', 'none'],
-      upperCaseChar: ['block', 'none'],
-      passwordMatch: '',
-      emailValidation: '',
+      // eslint-disable-next-line react/no-unused-state
+      confirmedPassword: '',
+      submitButtonDisabled: true,
+      submitButtonColor: 'black',
+      passwordValidation: {
+        charCount: false,
+        specialCharCount: false,
+        containsNumber: false,
+        containsUppercaseLetter: false,
+      },
+      passwordValidationMessage: '',
+      usernameValidationMessage: '',
     };
   }
 
-  componentDidMount = () => {
-    this.disableSubmitBtn();
-  };
+  componentDidMount() {
+    this.fetchDatastoreConfig();
+  }
 
-  enableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'primary',
-      btnColor: 'white',
-      btnDisabled: 'false',
-    });
-  };
-
-  disableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
-    });
-  };
-
-  handleNameInputChange = username => {
-    const { email, password, confPassword } = this.state;
-    this.setState({
-      username,
-    });
-    if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-      this.enableSubmitBtn();
-    } else {
-      this.disableSubmitBtn();
-    }
-  };
-
-  handleEmailInputChange = email => {
-    const { username, password, confPassword } = this.state;
-    this.setState({
-      email,
-    });
-    const re = /\S+@\S+\.\S+/;
-    if (!re.test(email) && email !== '') {
-      this.setState({ emailValidation: 'Enter a valid Email' });
-    } else {
-      this.setState({ emailValidation: '' });
-      if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-        this.enableSubmitBtn();
-      } else {
-        this.disableSubmitBtn();
-      }
-    }
-  };
-
-  handlePassWordInputChange = password => {
-    const { username, email, confPassword } = this.state;
-    this.setState({
-      password,
-    });
-    if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-      this.enableSubmitBtn();
-    } else {
-      this.disableSubmitBtn();
-    }
-    if (password.length >= 8) {
-      this.setState({ charLength: ['none', 'block'] });
-    }
-    const specRegex = /^[A-Za-z0-9 ]+$/;
-    if (!specRegex.test(password) && password !== '') {
-      this.setState({ specialChar: ['none', 'block'] });
-    }
-    const hasNumber = /\d/;
-    if (hasNumber.test(password)) {
-      this.setState({ number: ['none', 'block'] });
-    }
-    const upperCase = /[A-Z]/;
-    if (upperCase.test(password)) {
-      this.setState({ upperCaseChar: ['none', 'block'] });
-    }
-  };
-
-  checkConfirmPassword = newpassword => {
-    const { username, email, password } = this.state;
-    if (password !== newpassword && newpassword !== '') {
-      this.setState({ passwordMatch: "Password doesn't match" });
-    } else {
-      this.setState({ passwordMatch: '' });
-      if (username !== '' && email !== '' && password !== '' && newpassword !== '') {
-        this.enableSubmitBtn();
-      } else {
-        this.disableSubmitBtn();
-      }
-    }
-  };
-
-  handleSignupSubmit = () => {
+  fetchDatastoreConfig = () => {
     const { dispatch } = this.props;
-    const { username, password, email } = this.state;
-    this.setState({
-      password,
-      username,
-      email,
+
+    dispatch({
+      type: 'datastore/fetchDatastoreConfig',
     });
-    dispatch(routerRedux.push(`/login`));
+  };
+
+  registerUser = () => {
+    const { dispatch, datastoreConfig } = this.props;
+    const { firstName, lastName, username, password, confirmedPassword } = this.state;
+
+    let validRegistration = true;
+    const validEmailRegex = /\S+@\S+\.\S+/;
+
+    if (!validEmailRegex.test(username)) {
+      this.setState({ usernameValidationMessage: 'Please enter a valid email address' });
+      validRegistration = false;
+    } else {
+      this.setState({ usernameValidationMessage: '' });
+    }
+
+    if (password !== confirmedPassword) {
+      this.setState({ passwordValidationMessage: 'The password confirmation does not match' });
+      validRegistration = false;
+    } else {
+      this.setState({ passwordValidationMessage: '' });
+    }
+
+    if (validRegistration) {
+      dispatch({
+        type: 'auth/registerUser',
+        payload: { datastoreConfig, firstName, lastName, username, password },
+      }).then(response => {
+        if (
+          response.errors !== undefined &&
+          response.errors[0].message ===
+            'A unique constraint would be violated on User. Details: Field name = username'
+        ) {
+          this.setState({
+            usernameValidationMessage:
+              'This email address is already registered. If it belongs to you, please log in or visit our account recovery page to get access to this account.',
+          });
+        } else {
+          dispatch(routerRedux.push(`/login`));
+        }
+      });
+    }
+  };
+
+  isFormFilled = () => {
+    const {
+      firstName,
+      lastName,
+      username,
+      password,
+      confirmedPassword,
+      passwordValidation,
+    } = this.state;
+
+    const containsSpecialCharRegex = /^[A-Za-z0-9 ]+$/;
+    const containsNumberRegex = /\d/;
+    const containsUppercaseLetterRegex = /[A-Z]/;
+
+    let validPassword = true;
+
+    this.setState({
+      passwordValidation: {
+        charCount: password.length >= 8,
+        specialCharCount: !containsSpecialCharRegex.test(password),
+        containsNumber: containsNumberRegex.test(password),
+        containsUppercaseLetter: containsUppercaseLetterRegex.test(password),
+      },
+    });
+
+    Object.values(passwordValidation).forEach(validation => {
+      if (validation === false) {
+        validPassword = false;
+      }
+    });
+
+    if (
+      firstName !== '' &&
+      lastName !== '' &&
+      username !== '' &&
+      password !== '' &&
+      confirmedPassword !== '' &&
+      validPassword === true
+    ) {
+      this.setState({
+        submitButtonDisabled: false,
+        submitButtonColor: 'white',
+      });
+    } else {
+      this.setState({
+        submitButtonDisabled: true,
+        submitButtonColor: 'black',
+      });
+    }
+  };
+
+  onChangeFirstName = firstName => {
+    this.setState({ firstName });
+    this.isFormFilled();
+  };
+
+  onChangeLastName = lastName => {
+    this.setState({ lastName });
+    this.isFormFilled();
+  };
+
+  onChangeUsername = username => {
+    this.setState({ username });
+    this.isFormFilled();
+  };
+
+  onChangePassword = password => {
+    this.setState({ password });
+    this.isFormFilled();
+  };
+
+  onChangeConfirmedPassword = confirmedPassword => {
+    this.setState({ confirmedPassword });
+    this.isFormFilled();
   };
 
   render() {
     const {
-      variantVal,
-      btnColor,
-      btnDisabled,
-      charLength,
-      number,
-      specialChar,
-      upperCaseChar,
-      passwordMatch,
-      emailValidation,
+      submitButtonDisabled,
+      submitButtonColor,
+      passwordValidation,
+      passwordValidationMessage,
+      usernameValidationMessage,
     } = this.state;
 
     const form = (
       <Form className={styles.section}>
-        <FormGroup label="First name" isRequired fieldId="horizontal-form-first-name">
+        <FormGroup label="First Name" fieldId="firstName">
           <TextInput
             isRequired
             type="text"
-            id="horizontal-form-first-name"
-            aria-describedby="horizontal-form-name-helper"
-            name="horizontal-form-name"
-            onChange={this.handleNameInputChange}
+            onChange={this.onChangeFirstName}
+            aria-label="First Name"
           />
         </FormGroup>
-        <FormGroup label="Last name" fieldId="horizontal-form-last-name">
-          <TextInput
-            type="text"
-            id="horizontal-form-last-name"
-            aria-describedby="horizontal-form-name-helper"
-            name="horizontal-form-name"
-          />
-        </FormGroup>
-        <FormGroup label="Email address" isRequired fieldId="horizontal-form-email">
+        <FormGroup label="Last Name" fieldId="lastName">
           <TextInput
             isRequired
             type="text"
-            id="horizontal-form-email"
-            aria-describedby="horizontal-form-email-helper"
-            name="horizontal-form-name"
-            onChange={this.handleEmailInputChange}
+            onChange={this.onChangeLastName}
+            aria-label="Last Name"
           />
-          <p className={styles.error}>{emailValidation}</p>
         </FormGroup>
-        <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
+        <FormGroup label="Email Address" fieldId="emailAddress">
+          <TextInput
+            isRequired
+            type="text"
+            onChange={this.onChangeUsername}
+            aria-label="Email Address"
+          />
+          <p className={styles.error}>{usernameValidationMessage}</p>
+        </FormGroup>
+        <FormGroup label="Password" fieldId="password">
           <TextInput
             isRequired
             type="password"
-            id="horizontal-form-password"
-            name="horizontal-form-password"
-            onChange={this.handlePassWordInputChange}
+            onChange={this.onChangePassword}
+            aria-label="Password"
           />
         </FormGroup>
-        <FormGroup label="Confirm password" isRequired fieldId="horizontal-form-password">
+        <FormGroup label="Confirm Password" fieldId="confirmPassword">
           <TextInput
             isRequired
             type="password"
-            id="horizontal-form-confirm-password"
-            name="horizontal-form-confirm-password"
-            onChange={this.checkConfirmPassword}
+            onChange={this.onChangeConfirmedPassword}
+            aria-label="Confirm Password"
           />
-          <p className={styles.error}>{passwordMatch}</p>
+          <p className={styles.error}>{passwordValidationMessage}</p>
         </FormGroup>
-        <div id="passworkCheck">
+        <div>
           <h4>Password must contain at least</h4>
           <Split>
-            <SplitItem style={{ marginTop: '2px', display: charLength[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: charLength[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
+            {passwordValidation.charCount ? (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CheckIcon style={{ color: 'green' }} />
+              </SplitItem>
+            ) : (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CloseIcon style={{ color: 'red' }} />
+              </SplitItem>
+            )}
             <SplitItem isFilled style={{ marginLeft: '15px' }}>
               8 characters
             </SplitItem>
           </Split>
           <Split>
-            <SplitItem style={{ marginTop: '2px', display: specialChar[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: specialChar[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
+            {passwordValidation.specialCharCount ? (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CheckIcon style={{ color: 'green' }} />
+              </SplitItem>
+            ) : (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CloseIcon style={{ color: 'red' }} />
+              </SplitItem>
+            )}
             <SplitItem isFilled style={{ marginLeft: '15px' }}>
               1 special character (!,/,@,#,$,%,?)
             </SplitItem>
           </Split>
           <Split>
-            <SplitItem style={{ marginTop: '2px', display: number[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: number[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
+            {passwordValidation.containsNumber ? (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CheckIcon style={{ color: 'green' }} />
+              </SplitItem>
+            ) : (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CloseIcon style={{ color: 'red' }} />
+              </SplitItem>
+            )}
             <SplitItem isFilled style={{ marginLeft: '15px' }}>
               1 number
             </SplitItem>
           </Split>
           <Split>
-            <SplitItem style={{ marginTop: '2px', display: upperCaseChar[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: upperCaseChar[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
+            {passwordValidation.containsUppercaseLetter ? (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CheckIcon style={{ color: 'green' }} />
+              </SplitItem>
+            ) : (
+              <SplitItem style={{ marginTop: '2px' }}>
+                <CloseIcon style={{ color: 'red' }} />
+              </SplitItem>
+            )}
             <SplitItem isFilled style={{ marginLeft: '15px' }}>
               1 uppercase letter
             </SplitItem>
@@ -253,13 +286,11 @@ class SignupHandler extends React.Component {
         <ActionGroup>
           <Button
             isBlock
-            variant={variantVal}
-            onClick={() => this.handleSignupSubmit()}
-            className={styles.btn}
-            id="submitBtn"
-            {...(btnDisabled === 'true' ? { isDisabled: 'true' } : {})}
+            onClick={() => this.registerUser()}
+            className={styles.submitButton}
+            isDisabled={submitButtonDisabled}
           >
-            <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
+            <Title headingLevel="h4" size="xl" style={{ color: submitButtonColor }}>
               Create account
             </Title>
           </Button>

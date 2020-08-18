@@ -6,7 +6,7 @@ import { connect } from 'dva';
 import styles from './index.less';
 
 @connect(auth => ({
-  auth: auth.auth,
+  username: auth.username,
 }))
 class PrivateRoute extends Component {
   constructor(props) {
@@ -20,7 +20,7 @@ class PrivateRoute extends Component {
   };
 
   render() {
-    const { children, auth } = this.props;
+    const { children, username } = this.props;
     const pbenchLogin = (
       <Grid gutter="md" className={styles.section}>
         <GridItem>
@@ -112,7 +112,7 @@ class PrivateRoute extends Component {
         {thirdPartyLogin}
       </Fragment>
     );
-    if (auth.auth.username === 'admin') {
+    if (username === 'admin') {
       return <Fragment>{children}</Fragment>;
     }
     return <AuthLayout toPreview={toPreview} heading="Log in with ..." />;
