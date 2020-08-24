@@ -12,9 +12,10 @@ export default {
         payload,
       });
     },
-    *logoutUser({ put }) {
+    *logoutUser({ payload }, { put }) {
       yield put({
         type: 'removeUser',
+        payload,
       });
     },
   },
@@ -26,9 +27,8 @@ export default {
         auth: payload,
       };
     },
-    removeUser(state) {
+    removeUser() {
       return {
-        ...state,
         auth: {},
       };
     },

@@ -73,7 +73,6 @@ class GlobalHeader extends Component {
     dispatch({
       type: 'auth/logoutUser',
     });
-    window.location.reload();
   };
 
   navigateToProfile = () => {
@@ -105,12 +104,6 @@ class GlobalHeader extends Component {
     ];
 
     const { isDropdownOpen } = this.state;
-
-    const avatarIcon = (
-      <Tooltip className={styles.profileOpt}>
-        {<Avatar src={imgAvatar} alt="Avatar image" />}
-      </Tooltip>
-    );
 
     return (
       <div>
@@ -184,6 +177,7 @@ class GlobalHeader extends Component {
                 <Icon type="message" />
               </a>
             </Tooltip>
+            {auth.username === 'admin' ? <Avatar src={imgAvatar} alt="Avatar image" /> : 'Admin'}
             <Tooltip className={styles.profileOpt}>
               <Dropdown
                 isPlain
@@ -196,7 +190,6 @@ class GlobalHeader extends Component {
                 dropdownItems={userDropdownItems}
               />
             </Tooltip>
-            {auth.username === 'admin' ? <avatarIcon /> : 'Admin'}
           </div>
         </div>
       </div>
