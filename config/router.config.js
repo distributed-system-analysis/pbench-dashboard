@@ -20,7 +20,7 @@ module.exports = [
     Routes: ['./src/pages/PrivateRoute/index.js'],
     routes: [
       {
-        path: '/dashboard',
+        path: '/',
         name: 'dashboard',
         icon: 'dashboard',
         component: './Controllers',
