@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Icon, Spin, message } from 'antd';
 import DocumentTitle from 'react-document-title';
@@ -10,8 +10,6 @@ import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
 import pathToRegexp from 'path-to-regexp';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
-import memoizeOne from 'memoize-one';
-import deepEqual from 'lodash/isEqual';
 import GlobalFooter from 'ant-design-pro/lib/GlobalFooter';
 import GlobalHeader from '@/components/GlobalHeader';
 import SiderMenu from '../components/SiderMenu';
@@ -36,7 +34,7 @@ const getRedirect = item => {
 };
 getMenuData().forEach(getRedirect);
 
-const getBreadcrumbNameMap = memoizeOne(menu => {
+const getBreadcrumbNameMap = menu => {
   const routerMap = {};
   const mergeMeunAndRouter = menuData => {
     menuData.forEach(menuItem => {
@@ -49,7 +47,7 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   };
   mergeMeunAndRouter(menu);
   return routerMap;
-}, deepEqual);
+};
 
 const query = {
   'screen-xs': {
@@ -103,7 +101,7 @@ class BasicLayout extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.getPageTitle = memoizeOne(this.getPageTitle);
+    this.getPageTitle = this.getPageTitle;
     this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
     // eslint-disable-next-line no-underscore-dangle
     this.persistor = persistStore(window.g_app._store);
@@ -280,4 +278,4 @@ class BasicLayout extends React.PureComponent {
   }
 }
 
-export default BasicLayout;
+export default memo(BasicLayout);
