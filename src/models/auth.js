@@ -2,7 +2,7 @@ export default {
   namespace: 'auth',
 
   state: {
-    auth: {},
+    auth: { username: '' },
   },
 
   effects: {
@@ -29,7 +29,7 @@ export default {
     },
     removeUser() {
       return {
-        auth: {},
+        auth: { username: '' },
       };
     },
   },

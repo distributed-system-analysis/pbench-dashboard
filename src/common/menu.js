@@ -8,19 +8,19 @@ const menuData = [
     routes: [
       {
         name: 'Results',
-        path: '/results',
+        path: '/private/results',
         routes: [
           {
             name: 'Summary',
-            path: '/summary',
+            path: '/private/summary',
           },
           {
             name: 'Comparison Select',
-            path: '/comparison-select',
+            path: '/private/comparison-select',
             routes: [
               {
                 name: 'Comparison',
-                path: '/comparison',
+                path: '/private/comparison',
               },
             ],
           },
@@ -31,12 +31,12 @@ const menuData = [
   {
     name: 'Search',
     icon: 'search',
-    path: '/search',
+    path: '/private/search',
   },
   {
     name: 'Explore',
     icon: 'global',
-    path: '/explore',
+    path: '/private/explore',
   },
 ];
 

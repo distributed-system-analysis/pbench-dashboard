@@ -1,5 +1,10 @@
 module.exports = [
   {
+    path: '/auth',
+    name: 'auth',
+    component: '../components/AuthLayout',
+  },
+  {
     path: '/login',
     name: 'login',
     component: './LoginHandler',
@@ -15,70 +20,81 @@ module.exports = [
     component: './PasswordHandler',
   },
   {
+    path: '/exception/403',
+    name: 'exception-403',
+    component: './Exception/403',
+  },
+  {
+    path: '/exception/404',
+    name: 'exception-404',
+    component: './Exception/404',
+  },
+  {
+    path: '/exception/500',
+    name: 'exception-500',
+    component: './Exception/500',
+  },
+  {
+    path: '/share/:id',
+    name: 'share',
+    component: './SessionPlaceholder',
+  },
+  {
     path: '/',
     component: '../layouts/BasicLayout',
-    Routes: ['./src/pages/PrivateRoute/index.js'],
     routes: [
       {
         path: '/',
-        name: 'dashboard',
-        icon: 'dashboard',
-        component: './Controllers',
+        name: 'publicview',
+        component: './PublicView',
       },
       {
-        path: '/profile',
-        name: 'profile',
-        component: './Profile',
-      },
-      {
-        path: '/results',
-        name: 'results',
-        component: './Results',
-      },
-      {
-        path: '/summary',
-        name: 'summary',
-        component: './Summary',
-      },
-      {
-        path: '/comparison-select',
-        name: 'comparison-select',
-        component: './ComparisonSelect',
-      },
-      {
-        path: '/comparison',
-        name: 'comparison',
-        component: './RunComparison',
-      },
-      {
-        path: '/search',
-        name: 'search',
-        component: './Search',
-      },
-      {
-        path: '/explore',
-        name: 'explore',
-        component: './Explore',
-      },
-      {
-        path: '/exception/403',
-        name: 'exception-403',
-        component: './Exception/403',
-      },
-      {
-        path: '/exception/404',
-        name: 'exception-404',
-        component: './Exception/404',
-      },
-      {
-        path: '/exception/500',
-        name: 'exception-500',
-        component: './Exception/500',
-      },
-      {
-        path: '/share/:id',
-        name: 'share',
-        component: './SessionPlaceholder',
+        path: '/private',
+        Routes: ['./src/pages/PrivateRoute/index.js'],
+        routes: [
+          {
+            path: '/private',
+            name: 'dashboard',
+            icon: 'dashboard',
+            component: './Controllers',
+          },
+          {
+            path: '/private/profile',
+            name: 'profile',
+            exact: true,
+            component: './Profile',
+          },
+          {
+            path: '/private/results',
+            name: 'results',
+            component: './Results',
+          },
+          {
+            path: '/private/summary',
+            name: 'summary',
+            component: './Summary',
+          },
+          {
+            path: '/private/comparison-select',
+            name: 'comparison-select',
+            component: './ComparisonSelect',
+          },
+          {
+            path: '/private/comparison',
+            name: 'comparison',
+            component: './RunComparison',
+          },
+          {
+            path: '/private/search',
+            name: 'search',
+            component: './Search',
+          },
+          {
+            path: '/private/explore',
+            name: 'explore',
+            component: './Explore',
+          },
+        ],
       },
     ],
   },
