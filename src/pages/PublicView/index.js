@@ -1,27 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Form, Icon, Tabs } from 'antd';
-import {
-  PageSection,
-  PageSectionVariants,
-  Divider,
-  Text,
-  TextContent,
-  Card,
-  CardBody,
-  Spinner,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { Card, Form, Icon, Tabs } from 'antd';
 import SearchBar from '@/components/SearchBar';
 import AntdDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
-import { getDiffDate } from '@/utils/moment_constants';
+import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 const { TabPane } = Tabs;
 
-@connect(({ datastore, global, dashboard, loading, user }) => ({
+@connect(({ auth, datastore, global, dashboard, loading, user }) => ({
+  auth: auth.auth,
   controllers: dashboard.controllers,
   indices: datastore.indices,
   selectedDateRange: global.selectedDateRange,
@@ -32,7 +21,7 @@ const { TabPane } = Tabs;
     loading.effects['datastore/fetchMonthIndices'] ||
     loading.effects['datastore/fetchDatastoreConfig'],
 }))
-class Controllers extends Component {
+class PublicView extends Component {
   constructor(props) {
     super(props);
 
@@ -43,7 +32,7 @@ class Controllers extends Component {
 
   componentDidMount() {
     const { controllers } = this.state;
-    const { indices, selectedDateRange } = this.props;
+    const { auth, indices, selectedDateRange } = this.props;
 
     if (
       controllers.length === 0 ||
@@ -52,6 +41,11 @@ class Controllers extends Component {
       selectedDateRange.end === ''
     ) {
       this.queryDatastoreConfig();
+    }
+
+    if (auth.username === 'admin') {
+      const { dispatch } = this.props;
+      dispatch(routerRedux.push(`/private`));
     }
   }
 
@@ -136,7 +130,7 @@ class Controllers extends Component {
     }).then(() => {
       dispatch(
         routerRedux.push({
-          pathname: '/private/results',
+          pathname: '/priavte/results',
         })
       );
     });
@@ -151,6 +145,11 @@ class Controllers extends Component {
       type: 'user/favoriteController',
       payload: controller,
     });
+  };
+
+  navigateToAuth = () => {
+    const { dispatch } = this.props;
+    dispatch(routerRedux.push(`/private`));
   };
 
   render() {
@@ -168,11 +167,6 @@ class Controllers extends Component {
         dataIndex: 'last_modified_string',
         key: 'last_modified_string',
         sorter: (a, b) => a.last_modified_value - b.last_modified_value,
-        render: val => (
-          <Tooltip content={val}>
-            <span>{getDiffDate(val)}</span>
-          </Tooltip>
-        ),
       },
       {
         title: 'Results',
@@ -206,67 +200,48 @@ class Controllers extends Component {
     ];
 
     return (
-      <React.Fragment>
-        <PageSection variant={PageSectionVariants.light}>
-          <TextContent>
-            <Text component="h1">Controllers</Text>
-          </TextContent>
-        </PageSection>
-        <Divider component="div" />
-        <PageSection>
-          <Card>
-            {loadingControllers ? (
-              <Spinner
-                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      <PageHeaderLayout title="Public Controllers" handleLogin={this.navigateToAuth}>
+        <Card bordered={false}>
+          <Form layout="inline" style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+            <SearchBar
+              style={{ marginRight: 32 }}
+              placeholder="Search controllers"
+              onSearch={this.onSearch}
+            />
+            <AntdDatePicker onChangeCallback={this.fetchControllers} />
+          </Form>
+          <Tabs type="card">
+            <TabPane tab="Controllers" key="controllers">
+              <Table
+                style={{ marginTop: 20 }}
+                columns={columns}
+                dataSource={controllers}
+                onRow={record => ({
+                  onClick: () => {
+                    this.retrieveResults(record);
+                  },
+                })}
+                loading={loadingControllers}
               />
-            ) : (
-              <CardBody>
-                <Form
-                  layout="inline"
-                  style={{ display: 'flex', flex: 1, alignItems: 'center', marginBottom: 16 }}
-                >
-                  <SearchBar
-                    style={{ marginRight: 32 }}
-                    placeholder="Search controllers"
-                    onSearch={this.onSearch}
-                  />
-                  <AntdDatePicker onChangeCallback={this.fetchControllers} />
-                </Form>
-                <Tabs type="card">
-                  <TabPane tab="Controllers" key="controllers">
-                    <Table
-                      style={{ marginTop: 20 }}
-                      columns={columns}
-                      dataSource={controllers}
-                      onRow={record => ({
-                        onClick: () => {
-                          this.retrieveResults(record);
-                        },
-                      })}
-                      loading={loadingControllers}
-                    />
-                  </TabPane>
-                  <TabPane tab="Favorites" key="favorites">
-                    <Table
-                      style={{ marginTop: 20 }}
-                      columns={columns}
-                      dataSource={favoriteControllers}
-                      onRow={record => ({
-                        onClick: () => {
-                          this.retrieveResults(record);
-                        },
-                      })}
-                      loading={loadingControllers}
-                    />
-                  </TabPane>
-                </Tabs>
-              </CardBody>
-            )}
-          </Card>
-        </PageSection>
-      </React.Fragment>
+            </TabPane>
+            <TabPane tab="Favorites" key="favorites">
+              <Table
+                style={{ marginTop: 20 }}
+                columns={columns}
+                dataSource={favoriteControllers}
+                onRow={record => ({
+                  onClick: () => {
+                    this.retrieveResults(record);
+                  },
+                })}
+                loading={loadingControllers}
+              />
+            </TabPane>
+          </Tabs>
+        </Card>
+      </PageHeaderLayout>
     );
   }
 }
 
-export default Controllers;
+export default PublicView;

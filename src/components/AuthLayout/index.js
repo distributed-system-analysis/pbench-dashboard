@@ -48,8 +48,14 @@ class AuthLayout extends Component {
     dispatch(routerRedux.push(`/`));
   };
 
+  navigate = page => {
+    const { dispatch } = this.props;
+    dispatch(routerRedux.push(`/${page}`));
+  };
+
   render() {
-    const { toPreview, heading, backOpt } = this.props;
+    let { heading } = this.props;
+    const { backOpt, toPreview } = this.props;
     const { isOpen } = this.state;
 
     const dropdownItems = [
@@ -81,7 +87,7 @@ class AuthLayout extends Component {
         <Title headingLevel="h2" size="3xl" className={styles.section}>
           {backOpt === 'true' ? back : <Fragment />}
           <br />
-          {heading}
+          {heading === undefined ? (heading = 'login with...') : heading}
           <Dropdown
             style={{ float: 'right' }}
             id="toggle"
@@ -102,6 +108,98 @@ class AuthLayout extends Component {
         </Title>
       </div>
     );
+    const pbenchLogin = (
+      <Grid gutter="md" className={styles.section}>
+        <GridItem>
+          <Button
+            isBlock
+            variant="primary"
+            onClick={() => this.navigate('login')}
+            className={styles.btn}
+          >
+            <Title headingLevel="h4" size="xl" style={{ color: 'white' }}>
+              Pbench credentials
+            </Title>
+          </Button>
+        </GridItem>
+      </Grid>
+    );
+
+    const authForms = (
+      <Grid gutter="md" className={styles.restLoginDiv}>
+        <GridItem>
+          <Title headingLevel="h4" size="xl">
+            Need an account?
+            <Button
+              variant="link"
+              onClick={() => this.navigate('signup')}
+              className={styles.inlineLink}
+              style={{ paddingLeft: '10px' }}
+            >
+              Sign up
+            </Button>
+          </Title>
+        </GridItem>
+        <GridItem>
+          <Title headingLevel="h4" size="xl">
+            <Button
+              variant="link"
+              className={styles.inlineLink}
+              onClick={() => this.navigate('password')}
+            >
+              Forgot your password?
+            </Button>
+          </Title>
+        </GridItem>
+      </Grid>
+    );
+
+    const thirdPartyLogin = (
+      <Grid gutter="md" className={styles.section}>
+        <Title headingLevel="h4" size="xl">
+          Or log in with ...
+        </Title>
+        <GridItem>
+          <Button
+            isBlock
+            id="ssologin"
+            variant="secondary"
+            onClick={() => this.navigate('ssoLogin')}
+            className={styles.btn}
+          >
+            <p className={styles.inlineLink}>Red Hat SSO</p>
+          </Button>
+        </GridItem>
+        <GridItem>
+          <Button
+            isBlock
+            variant="secondary"
+            onClick={() => this.navigate('githubLogin')}
+            className={styles.btn}
+          >
+            <p className={styles.inlineLink}>GitHub</p>
+          </Button>
+        </GridItem>
+        <GridItem>
+          <Button
+            isBlock
+            variant="secondary"
+            onClick={() => this.navigate('gmailLogin')}
+            className={styles.btn}
+          >
+            <p className={styles.inlineLink}>Gmail</p>
+          </Button>
+        </GridItem>
+      </Grid>
+    );
+    const authPreview = (
+      <Fragment>
+        {pbenchLogin}
+        {authForms}
+        {thirdPartyLogin}
+      </Fragment>
+    );
+
     return (
       <div className={styles.mainDiv}>
         <div className="pf-c-background-image">
@@ -133,7 +231,7 @@ class AuthLayout extends Component {
             className={styles.form}
           >
             {Heading}
-            {toPreview}
+            {toPreview === undefined ? authPreview : toPreview}
           </GridItem>
           <GridItem
             sm={11}

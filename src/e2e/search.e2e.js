@@ -13,16 +13,17 @@ beforeAll(async () => {
   await page.goto('http://localhost:8000/dashboard/');
   // Login using dummy credentials
   await page.waitForSelector(
-    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
+    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid:nth-child(2) > .pf-l-grid__item > .pf-c-button'
   );
   await page.click(
-    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
+    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid:nth-child(2) > .pf-l-grid__item > .pf-c-button'
   );
-  await page.waitForSelector('.pf-l-grid #horizontal-form-name');
-  await page.click('.pf-l-grid #horizontal-form-name');
+
+  await page.waitForSelector('.pf-l-grid__item #horizontal-form-name');
+  await page.click('.pf-l-grid__item #horizontal-form-name');
   await page.type('.pf-l-grid #horizontal-form-name', 'admin');
-  await page.waitForSelector('.pf-l-grid #horizontal-form-password');
-  await page.click('.pf-l-grid #horizontal-form-password');
+  await page.waitForSelector('.pf-l-grid__item #horizontal-form-password');
+  await page.click('.pf-l-grid__item #horizontal-form-password');
   await page.type('.pf-l-grid #horizontal-form-password', 'admin');
   await page.waitForSelector('#submitBtn');
   await page.click('#submitBtn');

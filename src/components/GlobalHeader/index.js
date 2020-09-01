@@ -57,11 +57,17 @@ class GlobalHeader extends Component {
     dispatch({
       type: 'auth/logoutUser',
     });
+    dispatch(routerRedux.push('/'));
   };
 
   navigateToProfile = () => {
     const { dispatch } = this.props;
-    dispatch(routerRedux.push(`/profile`));
+    dispatch(routerRedux.push(`/private/profile`));
+  };
+
+  navigateToAuth = () => {
+    const { dispatch } = this.props;
+    dispatch(routerRedux.push(`/auth`));
   };
 
   render() {
@@ -107,7 +113,7 @@ class GlobalHeader extends Component {
               onClick={() => {
                 dispatch(
                   routerRedux.push({
-                    pathname: '/search',
+                    pathname: '/private/search',
                   })
                 );
               }}

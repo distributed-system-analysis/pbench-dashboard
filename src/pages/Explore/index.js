@@ -69,7 +69,7 @@ class Explore extends Component {
   startSharedSession = record => {
     const { dispatch } = this.props;
 
-    dispatch(routerRedux.push(`/share/${record.id}`));
+    dispatch(routerRedux.push(`/private/share/${record.id}`));
   };
 
   editDescription = (id, value) => {

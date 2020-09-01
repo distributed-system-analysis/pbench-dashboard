@@ -38,7 +38,7 @@ class LoginHandler extends React.Component {
       type: 'auth/loadUser',
       payload,
     });
-    dispatch(routerRedux.push(`/`));
+    dispatch(routerRedux.push(`/private`));
   };
 
   enableSubmitBtn = () => {
