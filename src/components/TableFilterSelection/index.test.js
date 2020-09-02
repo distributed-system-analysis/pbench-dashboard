@@ -30,7 +30,6 @@ describe('test rendering of TableFilterSelection page component', () => {
   it('check rendering', () => {
     expect(wrapper.find('Select').length).toEqual(7);
     expect(wrapper.find('Form')).toHaveLength(1);
-    expect(wrapper.find('Row')).toHaveLength(2);
     expect(wrapper.find('Button')).toHaveLength(2);
   });
 });
@@ -55,22 +54,5 @@ describe('test interaction of TableFilterSelection page component', () => {
       .props()
       .onClick();
     expect(spy).toHaveBeenCalledTimes(1);
-  });
-  it('Check change of Filter', () => {
-    const state = [];
-    state.benchmark_version = { value: 'abc', category: 'letters' };
-    wrapper
-      .find('Select')
-      .at(1)
-      .simulate('change', { value: 'abc', category: 'letters' });
-    expect(wrapper.state('selectedFilters')).toEqual(state);
-  });
-  it('Check change of Filter with null value', () => {
-    const state = [];
-    wrapper
-      .find('Select')
-      .at(1)
-      .simulate('change');
-    expect(wrapper.state('selectedFilters')).toEqual(state);
   });
 });

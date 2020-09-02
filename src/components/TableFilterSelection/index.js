@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Row, Select } from 'antd';
+import { Form, Flex, FlexItem } from '@patternfly/react-core';
+
+import Select from '@/components/Select';
 
 import Button from '../Button';
-
-const { Option } = Select;
 
 export default class TableFilterSelection extends Component {
   static propTypes = {
@@ -29,7 +29,7 @@ export default class TableFilterSelection extends Component {
     this.setState({ updateFiltersDisabled: true });
   };
 
-  onFilterChange = (value, category) => {
+  onFilterChange = (event, value, category) => {
     const { selectedFilters } = this.state;
 
     if (value) {
@@ -63,45 +63,33 @@ export default class TableFilterSelection extends Component {
             borderRadius: '6px',
           }}
         >
-          <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Flex>
             {Object.keys(filters).map(category => (
-              <div key={category}>
+              <FlexItem key={category} style={{ marginRight: 16, marginBottom: 16, width: 160 }}>
                 <p style={{ marginBottom: 4, fontSize: 12, fontWeight: 600 }}>{category}</p>
                 <Select
                   key={category}
-                  allowClear
-                  placeholder={category}
-                  style={{ marginRight: 16, marginBottom: 16, width: 160 }}
-                  dropdownMatchSelectWidth={false}
-                  value={selectedFilters[category]}
-                  onChange={value => this.onFilterChange(value, category)}
-                >
-                  {filters[category].map(categoryData => (
-                    <Option key={categoryData} value={categoryData}>
-                      {categoryData}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+                  selected={selectedFilters[category]}
+                  options={filters[category]}
+                  onSelect={(event, value) => this.onFilterChange(event, value, category)}
+                />
+              </FlexItem>
             ))}
-          </Row>
-          <Row>
-            <div style={{ textAlign: 'right' }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                name="Filter"
-                disabled={updateFiltersDisabled}
-                onClick={this.onFilterTable}
-              />
-              <Button
-                type="secondary"
-                style={{ marginLeft: 8 }}
-                onClick={this.onClearFilters}
-                name="Clear"
-              />
-            </div>
-          </Row>
+          </Flex>
+          <div style={{ textAlign: 'right' }}>
+            <Button
+              type="primary"
+              name="Filter"
+              disabled={updateFiltersDisabled}
+              onClick={this.onFilterTable}
+            />
+            <Button
+              type="secondary"
+              style={{ marginLeft: 8 }}
+              onClick={this.onClearFilters}
+              name="Clear"
+            />
+          </div>
         </Form>
       </div>
     );

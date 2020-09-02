@@ -3,7 +3,6 @@ import { shallow, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 import ComparisonSelect from './index';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 const mockProps = {
   selectedResults: [],
@@ -22,9 +21,5 @@ const wrapper = shallow(
 describe('test ComparisonSelect page component', () => {
   it('render with empty props', () => {
     expect(wrapper).toMatchSnapshot();
-  });
-
-  it('render multiple user selected controllers', () => {
-    expect(wrapper.find(PageHeaderLayout).prop('title')).toBe('controller1, controller2');
   });
 });

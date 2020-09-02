@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer';
-import moment from 'moment';
 import { generateMockControllerAggregation, mockIndices } from '../../mock/api';
 
 let browser;
@@ -11,7 +10,7 @@ beforeAll(async () => {
     args: ['--no-sandbox'],
   });
   page = await browser.newPage();
-  await page.goto('http://localhost:8000/dashboard/#/');
+  await page.goto('http://localhost:8000/dashboard/');
   // Login using dummy credentials
   await page.waitForSelector(
     '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
@@ -58,13 +57,12 @@ afterAll(() => {
 describe('controller page component', () => {
   test(
     'should load controllers',
-    async done => {
+    async () => {
       await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
       const testController = await page.$eval('.ant-table-row', elem =>
         elem.getAttribute('data-row-key')
       );
       expect(testController).toBe('controller_1');
-      done();
     },
     30000
   );
@@ -74,22 +72,43 @@ describe('controller page component', () => {
     let testController = await page.$eval('.ant-table-row', elem =>
       elem.getAttribute('data-row-key')
     );
-    await page.type('.ant-input', testController);
-    await page.click('.ant-input-search-button');
+    await page.waitForSelector(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    await page.click(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    await page.type(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control',
+      testController
+    );
+    await page.waitForSelector(
+      '.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg'
+    );
+    await page.click('.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg');
     testController = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
     expect(testController).toBe('controller_1');
   });
 
   test('should reset search results', async () => {
     await page.waitForSelector(
-      '.ant-input-wrapper > .ant-input-search > .ant-input-suffix > .anticon > svg'
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
     );
-    await page.click('.ant-input-wrapper > .ant-input-search > .ant-input-suffix > .anticon > svg');
-    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
-
-    const testController = await page.$eval('.ant-table-row', elem =>
+    await page.click(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    let testController = await page.$eval('.ant-table-row', elem =>
       elem.getAttribute('data-row-key')
     );
+    for (let i = 0; i < testController.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await page.keyboard.press('Backspace');
+    }
+    await page.waitForSelector(
+      '.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg'
+    );
+    await page.click('.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg');
+    testController = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
     expect(testController).toBe('controller_1');
   });
 
@@ -108,6 +127,7 @@ describe('controller page component', () => {
   });
 
   test('should sort controllers column alphabetically descending', async () => {
+    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     await page.waitForSelector(
       '.ant-table-thead > tr > .ant-table-column-has-actions:nth-child(1) > .ant-table-header-column > .ant-table-column-sorters'
     );
@@ -222,61 +242,19 @@ describe('controller page component', () => {
 
   test('should display the date picker component on click', async () => {
     await page.waitForSelector(
-      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+      '.pf-c-card__body > .ant-form > .index__picker___2L2d5 > .ant-calendar-picker-input'
     );
     await page.click(
-      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
+      '.pf-c-card__body > .ant-form > .index__picker___2L2d5 > .ant-calendar-picker-input'
     );
-    await page.waitForSelector('.ant-calendar-picker-container', { visible: true });
   });
 
   test('should change the selected dates after picking them from the calendar', async () => {
     await page.waitForSelector(
-      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)'
-    );
-    await page.click(
-      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)'
-    );
-
-    await page.waitForSelector(
       '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(3)'
     );
     await page.click(
       '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(3)'
     );
-
-    await page.$eval(
-      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)',
-      elem => elem.click()
-    );
-    const startDate = await page.$eval(
-      '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)',
-      elem => {
-        return elem.defaultValue.slice(0, -3);
-      }
-    );
-    expect(moment(startDate).isValid()).toBe(true);
   });
-
-  test(
-    'should update controllers on selection of a date range',
-    async done => {
-      await page.waitForSelector(
-        '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
-      );
-      await page.click(
-        '.ant-card-body > .ant-form > .ant-calendar-picker > .ant-calendar-picker-input'
-      );
-
-      await page.waitForSelector(
-        '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(2)'
-      );
-      await page.click(
-        '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > .ant-tag:nth-child(2)'
-      );
-      await page.waitForSelector('.ant-table-tbody', { visible: true });
-      done();
-    },
-    30000
-  );
 });

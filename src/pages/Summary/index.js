@@ -1,30 +1,25 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Spin, Tag, Card, List, Typography, Divider } from 'antd';
+import { Spin } from 'antd';
+import {
+  PageSection,
+  PageSectionVariants,
+  Tabs,
+  Tab,
+  TabTitleText,
+  Text,
+  TextContent,
+  Card,
+  CardBody,
+  DataList,
+  DataListItem,
+  DataListItemRow,
+  DataListItemCells,
+  DataListCell,
+} from '@patternfly/react-core';
 import Table from '@/components/Table';
 import TableFilterSelection from '@/components/TableFilterSelection';
 import { filterIterations } from '../../utils/parse';
-
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-
-const tabList = [
-  {
-    key: 'iterations',
-    tab: 'Iterations',
-  },
-  {
-    key: 'toc',
-    tab: 'Table of Contents',
-  },
-  {
-    key: 'metadata',
-    tab: 'Metadata',
-  },
-  {
-    key: 'tools',
-    tab: 'Tools & Parameters',
-  },
-];
 
 const tocColumns = [
   {
@@ -66,7 +61,7 @@ class Summary extends React.Component {
     const { iterations } = props;
 
     this.state = {
-      activeSummaryTab: 'iterations',
+      activeTabKey: 0,
       resultIterations: iterations,
     };
   }
@@ -111,111 +106,110 @@ class Summary extends React.Component {
     this.setState({ resultIterations: filteredIterations });
   };
 
-  onTabChange = key => {
-    this.setState({ activeSummaryTab: key });
+  onTabChange = (event, tabIndex) => {
+    this.setState({ activeTabKey: tabIndex });
   };
 
   render() {
-    const { activeSummaryTab, resultIterations } = this.state;
-    const {
-      selectedResults,
-      loadingSummary,
-      iterationParams,
-      selectedControllers,
-      tocResult,
-      result,
-    } = this.props;
-
-    const contentList = {
-      iterations: (
-        <Card title="Result Iterations" style={{ marginTop: 32 }}>
-          <Spin spinning={loadingSummary} tip="Loading Iterations...">
-            <TableFilterSelection onFilterTable={this.onFilterTable} filters={iterationParams} />
-            <Table
-              style={{ marginTop: 16 }}
-              columns={
-                resultIterations[Object.keys(resultIterations)[0]] &&
-                resultIterations[Object.keys(resultIterations)[0]].columns
-              }
-              dataSource={
-                resultIterations[Object.keys(resultIterations)[0]] &&
-                Object.values(resultIterations[Object.keys(resultIterations)[0]].iterations)
-              }
-              bordered
-            />
-          </Spin>
-        </Card>
-      ),
-      toc: (
-        <Card title="Table of Contents" style={{ marginTop: 32 }}>
-          <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
-        </Card>
-      ),
-      metadata: (
-        <Card title="Run Metadata" style={{ marginTop: 32 }}>
-          {result.runMetadata && (
-            <List
-              size="small"
-              bordered
-              dataSource={Object.entries(result.runMetadata)}
-              renderItem={([label, value]) => (
-                <List.Item key={label}>
-                  <Typography.Text strong>{label}</Typography.Text>
-                  <Divider type="vertical" />
-                  {value}
-                </List.Item>
-              )}
-            />
-          )}
-        </Card>
-      ),
-      tools: (
-        <Card title="Host Tools & Parameters" style={{ marginTop: 32 }}>
-          {result.hostTools &&
-            result.hostTools.map(host => (
-              <List
-                key={host.hostname}
-                style={{ marginBottom: 16 }}
-                size="small"
-                bordered
-                header={
-                  <div>
-                    <Typography.Text strong>hostname</Typography.Text>
-                    <Divider type="vertical" />
-                    {host.hostname}
-                  </div>
-                }
-                dataSource={Object.entries(host.tools)}
-                renderItem={([label, value]) => (
-                  <List.Item key={label}>
-                    <Typography.Text strong>{label}</Typography.Text>
-                    <Divider type="vertical" />
-                    {value}
-                  </List.Item>
-                )}
-              />
-            ))}
-        </Card>
-      ),
-    };
+    const { activeTabKey, resultIterations } = this.state;
+    const { loadingSummary, iterationParams, selectedControllers, tocResult, result } = this.props;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div>
-          <PageHeaderLayout
-            title={selectedResults[0]['run.name']}
-            content={
-              <Tag color="blue" key={selectedControllers[0]}>
-                {`controller: ${selectedControllers[0]}`}
-              </Tag>
-            }
-            tabList={tabList}
-            tabActiveKey={activeSummaryTab}
-            onTabChange={this.onTabChange}
-          />
-          {contentList[activeSummaryTab]}
-        </div>
-      </div>
+      <React.Fragment>
+        <PageSection variant={PageSectionVariants.light}>
+          <TextContent>
+            <Text component="h1">{selectedControllers.join(', ')}</Text>
+          </TextContent>
+        </PageSection>
+        <PageSection padding="noPadding" isFilled>
+          <Tabs
+            activeKey={activeTabKey}
+            onSelect={this.onTabChange}
+            style={{ background: '#FFF', marginBottom: 16 }}
+          >
+            <Tab eventKey={0} title={<TabTitleText>Iterations</TabTitleText>}>
+              <Card>
+                <CardBody>
+                  <Spin spinning={loadingSummary} tip="Loading Iterations...">
+                    <TableFilterSelection
+                      onFilterTable={this.onFilterTable}
+                      filters={iterationParams}
+                    />
+                    <Table
+                      style={{ marginTop: 16 }}
+                      columns={
+                        resultIterations[Object.keys(resultIterations)[0]] &&
+                        resultIterations[Object.keys(resultIterations)[0]].columns
+                      }
+                      dataSource={
+                        resultIterations[Object.keys(resultIterations)[0]] &&
+                        Object.values(resultIterations[Object.keys(resultIterations)[0]].iterations)
+                      }
+                      bordered
+                    />
+                  </Spin>
+                </CardBody>
+              </Card>
+            </Tab>
+            <Tab eventKey={1} title={<TabTitleText>Table of Contents</TabTitleText>}>
+              <Card>
+                <CardBody>
+                  <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
+                </CardBody>
+              </Card>
+            </Tab>
+            <Tab eventKey={2} title={<TabTitleText>Metadata</TabTitleText>}>
+              <Card>
+                <CardBody>
+                  {result.runMetadata && (
+                    <DataList aria-label="Simple data list example">
+                      {Object.entries(result.runMetadata).map(([label, value]) => (
+                        <DataListItem aria-labelledby="simple-item1">
+                          <DataListItemRow>
+                            <DataListItemCells
+                              dataListCells={[
+                                <DataListCell key="primary content">
+                                  <span id="simple-item1">{label}</span>
+                                </DataListCell>,
+                                <DataListCell key="secondary content">{value}</DataListCell>,
+                              ]}
+                            />
+                          </DataListItemRow>
+                        </DataListItem>
+                      ))}
+                    </DataList>
+                  )}
+                </CardBody>
+              </Card>
+            </Tab>
+            <Tab eventKey={3} title={<TabTitleText>Tools & Parameters</TabTitleText>}>
+              <Card>
+                <CardBody>
+                  {result.hostTools &&
+                    result.hostTools.map(host => (
+                      <DataList aria-label="Simple data list example">
+                        {Object.entries(host.tools).map(([label, value]) => (
+                          <DataListItem aria-labelledby="simple-item1">
+                            <DataListItemRow>
+                              <DataListItemCells
+                                dataListCells={[
+                                  <DataListCell key="primary content">
+                                    <span id="simple-item1">{label}</span>
+                                  </DataListCell>,
+                                  <DataListCell key="secondary content">{value}</DataListCell>,
+                                ]}
+                              />
+                            </DataListItemRow>
+                          </DataListItem>
+                        ))}
+                      </DataList>
+                    ))}
+                </CardBody>
+              </Card>
+            </Tab>
+          </Tabs>
+        </PageSection>
+      </React.Fragment>
     );
   }
 }

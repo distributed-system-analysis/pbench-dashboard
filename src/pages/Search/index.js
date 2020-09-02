@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
-import { Input, Card, Row, Form, Tag, Icon, Spin, Select, Popover, Descriptions } from 'antd';
+import { Tag, Spin, Popover, Descriptions } from 'antd';
+import {
+  Form,
+  Flex,
+  FlexItem,
+  PageSection,
+  PageSectionVariants,
+  Divider,
+  Card,
+  CardBody,
+} from '@patternfly/react-core';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import _ from 'lodash';
@@ -7,7 +17,8 @@ import _ from 'lodash';
 import Button from '@/components/Button';
 import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import SearchBar from '@/components/SearchBar';
+import Select from '@/components/Select';
 import AntdDatePicker from '@/components/DatePicker';
 
 @connect(({ search, global, datastore, loading }) => ({
@@ -240,20 +251,14 @@ class SearchList extends Component {
     };
 
     return (
-      <PageHeaderLayout
-        content={
+      <React.Fragment>
+        <PageSection variant={PageSectionVariants.light}>
           <div>
-            <div style={{ textAlign: 'center' }}>
-              <Input.Search
-                prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                placeholder="Search the datastore"
-                enterButton="Search"
-                size="large"
-                onChange={this.updateSearchQuery}
-                onSearch={this.fetchSearchQuery}
-                style={{ width: 522, marginBottom: 16 }}
-              />
-            </div>
+            <SearchBar
+              style={{ marginRight: 32, marginBottom: 16 }}
+              placeholder="Search runs"
+              onSearch={this.fetchSearchQuery}
+            />
             <Spin spinning={loadingMapping}>
               <Form
                 style={{
@@ -263,115 +268,109 @@ class SearchList extends Component {
                   borderRadius: '6px',
                 }}
               >
-                <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
-                  <div style={{ marginRight: 16 }}>
-                    <p style={{ marginBottom: 0, fontSize: 12, fontWeight: 600 }}>months</p>
+                <Flex>
+                  <FlexItem style={{ marginRight: 16, marginBottom: 16 }}>
+                    <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 600 }}>months</p>
                     <AntdDatePicker />
-                  </div>
+                  </FlexItem>
                   {Object.keys(mapping).map(field => (
-                    <div key={field}>
+                    <FlexItem key={field} style={{ marginRight: 16, marginBottom: 16 }}>
                       <p style={{ marginBottom: 4, fontSize: 12, fontWeight: 600 }}>{field}</p>
                       <Select
-                        mode="multiple"
                         key={field}
-                        placeholder={field}
-                        value={selectedFields.filter(item => {
+                        selected={selectedFields.filter(item => {
                           return item.split('.')[0] === field;
                         })}
-                        onSelect={value => this.updateSelectedFields(`${field}.${value}`)}
-                        onDeselect={value => this.updateSelectedFields(`${value}`)}
-                        style={{ marginRight: 16, width: 160 }}
-                        dropdownMatchSelectWidth={false}
-                      >
-                        {mapping[field].map(item => {
-                          return (
-                            <Select.Option value={item} label={item} key={item}>
-                              {item}
-                            </Select.Option>
-                          );
+                        options={mapping[field].map(item => {
+                          return item;
                         })}
-                      </Select>
-                    </div>
+                        onSelect={(event, value) => this.updateSelectedFields(`${field}.${value}`)}
+                      />
+                    </FlexItem>
                   ))}
-                </Row>
-                <Row>
-                  <div style={{ textAlign: 'right' }}>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      name="Filter"
-                      disabled={updateFiltersDisabled}
-                      onClick={this.fetchSearchQuery}
-                    />
-                    <Button
-                      type="secondary"
-                      style={{ marginLeft: 8 }}
-                      onClick={this.resetSelectedFields}
-                      name="Reset"
-                    />
-                  </div>
-                </Row>
+                </Flex>
+                <div style={{ textAlign: 'right' }}>
+                  <Button
+                    type="primary"
+                    name="Filter"
+                    disabled={updateFiltersDisabled}
+                    onClick={this.fetchSearchQuery}
+                  />
+                  <Button
+                    type="secondary"
+                    style={{ marginLeft: 8 }}
+                    onClick={this.resetSelectedFields}
+                    name="Reset"
+                  />
+                </div>
               </Form>
             </Spin>
           </div>
-        }
-      >
-        <div>
+        </PageSection>
+        <Divider component="div" />
+        <PageSection>
           <Card>
-            <p style={{ fontWeight: '400', color: 'rgba(0,0,0,.50)' }}>
-              {searchResults.resultCount !== undefined && `${searchResults.resultCount} hits`}
-            </p>
-            <RowSelection
-              selectedItems={selectedRuns}
-              compareActionName="Compare Results"
-              onCompare={this.compareResults}
-            />
-            <br />
-            <div style={{ display: 'flex', flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
-              {selectedRuns.map(run => {
-                return (
-                  <div key={run['run.id']}>
-                    <Popover
-                      content={
-                        <Descriptions bordered column={1} size="small">
-                          {columns.map(column => {
-                            return (
-                              <Descriptions.Item key={column.dataIndex} label={column.dataIndex}>
-                                {run[column.dataIndex]}
-                              </Descriptions.Item>
-                            );
-                          })}
-                        </Descriptions>
-                      }
-                    >
-                      <Tag
-                        visible
-                        style={{ marginBottom: 8 }}
-                        closable
-                        onClose={() => this.onRemoveRun(run)}
-                      >
-                        {run['run.name']}
-                      </Tag>
-                    </Popover>
-                  </div>
-                );
-              })}
-            </div>
-            <Table
-              style={{ marginTop: 20 }}
-              rowSelection={rowSelection}
-              columns={columns}
-              dataSource={searchResults.results}
-              onRow={record => ({
-                onClick: () => {
-                  this.retrieveResults([record]);
-                },
-              })}
-              loading={loadingSearchResults}
-            />
+            <CardBody>
+              <div>
+                <p style={{ fontWeight: '400', color: 'rgba(0,0,0,.50)' }}>
+                  {searchResults.resultCount !== undefined && `${searchResults.resultCount} hits`}
+                </p>
+                <RowSelection
+                  selectedItems={selectedRuns}
+                  compareActionName="Compare Results"
+                  onCompare={this.compareResults}
+                />
+                <br />
+                <div style={{ display: 'flex', flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
+                  {selectedRuns.map(run => {
+                    return (
+                      <div key={run['run.id']}>
+                        <Popover
+                          content={
+                            <Descriptions bordered column={1} size="small">
+                              {columns.map(column => {
+                                return (
+                                  <Descriptions.Item
+                                    key={column.dataIndex}
+                                    label={column.dataIndex}
+                                  >
+                                    {run[column.dataIndex]}
+                                  </Descriptions.Item>
+                                );
+                              })}
+                            </Descriptions>
+                          }
+                        >
+                          <Tag
+                            visible
+                            style={{ marginBottom: 8 }}
+                            closable
+                            onClose={() => this.onRemoveRun(run)}
+                          >
+                            {run['run.name']}
+                          </Tag>
+                        </Popover>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Table
+                  style={{ marginTop: 20 }}
+                  rowSelection={rowSelection}
+                  columns={columns}
+                  dataSource={searchResults.results}
+                  onRow={record => ({
+                    onClick: () => {
+                      this.retrieveResults([record]);
+                    },
+                  })}
+                  loading={loadingSearchResults}
+                />
+              </div>
+            </CardBody>
           </Card>
-        </div>
-      </PageHeaderLayout>
+        </PageSection>
+      </React.Fragment>
     );
   }
 }

@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer';
-import moment from 'moment';
 import { mockIndices, mockMappings, mockSearch } from '../../mock/api';
 
 let browser;
@@ -11,7 +10,7 @@ beforeAll(async () => {
     args: ['--no-sandbox'],
   });
   page = await browser.newPage();
-  await page.goto('http://localhost:8000/dashboard/#/');
+  await page.goto('http://localhost:8000/dashboard/');
   // Login using dummy credentials
   await page.waitForSelector(
     '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
@@ -27,7 +26,9 @@ beforeAll(async () => {
   await page.type('.pf-l-grid #horizontal-form-password', 'admin');
   await page.waitForSelector('#submitBtn');
   await page.click('#submitBtn');
-  await page.goto('http://localhost:8000/dashboard/#/search/');
+  await page.click('#nav-toggle > svg');
+  await page.click('#page-sidebar > div > nav > ul > li:nth-child(2) > a');
+  await page.click('#nav-toggle > svg');
 
   // Intercept network requests
   await page.setRequestInterception(true);
@@ -64,84 +65,78 @@ afterAll(() => {
 });
 
 describe('search page component', () => {
-  test('should load mappings', async () => {
-    await page.waitForSelector('.ant-select:nth-child(2) > .ant-select-selection');
-    const testField = await page.$eval(
-      '.ant-select:nth-child(2) > .ant-select-selection > .ant-select-selection__rendered > ul > .ant-select-selection__choice',
-      elem => elem.getAttribute('title')
-    );
-    expect(testField).toBe('run.name');
-  });
+  test(
+    'should load mappings',
+    async () => {
+      await page.waitForSelector(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p'
+      );
+      const testField = await page.$eval(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p',
+        elem => elem.innerHTML
+      );
+      expect(testField).toBe('run');
+    },
+    30000
+  );
 
-  test('should select field tag', async () => {
-    await page.waitForSelector('.ant-select:nth-child(2) > .ant-select-selection', {
-      visible: true,
-    });
-    const elementToClickHandle = await page.$('.ant-select:nth-child(2) > .ant-select-selection');
-    await page.evaluate(el => el.click(), elementToClickHandle);
-    await page.waitForSelector(
-      '.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active',
-      {
-        visible: true,
-      }
-    );
-    await page.click('.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active');
-    await page.click(
-      '.ant-select-dropdown-menu > .ant-select-dropdown-menu-item-active[aria-selected="false"]'
-    );
-  });
+  test(
+    'should select field tag',
+    async () => {
+      await page.waitForSelector(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+      );
+      await page.click(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+      );
 
-  test('should display the date picker component on click', async () => {
-    await page.waitForSelector(
-      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input'
-    );
-    await page.click(
-      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input'
-    );
-    await page.waitForSelector('.ant-calendar-picker-container', { visible: true });
-    await page.click('.ant-row > div > p');
-  });
-
-  test('should change the selected dates after picking them from the calendar', async () => {
-    await page.waitForSelector(
-      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input'
-    );
-    await page.click(
-      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input'
-    );
-    await page.click(
-      '.ant-calendar-panel > .ant-calendar-footer > .ant-calendar-footer-btn > .ant-calendar-footer-extra > span.ant-tag.ant-tag-blue:nth-child(3)'
-    );
-    const startDate = await page.$eval(
-      '.ant-row > div > .ant-calendar-picker > .ant-calendar-picker-input > .ant-calendar-range-picker-input:nth-child(1)',
-      elem => {
-        return elem.defaultValue.slice(0, -3);
-      }
-    );
-    expect(moment(startDate).isValid()).toBe(true);
-  });
+      await page.waitForSelector(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+      );
+      await page.click(
+        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+      );
+    },
+    30000
+  );
 
   test('should apply filter changes', async () => {
     await page.waitForSelector(
-      '.ant-spin-container > .ant-form > .ant-row > div > .ant-btn-primary'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(1)'
     );
-    await page.click('.ant-spin-container > .ant-form > .ant-row > div > .ant-btn-primary');
+    await page.click(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(1)'
+    );
   });
 
   test('should reset filter changes', async () => {
     await page.waitForSelector(
-      '.ant-spin-container > .ant-form > .ant-row > div > .ant-btn-secondary'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(2)'
     );
-    await page.click('.ant-spin-container > .ant-form > .ant-row > div > .ant-btn-secondary');
+    await page.click(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(2)'
+    );
   });
 
   test('should input search query', async () => {
-    await page.type('.ant-input', 'test', { delay: 50 });
+    await page.waitForSelector(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > input'
+    );
+    await page.type(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > input',
+      'test',
+      { delay: 50 }
+    );
   });
 
   test('should execute search query', async () => {
-    await page.waitForSelector('.ant-input-search-button', { visible: true });
-    await page.click('.ant-input-search-button');
+    await page.waitForSelector(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button',
+      { visible: true }
+    );
+    await page.click(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button'
+    );
     await page.waitForSelector('.ant-table-tbody > tr > td:nth-child(2)', { visible: true });
     const testResult = await page.$eval(
       '.ant-table-tbody > tr > td:nth-child(2)',

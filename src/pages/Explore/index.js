@@ -1,11 +1,20 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Button, Popconfirm, Icon, Form, Modal, Input, Tooltip } from 'antd';
+import { Button, Popconfirm, Icon, Form, Modal, Input } from 'antd';
+import {
+  PageSection,
+  PageSectionVariants,
+  Divider,
+  Text,
+  TextContent,
+  Card,
+  CardBody,
+  Tooltip,
+} from '@patternfly/react-core';
 
-import Table from '@/components/Table';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import { getDiffDate } from '@/utils/moment_constants';
+import Table from '@/components/Table';
 
 const { TextArea } = Input;
 
@@ -127,7 +136,7 @@ class Explore extends Component {
         defaultSortOrder: 'descend',
         sorter: (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
         render: val => (
-          <Tooltip title={val}>
+          <Tooltip content={val}>
             <span>{getDiffDate(val)}</span>
           </Tooltip>
         ),
@@ -199,14 +208,24 @@ class Explore extends Component {
     ];
 
     return (
-      <PageHeaderLayout title="Explore">
-        <Card title="Shared Sessions" bordered={false}>
-          <Table
-            columns={sharedSessionColumns}
-            dataSource={sharedSessions}
-            loading={loadingSharedSessions}
-          />
-        </Card>
+      <React.Fragment>
+        <PageSection variant={PageSectionVariants.light}>
+          <TextContent>
+            <Text component="h1">Explore</Text>
+          </TextContent>
+        </PageSection>
+        <Divider component="div" />
+        <PageSection>
+          <Card>
+            <CardBody>
+              <Table
+                columns={sharedSessionColumns}
+                dataSource={sharedSessions}
+                loading={loadingSharedSessions}
+              />
+            </CardBody>
+          </Card>
+        </PageSection>
         <Modal
           title="Edit the description"
           visible={visible}
@@ -229,7 +248,7 @@ class Explore extends Component {
             </Form.Item>
           </Form>
         </Modal>
-      </PageHeaderLayout>
+      </React.Fragment>
     );
   }
 }
