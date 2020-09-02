@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Modal, Form, Input, Button, message, Tooltip, Icon } from 'antd';
-import styles from './index.less';
+import { Modal, Form, Input, message } from 'antd';
+import { ToolbarItem, Button } from '@patternfly/react-core';
+import { ShareAltIcon } from '@patternfly/react-icons';
 
 const { TextArea } = Input;
 
@@ -25,7 +26,7 @@ class SessionModal extends Component {
         <div style={{ display: 'flex', flex: 1, flexDirection: 'row' }}>
           <Input value={sessionUrl} />
           <CopyToClipboard text={sessionUrl}>
-            <Button style={{ marginLeft: 8 }} icon="copy" onClick={this.copyLink}>
+            <Button style={{ marginLeft: 8 }} onClick={this.copyLink}>
               Copy Link
             </Button>
           </CopyToClipboard>
@@ -85,11 +86,11 @@ class SessionModal extends Component {
 
     return (
       <span>
-        <Tooltip title="Share" onClick={this.showModal}>
-          <a className={styles.action}>
-            <Icon type="share-alt" />
-          </a>
-        </Tooltip>
+        <ToolbarItem>
+          <Button onClick={this.showModal} variant="plain">
+            <ShareAltIcon />
+          </Button>
+        </ToolbarItem>
         <Modal
           title="Share Session Link"
           visible={visible}

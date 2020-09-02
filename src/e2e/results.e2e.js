@@ -10,7 +10,7 @@ beforeAll(async () => {
     args: ['--no-sandbox'],
   });
   page = await browser.newPage();
-  await page.goto('http://localhost:8000/dashboard/#/');
+  await page.goto('http://localhost:8000/dashboard/');
   // Login using dummy credentials
   await page.waitForSelector(
     '.pf-l-grid > .pf-l-grid__item > .pf-l-grid > .pf-l-grid__item:nth-child(1) > .pf-c-button'
@@ -83,24 +83,46 @@ describe('results page component', () => {
   test('should search for result name', async () => {
     await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     let testRun = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
-    await page.type('.ant-input', testRun);
-    await page.click('.ant-input-search-button');
+    await page.waitForSelector(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    await page.click(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    await page.type(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control',
+      testRun
+    );
+    await page.waitForSelector(
+      '.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg'
+    );
+    await page.click('.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg');
     testRun = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
     expect(testRun).toBe('a_test_run');
   });
 
   test('should reset search results', async () => {
     await page.waitForSelector(
-      '.ant-input-wrapper > .ant-input-search > .ant-input-suffix > .anticon > svg'
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
     );
-    await page.click('.ant-input-wrapper > .ant-input-search > .ant-input-suffix > .anticon > svg');
-    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
-
-    const testRun = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
+    await page.click(
+      '.pf-c-card > .pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-form-control'
+    );
+    let testRun = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
+    for (let i = 0; i < testRun.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await page.keyboard.press('Backspace');
+    }
+    await page.waitForSelector(
+      '.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg'
+    );
+    await page.click('.pf-c-card__body > .ant-form > .pf-c-input-group > .pf-c-button > svg');
+    testRun = await page.$eval('.ant-table-row', elem => elem.getAttribute('data-row-key'));
     expect(testRun).toBe('a_test_run');
   });
 
   test('should sort result column alphabetically ascending', async () => {
+    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     await page.waitForSelector(
       '.ant-table-thead > tr > .ant-table-column-has-actions:nth-child(2) > .ant-table-header-column > .ant-table-column-sorters'
     );
@@ -112,6 +134,7 @@ describe('results page component', () => {
   });
 
   test('should sort result column alphabetically descending', async () => {
+    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     await page.waitForSelector(
       '.ant-table-thead > tr > .ant-table-column-has-actions:nth-child(2) > .ant-table-header-column > .ant-table-column-sorters'
     );
@@ -123,6 +146,7 @@ describe('results page component', () => {
   });
 
   test('should sort start time column chronologically ascending', async () => {
+    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     await page.waitForSelector(
       '.ant-table-thead > tr > .ant-table-column-has-actions:nth-child(4) > .ant-table-header-column > .ant-table-column-sorters'
     );
@@ -134,6 +158,7 @@ describe('results page component', () => {
   });
 
   test('should sort start time column chronologically descending', async () => {
+    await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
     await page.waitForSelector(
       '.ant-table-thead > tr > .ant-table-column-has-actions:nth-child(4) > .ant-table-header-column > .ant-table-column-sorters'
     );

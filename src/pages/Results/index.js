@@ -1,12 +1,21 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Form, Icon, Tabs, Tooltip } from 'antd';
+import { Form, Icon, Tabs } from 'antd';
+import {
+  PageSection,
+  PageSectionVariants,
+  Divider,
+  Text,
+  TextContent,
+  Card,
+  CardBody,
+  Tooltip,
+} from '@patternfly/react-core';
 
 import SearchBar from '@/components/SearchBar';
 import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
@@ -168,7 +177,7 @@ class Results extends Component {
         key: 'run.start',
         sorter: (a, b) => a.startUnixTimestamp - b.startUnixTimestamp,
         render: val => (
-          <Tooltip title={val}>
+          <Tooltip content={val}>
             <span>{getDiffDate(val)}</span>
           </Tooltip>
         ),
@@ -209,52 +218,62 @@ class Results extends Component {
     ];
 
     return (
-      <PageHeaderLayout title={selectedControllers.join(', ')}>
-        <Card bordered={false}>
-          <Form layout="vertical">
-            <SearchBar
-              style={{ marginBottom: 16 }}
-              placeholder="Search results"
-              onSearch={this.onSearch}
-            />
-            <RowSelection
-              selectedItems={selectedRows}
-              compareActionName="Compare Results"
-              onCompare={this.compareResults}
-            />
-          </Form>
-          <Tabs type="card" style={{ marginTop: 16 }}>
-            <TabPane tab="Results" key="results">
-              <Table
-                rowSelection={rowSelection}
-                columns={columns}
-                dataSource={results}
-                onRow={record => ({
-                  onClick: () => {
-                    this.retrieveResults([record]);
-                  },
-                })}
-                loading={loading}
-                bordered
-              />
-            </TabPane>
-            <TabPane tab="Favorites" key="favorites">
-              <Table
-                rowSelection={rowSelection}
-                columns={columns}
-                dataSource={favoriteResults}
-                onRow={record => ({
-                  onClick: () => {
-                    this.retrieveResults([record]);
-                  },
-                })}
-                loading={loading}
-                bordered
-              />
-            </TabPane>
-          </Tabs>
-        </Card>
-      </PageHeaderLayout>
+      <React.Fragment>
+        <PageSection variant={PageSectionVariants.light}>
+          <TextContent>
+            <Text component="h1">{selectedControllers.join(', ')}</Text>
+          </TextContent>
+        </PageSection>
+        <Divider component="div" />
+        <PageSection>
+          <Card>
+            <CardBody>
+              <Form layout="vertical">
+                <SearchBar
+                  style={{ marginBottom: 16 }}
+                  placeholder="Search results"
+                  onSearch={this.onSearch}
+                />
+                <RowSelection
+                  selectedItems={selectedRows}
+                  compareActionName="Compare Results"
+                  onCompare={this.compareResults}
+                />
+              </Form>
+              <Tabs type="card" style={{ marginTop: 16 }}>
+                <TabPane tab="Results" key="results">
+                  <Table
+                    rowSelection={rowSelection}
+                    columns={columns}
+                    dataSource={results}
+                    onRow={record => ({
+                      onClick: () => {
+                        this.retrieveResults([record]);
+                      },
+                    })}
+                    loading={loading}
+                    bordered
+                  />
+                </TabPane>
+                <TabPane tab="Favorites" key="favorites">
+                  <Table
+                    rowSelection={rowSelection}
+                    columns={columns}
+                    dataSource={favoriteResults}
+                    onRow={record => ({
+                      onClick: () => {
+                        this.retrieveResults([record]);
+                      },
+                    })}
+                    loading={loading}
+                    bordered
+                  />
+                </TabPane>
+              </Tabs>
+            </CardBody>
+          </Card>
+        </PageSection>
+      </React.Fragment>
     );
   }
 }

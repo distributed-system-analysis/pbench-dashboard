@@ -5,7 +5,6 @@ import Adapter from 'enzyme-adapter-react-16';
 import Table from '@/components/Table';
 import RowSelection from '@/components/RowSelection';
 import Results from './index';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 const mockProps = {
   selectedControllers: ['controller1'],
@@ -28,9 +27,5 @@ describe('test Results page component', () => {
 
   it('render RowSelection component', () => {
     expect(wrapper.find(RowSelection).length).toBe(1);
-  });
-
-  it('render user selected controllers', () => {
-    expect(wrapper.find(PageHeaderLayout).prop('title')).toBe('controller1');
   });
 });

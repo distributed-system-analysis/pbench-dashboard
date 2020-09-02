@@ -100,11 +100,12 @@ export const mockSearch = {
   },
 };
 
-export const mockStore = {
-  router: {},
-  dashboard: {},
-  search: {},
-  store: {},
+export const mockSessionUrl = {
+  data: {
+    createUrl: {
+      id: 'test_id',
+    },
+  },
 };
 
 export const mockDataSample = [

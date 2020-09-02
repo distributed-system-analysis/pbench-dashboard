@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Spin } from 'antd';
+import { Row } from 'antd';
 import {
   Page,
   PageSection,
@@ -13,6 +13,7 @@ import {
   List,
   ListItem,
   ListVariant,
+  Spinner,
 } from '@patternfly/react-core';
 import {
   Chart,
@@ -53,6 +54,7 @@ class RunComparison extends React.Component {
       dispatch,
     } = this.props;
 
+    this.setState({ loadingClusters: true });
     const clusters = generateClusters(selectedIterations, iterationParams);
     this.setState({ paramKeys: clusters.paramKeys });
 
@@ -62,6 +64,9 @@ class RunComparison extends React.Component {
     }).then(timeseriesClusters => {
       this.setState({
         clusters: timeseriesClusters,
+      });
+      this.setState({
+        loadingClusters: false,
       });
     });
   }
@@ -85,8 +90,12 @@ class RunComparison extends React.Component {
           <PageSection>
             <Card>
               <CardHeader>Summary</CardHeader>
-              <CardBody>
-                <Spin spinning={loadingClusters}>
+              {loadingClusters ? (
+                <Spinner
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                />
+              ) : (
+                <CardBody>
                   {Object.keys(clusters).map(cluster => (
                     <Row style={{ marginTop: 16 }}>
                       <div style={{ height: '400px', width: '1000px' }}>
@@ -128,25 +137,31 @@ class RunComparison extends React.Component {
                       </div>
                     </Row>
                   ))}
-                </Spin>
-              </CardBody>
+                </CardBody>
+              )}
             </Card>
           </PageSection>
           <PageSection>
             {Object.keys(clusters).map(primaryMetric => (
               <Card>
                 <CardHeader>{primaryMetric}</CardHeader>
-                <CardBody>
-                  <TimeseriesGraph
-                    key={primaryMetric}
-                    graphId={primaryMetric}
-                    graphName={primaryMetric}
-                    data={clusters[primaryMetric]}
-                    dataSeriesNames={clusters[primaryMetric]}
-                    options={Object.keys(clusters[primaryMetric])}
-                    xAxisSeries="time"
+                {loadingClusters ? (
+                  <Spinner
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                   />
-                </CardBody>
+                ) : (
+                  <CardBody>
+                    <TimeseriesGraph
+                      key={primaryMetric}
+                      graphId={primaryMetric}
+                      graphName={primaryMetric}
+                      data={clusters[primaryMetric]}
+                      dataSeriesNames={clusters[primaryMetric]}
+                      options={Object.keys(clusters[primaryMetric])}
+                      xAxisSeries="time"
+                    />
+                  </CardBody>
+                )}
               </Card>
             ))}
           </PageSection>

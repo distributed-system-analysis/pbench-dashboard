@@ -1,27 +1,38 @@
-import 'rc-drawer/assets/index.css';
-import React from 'react';
-import DrawerMenu from 'rc-drawer/lib';
-import SiderMenu from './SiderMenu';
+import React, { PureComponent } from 'react';
+import { Link } from 'dva/router';
+import { PageSidebar, Nav, NavList, NavItem } from '@patternfly/react-core';
+import getMenuData from '../../common/menu';
 
-const SiderMenuWrapper = props => {
-  const { isMobile, collapsed } = props;
-  return isMobile ? (
-    <DrawerMenu
-      getContainer={null}
-      level={null}
-      onHandleClick={() => {
-        props.onCollapse(!collapsed);
-      }}
-      open={!collapsed}
-      onMaskClick={() => {
-        props.onCollapse(true);
-      }}
-    >
-      <SiderMenu {...props} collapsed={isMobile ? false : collapsed} />
-    </DrawerMenu>
-  ) : (
-    <SiderMenu {...props} />
-  );
-};
+export default class SiderMenu extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.rootPages = getMenuData();
+    this.state = {
+      activeItem: props.location,
+    };
+  }
 
-export default SiderMenuWrapper;
+  onNavSelect = result => {
+    this.setState({
+      activeItem: result.itemId,
+    });
+  };
+
+  render() {
+    const { activeItem } = this.state;
+
+    const PageNav = (
+      <Nav onSelect={this.onNavSelect} theme="dark">
+        <NavList>
+          {this.rootPages.map(page => (
+            <NavItem itemId={page.path} isActive={activeItem === page.path}>
+              <Link to={page.path}>{page.name}</Link>
+            </NavItem>
+          ))}
+        </NavList>
+      </Nav>
+    );
+
+    return <PageSidebar nav={PageNav} theme="dark" />;
+  }
+}

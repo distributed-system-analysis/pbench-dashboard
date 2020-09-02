@@ -16,34 +16,27 @@ export default class Select extends PureComponent {
     super(props);
 
     this.state = {
-      isToggleIcon: false,
-      isExpanded: false,
+      isOpen: false,
       isDisabled: false,
       direction: SelectDirection.down,
     };
   }
 
-  onToggle = isExpanded => {
+  onToggle = isOpen => {
     this.setState({
-      isExpanded,
+      isOpen,
     });
   };
 
-  clearSelection = () => {
+  onClear = () => {
     this.setState({
-      isExpanded: false,
+      isOpen: false,
     });
   };
 
   toggleDisabled = checked => {
     this.setState({
       isDisabled: checked,
-    });
-  };
-
-  setIcon = checked => {
-    this.setState({
-      isToggleIcon: checked,
     });
   };
 
@@ -63,21 +56,22 @@ export default class Select extends PureComponent {
 
   render() {
     const { options, onSelect, selected } = this.props;
-    const { isExpanded, isDisabled, direction, isToggleIcon } = this.state;
+    const { isOpen, isDisabled, direction } = this.state;
 
     return (
       <PFSelect
-        toggleIcon={isToggleIcon}
-        variant={SelectVariant.single}
+        variant={SelectVariant.typeaheadMulti}
+        placeholderText="Select"
         onToggle={this.onToggle}
+        onClear={this.onClear}
         onSelect={onSelect}
         selections={selected}
-        isExpanded={isExpanded}
+        isOpen={isOpen}
         isDisabled={isDisabled}
         direction={direction}
       >
         {options.map(option => (
-          <SelectOption key={option} value={parseInt(option, 10) + 1} />
+          <SelectOption key={option} value={option} />
         ))}
       </PFSelect>
     );

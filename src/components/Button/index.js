@@ -1,13 +1,13 @@
 import React from 'react';
-import { Button as AntdButton } from 'antd';
+import { Button as PatternFlyButton } from '@patternfly/react-core';
 
 const Button = props => {
-  const { name, type, disabled, onClick } = props;
+  const { name, variant, disabled, onClick } = props;
 
   return (
-    <AntdButton type={type} disabled={disabled} onClick={onClick} {...props}>
+    <PatternFlyButton variant={variant} isDisabled={disabled} onClick={onClick} {...props}>
       {name}
-    </AntdButton>
+    </PatternFlyButton>
   );
 };
 

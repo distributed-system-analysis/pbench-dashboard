@@ -7,7 +7,6 @@ export default {
     sessionBannerVisible: false,
     sessionDescription: '',
     sessionId: '',
-    collapsed: true,
     selectedIndices: [],
     selectedDateRange: {
       start: '',
@@ -84,12 +83,6 @@ export default {
       return {
         ...state,
         ...payload,
-      };
-    },
-    changeLayoutCollapsed(state, { payload }) {
-      return {
-        ...state,
-        collapsed: payload,
       };
     },
     startUserSession(state, { payload }) {

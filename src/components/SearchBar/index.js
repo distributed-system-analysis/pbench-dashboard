@@ -1,17 +1,18 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Input, Icon } from 'antd';
-
-const { Search } = Input;
+import { SearchIcon } from '@patternfly/react-icons';
+import { InputGroup, Button, TextInput } from '@patternfly/react-core';
 
 export default class SearchBar extends PureComponent {
   static propTypes = {
     onSearch: PropTypes.func.isRequired,
     style: PropTypes.object,
+    placeholder: PropTypes.string,
   };
 
   static defaultProps = {
     style: {},
+    placeholder: '',
   };
 
   constructor(props) {
@@ -22,47 +23,37 @@ export default class SearchBar extends PureComponent {
     };
   }
 
-  onChange = e => {
-    this.setState({ searchValue: e.target.value });
+  onChange = value => {
+    this.setState({ searchValue: value });
   };
 
-  emitEmpty = () => {
+  onEnter = event => {
     const { onSearch } = this.props;
+    const { searchValue } = this.state;
 
-    this.searchBar.focus();
-    onSearch('');
-    this.setState({ searchValue: '' });
+    if (event.key === 'Enter') {
+      onSearch(searchValue);
+    }
   };
 
   render() {
-    const { onSearch, placeholder, style } = this.props;
+    const { onSearch, style, placeholder } = this.props;
     const { searchValue } = this.state;
-    const suffix = searchValue ? <Icon type="close-circle" onClick={this.emitEmpty} /> : <span />;
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignContent: 'center',
-          maxWidth: 300,
-          ...style,
-        }}
-      >
-        <Search
-          ref={node => {
-            this.searchBar = node;
-            return this.searchBar;
-          }}
-          prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
-          suffix={suffix}
-          placeholder={placeholder}
+      <InputGroup style={{ maxWidth: 300, ...style }}>
+        <TextInput
+          aria-label="search"
           value={searchValue}
+          type="search"
+          placeholder={placeholder}
           onChange={this.onChange}
-          onSearch={value => onSearch(value)}
-          enterButton="Search"
+          onKeyDown={this.onEnter}
         />
-      </div>
+        <Button onClick={() => onSearch(searchValue)} variant="control">
+          <SearchIcon />
+        </Button>
+      </InputGroup>
     );
   }
 }
