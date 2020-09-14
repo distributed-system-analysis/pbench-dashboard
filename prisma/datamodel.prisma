@@ -8,8 +8,8 @@ type User {
 
 type Url {
   id: ID! @id
-  createdAt: DateTime! @createdAt
-  updatedAt: DateTime! @updatedAt
+  created: DateTime!
+  updated: DateTime!
   config: String!
   description: String
 }
