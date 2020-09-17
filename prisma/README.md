@@ -42,6 +42,13 @@ npm install -g prisma
 # yarn global add prisma
 ```
 
+### Generating schema from the datamodel
+
+Prisma automatically handles schema generation from a given data model, you can do that by running
+`prisma generate` on your terminal in the `prisma/` directory. The generated files will be placed in the
+`generated/` directory. You must not change this file manually and you need to re-run the `prisma generate`
+command after every change that's made to your Prisma schema to update the generated Prisma Client code.
+
 #### Step 3: Deploy the Prisma datamodel
 
 ```bash
