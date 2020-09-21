@@ -131,8 +131,8 @@ class Explore extends Component {
       },
       {
         title: 'Date Created',
-        dataIndex: 'createdAt',
-        key: 'createdAt',
+        dataIndex: 'created',
+        key: 'created',
         defaultSortOrder: 'descend',
         sorter: (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
         render: val => (
