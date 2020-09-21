@@ -14,7 +14,7 @@ export async function querySharedSessions(params) {
               id
               config
               description
-              createdAt
+              created
           }   
         }`,
     },
