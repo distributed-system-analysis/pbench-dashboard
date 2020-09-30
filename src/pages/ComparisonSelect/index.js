@@ -97,7 +97,7 @@ class ComparisonSelect extends React.Component {
     }).then(() => {
       dispatch(
         routerRedux.push({
-          pathname: '/private/comparison',
+          pathname: '/comparison',
         })
       );
     });

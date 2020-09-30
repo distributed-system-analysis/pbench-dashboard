@@ -11,22 +11,7 @@ beforeAll(async () => {
   });
   page = await browser.newPage();
   await page.goto('http://localhost:8000/dashboard/');
-  // Login using dummy credentials
-  await page.waitForSelector(
-    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid:nth-child(2) > .pf-l-grid__item > .pf-c-button'
-  );
-  await page.click(
-    '.pf-l-grid > .pf-l-grid__item > .pf-l-grid:nth-child(2) > .pf-l-grid__item > .pf-c-button'
-  );
 
-  await page.waitForSelector('.pf-l-grid__item #horizontal-form-name');
-  await page.click('.pf-l-grid__item #horizontal-form-name');
-  await page.type('.pf-l-grid #horizontal-form-name', 'admin');
-  await page.waitForSelector('.pf-l-grid__item #horizontal-form-password');
-  await page.click('.pf-l-grid__item #horizontal-form-password');
-  await page.type('.pf-l-grid #horizontal-form-password', 'admin');
-  await page.waitForSelector('#submitBtn');
-  await page.click('#submitBtn');
   await page.click('#nav-toggle > svg');
   await page.click('#page-sidebar > div > nav > ul > li:nth-child(2) > a');
   await page.click('#nav-toggle > svg');

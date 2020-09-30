@@ -19,8 +19,9 @@ import pbenchLogo from '../../assets/pbench_logo.svg';
 import imgAvatar from '../../assets/avatar.svg';
 import SessionModal from '../SessionModal';
 
-@connect(({ store }) => ({
+@connect(({ store, auth }) => ({
   store,
+  auth: auth.auth,
 }))
 class GlobalHeader extends Component {
   constructor(props) {
@@ -79,6 +80,7 @@ class GlobalHeader extends Component {
       sessionId,
       dispatch,
       store,
+      auth,
     } = this.props;
     const { isProfileDropdownOpen } = this.state;
 
@@ -113,7 +115,7 @@ class GlobalHeader extends Component {
               onClick={() => {
                 dispatch(
                   routerRedux.push({
-                    pathname: '/private/search',
+                    pathname: '/search',
                   })
                 );
               }}
@@ -121,20 +123,26 @@ class GlobalHeader extends Component {
               <SearchIcon />
             </Button>
           </PageHeaderToolsItem>
-          <PageHeaderToolsGroup>
-            <PageHeaderToolsItem>
-              <Dropdown
-                isPlain
-                position="right"
-                onSelect={this.onDropdownSelect}
-                isOpen={isProfileDropdownOpen}
-                toggle={
-                  <DropdownToggle onToggle={this.onProfileDropdownToggle}>Admin</DropdownToggle>
-                }
-                dropdownItems={profileDropdownItems}
-              />
-            </PageHeaderToolsItem>
-          </PageHeaderToolsGroup>
+          {auth.username === 'admin' ? (
+            <PageHeaderToolsGroup>
+              <PageHeaderToolsItem>
+                <Dropdown
+                  isPlain
+                  position="right"
+                  onSelect={this.onDropdownSelect}
+                  isOpen={isProfileDropdownOpen}
+                  toggle={
+                    <DropdownToggle onToggle={this.onProfileDropdownToggle}>Admin</DropdownToggle>
+                  }
+                  dropdownItems={profileDropdownItems}
+                />
+              </PageHeaderToolsItem>
+            </PageHeaderToolsGroup>
+          ) : (
+            <Button variant="tertiary" onClick={() => this.navigateToAuth()}>
+              Login
+            </Button>
+          )}
           <Avatar src={imgAvatar} alt="Avatar image" />
         </PageHeaderToolsGroup>
       </PageHeaderTools>

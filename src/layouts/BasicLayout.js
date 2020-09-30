@@ -10,6 +10,7 @@ import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
 import { Page, Spinner } from '@patternfly/react-core';
 import SiderMenu from '../components/SiderMenu';
+import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
 
 const redirectData = [];
@@ -43,12 +44,13 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   return routerMap;
 }, deepEqual);
 
-@connect(({ global, datastore, loading }) => ({
+@connect(({ global, datastore, loading, auth }) => ({
   datastoreConfig: datastore.datastoreConfig,
   sessionBannerVisible: global.sessionBannerVisible,
   sessionDescription: global.sessionDescription,
   sessionId: global.sessionId,
   savingSession: loading.effects['global/saveUserSession'],
+  auth: auth.auth,
 }))
 class BasicLayout extends React.PureComponent {
   static childContextTypes = {
@@ -99,6 +101,7 @@ class BasicLayout extends React.PureComponent {
       sessionId,
       children,
       location: { pathname },
+      auth,
     } = this.props;
 
     return (
@@ -117,6 +120,7 @@ class BasicLayout extends React.PureComponent {
             sidebar={<SiderMenu location={pathname} />}
             isManagedSidebar
           >
+            {auth.username === 'admin' ? '' : <LoginHint />}
             <PersistGate
               persistor={this.persistor}
               loading={
