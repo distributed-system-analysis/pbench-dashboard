@@ -45,8 +45,39 @@ module.exports = [
     routes: [
       {
         path: '/',
-        name: 'publicview',
-        component: './PublicView',
+        name: 'dashboard',
+        icon: 'dashboard',
+        component: './Controllers',
+      },
+      {
+        path: '/results',
+        name: 'results',
+        component: './Results',
+      },
+      {
+        path: '/summary',
+        name: 'summary',
+        component: './Summary',
+      },
+      {
+        path: '/comparison-select',
+        name: 'comparison-select',
+        component: './ComparisonSelect',
+      },
+      {
+        path: '/comparison',
+        name: 'comparison',
+        component: './RunComparison',
+      },
+      {
+        path: '/search',
+        name: 'search',
+        component: './Search',
+      },
+      {
+        path: '/explore',
+        name: 'explore',
+        component: './Explore',
       },
       {
         path: '/private',
@@ -56,43 +87,13 @@ module.exports = [
             path: '/private',
             name: 'dashboard',
             icon: 'dashboard',
-            component: './Controllers',
+            component: './Overview',
           },
           {
             path: '/private/profile',
             name: 'profile',
             exact: true,
             component: './Profile',
-          },
-          {
-            path: '/private/results',
-            name: 'results',
-            component: './Results',
-          },
-          {
-            path: '/private/summary',
-            name: 'summary',
-            component: './Summary',
-          },
-          {
-            path: '/private/comparison-select',
-            name: 'comparison-select',
-            component: './ComparisonSelect',
-          },
-          {
-            path: '/private/comparison',
-            name: 'comparison',
-            component: './RunComparison',
-          },
-          {
-            path: '/private/search',
-            name: 'search',
-            component: './Search',
-          },
-          {
-            path: '/private/explore',
-            name: 'explore',
-            component: './Explore',
           },
         ],
       },

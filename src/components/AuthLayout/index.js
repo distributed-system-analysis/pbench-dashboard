@@ -231,7 +231,7 @@ class AuthLayout extends Component {
             className={styles.form}
           >
             {Heading}
-            {toPreview === undefined ? authPreview : toPreview}
+            {toPreview || authPreview}
           </GridItem>
           <GridItem
             sm={11}

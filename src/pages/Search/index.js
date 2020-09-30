@@ -207,7 +207,7 @@ class SearchList extends Component {
       }).then(() => {
         dispatch(
           routerRedux.push({
-            pathname: '/private/summary',
+            pathname: '/summary',
           })
         );
       });
@@ -220,7 +220,7 @@ class SearchList extends Component {
     this.commitRunSelections().then(() => {
       dispatch(
         routerRedux.push({
-          pathname: '/private/comparison-select',
+          pathname: '/comparison-select',
         })
       );
     });

@@ -4,23 +4,23 @@ const menuData = [
   {
     name: 'Dashboard',
     icon: 'dashboard',
-    path: '/',
+    path: '/private',
     routes: [
       {
         name: 'Results',
-        path: '/private/results',
+        path: '/results',
         routes: [
           {
             name: 'Summary',
-            path: '/private/summary',
+            path: '/summary',
           },
           {
             name: 'Comparison Select',
-            path: '/private/comparison-select',
+            path: '/comparison-select',
             routes: [
               {
                 name: 'Comparison',
-                path: '/private/comparison',
+                path: '/comparison',
               },
             ],
           },
@@ -31,12 +31,12 @@ const menuData = [
   {
     name: 'Search',
     icon: 'search',
-    path: '/private/search',
+    path: '/search',
   },
   {
     name: 'Explore',
     icon: 'global',
-    path: '/private/explore',
+    path: '/explore',
   },
 ];
 

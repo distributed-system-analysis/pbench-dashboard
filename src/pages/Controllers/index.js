@@ -136,7 +136,7 @@ class Controllers extends Component {
     }).then(() => {
       dispatch(
         routerRedux.push({
-          pathname: '/private/results',
+          pathname: '/results',
         })
       );
     });
