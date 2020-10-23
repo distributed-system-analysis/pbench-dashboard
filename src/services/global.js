@@ -4,7 +4,8 @@ const { endpoints } = window;
 
 export async function saveUserSession(params) {
   const { sessionConfig, description } = params;
-  return request.post(endpoints.graphql, {
+  const endpoint = `${endpoints.pbench_server}/graphql`;
+  return request.post(endpoint, {
     data: {
       query: `
             mutation($config: String!, $description: String!) {
@@ -25,7 +26,8 @@ export async function saveUserSession(params) {
 
 export async function queryUserSession(params) {
   const { id } = params;
-  return request.post(endpoints.graphql, {
+  const endpoint = `${endpoints.pbench_server}/graphql`;
+  return request.post(endpoint, {
     data: {
       query: `
         query($id: ID!) {

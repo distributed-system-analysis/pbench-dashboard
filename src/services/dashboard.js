@@ -7,12 +7,11 @@ import { getAllMonthsWithinRange } from '../utils/moment_constants';
 const { endpoints } = window;
 
 function scrollUntilEmpty(data) {
-  const url = `/_search/scroll?scroll=1m`;
   const endpoint = `${endpoints.pbench_server}/elasticsearch`;
   const allData = data;
-  const indices = `_search/scroll?scroll=1m&scroll_id=${allData._scroll_id}`;
 
   if (allData.hits.total.value !== allData.hits.hits.length && allData._scroll_id) {
+    const indices = `_search/scroll?scroll=1m&scroll_id=${allData._scroll_id}`;
     const scroll = request.post(endpoint, {
       data: { indices },
     });
@@ -66,15 +65,15 @@ export async function queryResults(params) {
         payload: {
           _source: {
             includes: [
-                '@metadata.controller_dir',
-                '@metadata.satellite',
-                'run.controller',
-                'run.start',
-                'run.end',
-                'run.name',
-                'run.config',
-                'run.prefix',
-                'run.id',
+              '@metadata.controller_dir',
+              '@metadata.satellite',
+              'run.controller',
+              'run.start',
+              'run.end',
+              'run.name',
+              'run.config',
+              'run.prefix',
+              'run.id',
             ],
           },
           sort: {
@@ -166,7 +165,7 @@ export async function queryIterationSamples(params) {
           params: {
             ignore_unavailable: true,
           },
-          data: {
+          payload: {
             size: 1000,
             query: {
               match: {
@@ -186,7 +185,7 @@ export async function queryIterationSamples(params) {
                     aggs: {
                       title: {
                         terms: {
-                          field: 'sample.measurement_title',
+                          field: 'sample.measurement_title.raw',
                         },
                         aggs: {
                           uid: {
@@ -239,7 +238,7 @@ export async function queryIterationSamples(params) {
 export async function queryTimeseriesData(payload) {
   const { selectedDateRange, selectedIterations } = payload;
 
-  const indices = `${parseMonths(
+  const indices = `${getAllMonthsWithinRange(
     endpoints,
     endpoints.result_data_index,
     selectedDateRange
@@ -269,9 +268,9 @@ export async function queryTimeseriesData(payload) {
                         sample.sample.measurement_type
                       } AND sample.measurement_title:${
                         sample.sample.measurement_title
-                      } AND sample.measurement_idx:${sample.sample.measurement_idx} AND sample.name:${
-                        sample.sample.name
-                      }`,
+                      } AND sample.measurement_idx:${
+                        sample.sample.measurement_idx
+                      } AND sample.name:${sample.sample.name}`,
                       analyze_wildcard: true,
                     },
                   },
