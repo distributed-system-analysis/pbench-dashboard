@@ -4,7 +4,8 @@ const { endpoints } = window;
 
 export async function getSession(params) {
   const { sessionId } = params;
-  return request.post(endpoints.graphql, {
+  const endpoint = `${endpoints.pbench_server}/graphql`;
+  return request.post(endpoint, {
     data: {
       query: `
         query($id: ID!) {
@@ -23,7 +24,7 @@ export async function getSession(params) {
 
 // queries all the available shared sessions from the database to display
 export async function getAllSessions() {
-  const endpoint = `${endpoints.graphql}`;
+  const endpoint = `${endpoints.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {
@@ -42,7 +43,8 @@ export async function getAllSessions() {
 
 export async function saveSession(params) {
   const { sessionConfig, description } = params;
-  return request.post(endpoints.graphql, {
+  const endpoint = `${endpoints.pbench_server}/graphql`;
+  return request.post(endpoint, {
     data: {
       query: `
             mutation($config: String!, $description: String!) {
@@ -65,7 +67,7 @@ export async function saveSession(params) {
 export async function updateSessionDescription(params) {
   const { sessionId, description } = params;
 
-  const endpoint = `${endpoints.graphql}`;
+  const endpoint = `${endpoints.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {
@@ -92,7 +94,7 @@ export async function updateSessionDescription(params) {
 export async function deleteSession(params) {
   const { sessionId } = params;
 
-  const endpoint = `${endpoints.graphql}`;
+  const endpoint = `${endpoints.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {

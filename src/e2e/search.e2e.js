@@ -33,7 +33,7 @@ beforeAll(async () => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(mockIndices),
       });
-    } else if (request.method() === 'GET' && request.url().includes('_mappings')) {
+    } else if (request.method() === 'POST' && request.postData().includes('mappings')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
