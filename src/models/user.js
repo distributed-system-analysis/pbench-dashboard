@@ -25,9 +25,21 @@ export default {
         payload,
       });
     },
+    *removeControllerFromFavorites({ payload }, { put }) {
+      yield put({
+        type: 'removeFavoriteController',
+        payload,
+      });
+    },
     *favoriteResult({ payload }, { put }) {
       yield put({
         type: 'modifyFavoritedResults',
+        payload,
+      });
+    },
+    *removeResultFromFavorites({ payload }, { put }) {
+      yield put({
+        type: 'removeFavoriteResult',
         payload,
       });
     },
@@ -56,6 +68,18 @@ export default {
       return {
         ...state,
         favoriteResults: [...state.favoriteResults, payload],
+      };
+    },
+    removeFavoriteController(state, { payload }) {
+      return {
+        ...state,
+        favoriteControllers: state.favoriteControllers.filter(item => item.key !== payload.key),
+      };
+    },
+    removeFavoriteResult(state, { payload }) {
+      return {
+        ...state,
+        favoriteResults: state.favoriteResults.filter(item => item.key !== payload.key),
       };
     },
   },

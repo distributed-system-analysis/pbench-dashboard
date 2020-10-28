@@ -16,17 +16,19 @@ import {
 
 import SearchBar from '@/components/SearchBar';
 import AntdDatePicker from '@/components/DatePicker';
+import LoginModal from '@/components/LoginModal';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
 
-@connect(({ datastore, global, dashboard, loading, user }) => ({
+@connect(({ datastore, global, dashboard, loading, user, auth }) => ({
   controllers: dashboard.controllers,
   indices: datastore.indices,
   selectedDateRange: global.selectedDateRange,
   datastoreConfig: datastore.datastoreConfig,
   favoriteControllers: user.favoriteControllers,
+  auth: auth.auth,
   loadingControllers:
     loading.effects['dashboard/fetchControllers'] ||
     loading.effects['datastore/fetchMonthIndices'] ||
@@ -38,6 +40,7 @@ class Controllers extends Component {
 
     this.state = {
       controllers: props.controllers,
+      showLoginModal: false,
     };
   }
 
@@ -145,6 +148,7 @@ class Controllers extends Component {
   favoriteRecord = (event, value, controller) => {
     // Stop propagation from going to the next page
     event.stopPropagation();
+
     const { dispatch } = this.props;
     // dispatch an action to favorite controller
     dispatch({
@@ -153,8 +157,45 @@ class Controllers extends Component {
     });
   };
 
+  removeControllerFromFavorites = (event, value, controller) => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+    const { dispatch } = this.props;
+    // dispatch an action to favorite controller
+    dispatch({
+      type: 'user/removeControllerFromFavorites',
+      payload: controller,
+    });
+  };
+
+  showLoginRedirectModal = event => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+
+    // display the modal.
+    this.setState({
+      showLoginModal: true,
+    });
+  };
+
+  modalConfirm = () => {
+    this.setState({
+      showLoginModal: false,
+    });
+  };
+
+  redirectToLoginPage = () => {
+    const { dispatch } = this.props;
+    this.modalConfirm();
+    dispatch(
+      routerRedux.push({
+        pathname: '/login',
+      })
+    );
+  };
+
   render() {
-    const { controllers } = this.state;
+    const { controllers, showLoginModal } = this.state;
     const { loadingControllers, favoriteControllers } = this.props;
     const columns = [
       {
@@ -188,16 +229,27 @@ class Controllers extends Component {
           // if already favorited return a filled star,
           // else allow user to favorite a record
           let isFavorite = false;
+          const {
+            auth: { username },
+          } = this.props;
           favoriteControllers.forEach(item => {
             if (item.key === row.key) {
               isFavorite = true;
             }
           });
           if (isFavorite) {
-            return <Icon type="star" theme="filled" />;
+            return (
+              <a onClick={e => this.removeControllerFromFavorites(e, null, row)}>
+                <Icon type="star" theme="filled" />
+              </a>
+            );
           }
           return (
-            <a onClick={e => this.favoriteRecord(e, null, row)}>
+            <a
+              onClick={e =>
+                username ? this.favoriteRecord(e, null, row) : this.showLoginRedirectModal(e)
+              }
+            >
               <Icon type="star" />
             </a>
           );
@@ -232,6 +284,12 @@ class Controllers extends Component {
                   />
                   <AntdDatePicker onChangeCallback={this.fetchControllers} />
                 </Form>
+                <LoginModal
+                  showLoginModal={showLoginModal}
+                  redirect={this.redirectToLoginPage}
+                  content="Please login to favorite controllers"
+                  onConfirm={() => this.modalConfirm()}
+                />
                 <Tabs type="card">
                   <TabPane tab="Controllers" key="controllers">
                     <Table

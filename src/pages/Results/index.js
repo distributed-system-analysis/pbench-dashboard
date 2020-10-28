@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 
+import LoginModal from '@/components/LoginModal';
 import SearchBar from '@/components/SearchBar';
 import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
@@ -20,13 +21,14 @@ import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
 
-@connect(({ datastore, global, dashboard, loading, user }) => ({
+@connect(({ datastore, global, dashboard, loading, user, auth }) => ({
   selectedDateRange: global.selectedDateRange,
   results: dashboard.results[global.selectedControllers[0]]
     ? dashboard.results[global.selectedControllers[0]]
     : [],
   selectedControllers: global.selectedControllers,
   datastoreConfig: datastore.datastoreConfig,
+  auth: auth.auth,
   favoriteResults: user.favoriteResults,
   loading: loading.effects['dashboard/fetchResults'],
 }))
@@ -37,6 +39,7 @@ class Results extends Component {
     this.state = {
       results: props.results,
       selectedRows: [],
+      showLoginModal: false,
     };
   }
 
@@ -143,16 +146,54 @@ class Results extends Component {
   favoriteRecord = (event, value, result) => {
     // Stop propagation from going to the next page
     event.stopPropagation();
+
     const { dispatch } = this.props;
-    // dispatch an action to favorite result
+    // dispatch an action to favorite a result
     dispatch({
       type: 'user/favoriteResult',
       payload: result,
     });
   };
 
+  removeResultFromFavorites = (event, value, result) => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'user/removeResultFromFavorites',
+      payload: result,
+    });
+  };
+
+  showLoginRedirectModal = event => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+
+    // display the modal.
+    this.setState({
+      showLoginModal: true,
+    });
+  };
+
+  modalConfirm = () => {
+    this.setState({
+      showLoginModal: false,
+    });
+  };
+
+  redirectToLoginPage = () => {
+    const { dispatch } = this.props;
+    this.modalConfirm();
+    dispatch(
+      routerRedux.push({
+        pathname: '/login',
+      })
+    );
+  };
+
   render() {
-    const { results, selectedRows } = this.state;
+    const { results, selectedRows, showLoginModal } = this.state;
     const { selectedControllers, loading, favoriteResults } = this.props;
     const rowSelection = {
       // eslint-disable-next-line no-shadow
@@ -197,19 +238,28 @@ class Results extends Component {
         dataIndex: 'actions',
         key: 'actions',
         render: (value, row) => {
-          // if already favorited return a filled star,
-          // else allow user to favorite a record
           let isFavorite = false;
+          const {
+            auth: { username },
+          } = this.props;
           favoriteResults.forEach(item => {
             if (item.key === row.key) {
               isFavorite = true;
             }
           });
           if (isFavorite) {
-            return <Icon type="star" theme="filled" />;
+            return (
+              <a onClick={e => this.removeResultFromFavorites(e, null, row)}>
+                <Icon type="star" theme="filled" />
+              </a>
+            );
           }
           return (
-            <a onClick={e => this.favoriteRecord(e, null, row)}>
+            <a
+              onClick={e =>
+                !username ? this.favoriteRecord(e, null, row) : this.showLoginRedirectModal(e)
+              }
+            >
               <Icon type="star" />
             </a>
           );
@@ -240,6 +290,12 @@ class Results extends Component {
                   onCompare={this.compareResults}
                 />
               </Form>
+              <LoginModal
+                showLoginModal={showLoginModal}
+                redirect={this.redirectToLoginPage}
+                content="Please login to favorite results"
+                onConfirm={() => this.modalConfirm()}
+              />
               <Tabs type="card" style={{ marginTop: 16 }}>
                 <TabPane tab="Results" key="results">
                   <Table
