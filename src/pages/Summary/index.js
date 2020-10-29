@@ -77,6 +77,7 @@ class Summary extends React.Component {
       payload: {
         selectedDateRange,
         result: selectedResults[0]['run.name'],
+        parent: '',
       },
     });
     dispatch({
@@ -105,6 +106,21 @@ class Summary extends React.Component {
 
   onTabChange = (event, tabIndex) => {
     this.setState({ activeTabKey: tabIndex });
+  };
+
+  getMoreToCResult = name => {
+    const { dispatch, datastoreConfig, selectedDateRange, selectedResults } = this.props;
+    console.log(this.props);
+    console.log(name);
+    dispatch({
+      type: 'dashboard/fetchTocResult',
+      payload: {
+        datastoreConfig,
+        selectedDateRange,
+        id: selectedResults[0].id,
+        parent: name,
+      },
+    });
   };
 
   render() {
@@ -151,7 +167,14 @@ class Summary extends React.Component {
             <Tab eventKey={1} title={<TabTitleText>Table of Contents</TabTitleText>}>
               <Card>
                 <CardBody>
-                  <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
+                  <Table
+                    columns={tocColumns}
+                    dataSource={tocResult.tocResult}
+                    onRow={r => ({
+                      onClick: () => this.getMoreToCResult(`/${r.name}`),
+                    })}
+                    defaultExpandAllRows
+                  />
                 </CardBody>
               </Card>
             </Tab>
