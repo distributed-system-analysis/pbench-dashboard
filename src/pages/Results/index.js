@@ -187,7 +187,7 @@ class Results extends Component {
         dataIndex: 'run.end',
         key: 'run.end',
         render: val => (
-          <Tooltip title={val}>
+          <Tooltip content={val}>
             <span>{getDiffDate(val)}</span>
           </Tooltip>
         ),
