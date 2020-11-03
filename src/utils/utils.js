@@ -79,8 +79,10 @@ export const insertTocTreeData = (tocResult, items = [], [head, ...tail]) => {
     }
   }
   let child = items.find(childNode => childNode.name === head);
+  console.log(fileData, head, child);
   if (!child) {
     if (fileData[head] !== undefined) {
+      console.log('pushing size and mode');
       items.push(
         (child = {
           name: head,
