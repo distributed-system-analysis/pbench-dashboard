@@ -294,7 +294,12 @@ class SearchList extends Component {
                     type="primary"
                     name="Filter"
                     disabled={updateFiltersDisabled}
-                    onClick={this.fetchSearchQuery}
+                    onClick={e => {
+                      // prevent form submit
+                      // from reloading the page.
+                      e.preventDefault();
+                      this.fetchSearchQuery();
+                    }}
                   />
                   <Button
                     type="secondary"
