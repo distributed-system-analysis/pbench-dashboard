@@ -131,7 +131,7 @@ describe('search page component', () => {
 
   test('should execute search query', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button',
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button > svg',
       { visible: true }
     );
     await page.click(
