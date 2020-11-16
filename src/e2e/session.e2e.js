@@ -80,14 +80,14 @@ describe('session flow', () => {
     );
     await page.click('#root > div > header > div.pf-c-page__header-tools > span > div > button');
 
-    await page.waitForSelector('.ant-input');
-    await page.type('.ant-input', 'controller page test', { delay: 50 });
+    await page.waitForSelector('#description');
+    await page.type('#description', 'controller page test', { delay: 50 });
 
     await page.waitForSelector(
-      'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
+      'div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
     );
     await page.click(
-      'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
+      'div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
     );
   });
 
@@ -95,10 +95,10 @@ describe('session flow', () => {
     'should copy session link',
     async () => {
       await page.waitForSelector(
-        'body > div:nth-child(5) > div > div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
+        'div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
       );
       await page.click(
-        'body > div:nth-child(5) > div > div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
+        'div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
       );
     },
     30000
