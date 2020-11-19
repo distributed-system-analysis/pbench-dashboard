@@ -42,6 +42,7 @@ class Profile extends React.Component {
       email: React.createRef(),
       position: React.createRef(),
     };
+
     this.state = {
       editView: profileData.editView,
       displayName: profileData.displayName,
@@ -57,58 +58,49 @@ class Profile extends React.Component {
       { value: 'Active', label: 'Active', disabled: false },
       { value: 'Inactive', label: 'Inactive', disabled: false },
     ];
-
-    this.handleModalToggle = () => {
-      this.setState(({ isModalOpen }) => ({
-        isModalOpen: !isModalOpen,
-      }));
-    };
-
-    this.onaccountStatusChange = accountStatus => {
-      this.setState({
-        accountStatus,
-        color: accountStatus === 'Active' ? '#0080005e' : '#ff000052',
-      });
-    };
-
-    this.edit = () => {
-      const { editView } = this.state;
-      this.setState({
-        editView: !editView,
-      });
-    };
-
-    this.saveEdit = () => {
-      const { editView, displayName, emailVal, positionVal } = this.state;
-      const { name, email, position } = this.ref;
-      const editedName = name.current.value ? name.current.value : displayName;
-      const editedEmail = email.current.value ? email.current.value : emailVal;
-      const editedPosition = position.current.value ? position.current.value : positionVal;
-
-      this.setState({
-        editView: !editView,
-        displayName: editedName,
-        emailVal: editedEmail,
-        positionVal: editedPosition,
-      });
-    };
-
-    this.cancleEdit = () => {
-      const { editView } = this.state;
-      this.setState({
-        editView: !editView,
-      });
-    };
-
-    this.removeTag = tag => {
-      const { tags } = this.state;
-      const index = tags.indexOf(tag);
-      if (index > -1) {
-        tags.splice(index, 1);
-      }
-      this.setState({ tags });
-    };
   }
+
+  handleModalToggle = () => {
+    this.setState(({ isModalOpen }) => ({
+      isModalOpen: !isModalOpen,
+    }));
+  };
+
+  onaccountStatusChange = accountStatus => {
+    this.setState({
+      accountStatus,
+      color: accountStatus === 'Active' ? '#0080005e' : '#ff000052',
+    });
+  };
+
+  edit = () => {
+    const { editView } = this.state;
+    this.setState({
+      editView: !editView,
+    });
+  };
+
+  saveEdit = () => {
+    const { editView, displayName, emailVal, positionVal } = this.state;
+    const { name, email, position } = this.ref;
+    const editedName = name.current.value ? name.current.value : displayName;
+    const editedEmail = email.current.value ? email.current.value : emailVal;
+    const editedPosition = position.current.value ? position.current.value : positionVal;
+
+    this.setState({
+      editView: !editView,
+      displayName: editedName,
+      emailVal: editedEmail,
+      positionVal: editedPosition,
+    });
+  };
+
+  cancelEdit = () => {
+    const { editView } = this.state;
+    this.setState({
+      editView: !editView,
+    });
+  };
 
   render() {
     const {
@@ -279,7 +271,7 @@ class Profile extends React.Component {
                               <Button
                                 variant="secondary"
                                 className={styles.profileBtn}
-                                onClick={this.cancleEdit}
+                                onClick={this.cancelEdit}
                               >
                                 Cancel{' '}
                               </Button>
