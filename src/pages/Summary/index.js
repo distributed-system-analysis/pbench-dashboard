@@ -41,12 +41,11 @@ const tocColumns = [
   },
 ];
 
-@connect(({ global, datastore, dashboard, loading }) => ({
+@connect(({ global, dashboard, loading }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
   result: dashboard.result,
   tocResult: dashboard.tocResult,
-  datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
   selectedDateRange: global.selectedDateRange,
@@ -67,16 +66,15 @@ class Summary extends React.Component {
   }
 
   componentDidMount() {
-    const { dispatch, datastoreConfig, selectedDateRange, selectedResults } = this.props;
+    const { dispatch, selectedDateRange, selectedResults } = this.props;
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
-      payload: { selectedResults, selectedDateRange, datastoreConfig },
+      payload: { selectedResults, selectedDateRange },
     });
     dispatch({
       type: 'dashboard/fetchResult',
       payload: {
-        datastoreConfig,
         selectedDateRange,
         result: selectedResults[0]['run.name'],
       },
@@ -84,7 +82,6 @@ class Summary extends React.Component {
     dispatch({
       type: 'dashboard/fetchTocResult',
       payload: {
-        datastoreConfig,
         selectedDateRange,
         id: selectedResults[0].id,
       },

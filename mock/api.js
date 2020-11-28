@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import config from './datastoreConfig';
+import endpoints from '../config/endpoints';
 import constants from '../config/constants';
 
 // Generate controllers as per max page size options
@@ -22,8 +22,7 @@ export const generateMockControllerAggregation = {
   },
 };
 
-const datastoreConfig = config['/dev/datastoreConfig'];
-const prefix = datastoreConfig.prefix + datastoreConfig.run_index.slice(0, -1);
+const prefix = endpoints.prefix + endpoints.run_index.slice(0, -1);
 export const mockIndices = {
   [`${prefix}.2019-08-01`]: {},
   [`${prefix}.2019-09-01`]: {},

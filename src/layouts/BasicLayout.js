@@ -44,8 +44,7 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   return routerMap;
 }, deepEqual);
 
-@connect(({ global, datastore, loading, auth }) => ({
-  datastoreConfig: datastore.datastoreConfig,
+@connect(({ global, loading, auth }) => ({
   sessionBannerVisible: global.sessionBannerVisible,
   sessionDescription: global.sessionDescription,
   sessionId: global.sessionId,
@@ -94,7 +93,6 @@ class BasicLayout extends React.PureComponent {
 
   render() {
     const {
-      datastoreConfig,
       savingSession,
       sessionBannerVisible,
       sessionDescription,
@@ -110,7 +108,6 @@ class BasicLayout extends React.PureComponent {
           <Page
             header={
               <GlobalHeader
-                datastoreConfig={datastoreConfig}
                 savingSession={savingSession}
                 sessionBannerVisible={sessionBannerVisible}
                 sessionDescription={sessionDescription}

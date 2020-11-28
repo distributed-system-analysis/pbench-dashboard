@@ -73,7 +73,6 @@ class GlobalHeader extends Component {
 
   render() {
     const {
-      datastoreConfig,
       savingSession,
       sessionBannerVisible,
       sessionDescription,
@@ -102,12 +101,7 @@ class GlobalHeader extends Component {
             banner
           />
         )}
-        <SessionModal
-          datastoreConfig={datastoreConfig}
-          savingSession={savingSession}
-          sessionConfig={store}
-          dispatch={dispatch}
-        />
+        <SessionModal savingSession={savingSession} sessionConfig={store} dispatch={dispatch} />
         <PageHeaderToolsGroup>
           <PageHeaderToolsItem>
             <Button

@@ -1,8 +1,9 @@
 import pageRoutes from './router.config';
+import endpoints from './endpoints';
 
 export default {
   define: {
-    'process.env': process.env.NODE_ENV,
+    'process.env.endpoints': endpoints,
   },
   dynamicImport: undefined,
   base: '/dashboard/',

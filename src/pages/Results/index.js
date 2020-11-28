@@ -20,13 +20,12 @@ import { getDiffDate } from '@/utils/moment_constants';
 
 const { TabPane } = Tabs;
 
-@connect(({ datastore, global, dashboard, loading, user }) => ({
+@connect(({ global, dashboard, loading, user }) => ({
   selectedDateRange: global.selectedDateRange,
   results: dashboard.results[global.selectedControllers[0]]
     ? dashboard.results[global.selectedControllers[0]]
     : [],
   selectedControllers: global.selectedControllers,
-  datastoreConfig: datastore.datastoreConfig,
   favoriteResults: user.favoriteResults,
   loading: loading.effects['dashboard/fetchResults'],
 }))
@@ -41,19 +40,12 @@ class Results extends Component {
   }
 
   componentDidMount() {
-    const {
-      dispatch,
-      results,
-      datastoreConfig,
-      selectedDateRange,
-      selectedControllers,
-    } = this.props;
+    const { dispatch, results, selectedDateRange, selectedControllers } = this.props;
 
     if (results.length === 0) {
       dispatch({
         type: 'dashboard/fetchResults',
         payload: {
-          datastoreConfig,
           selectedDateRange,
           controller: selectedControllers,
         },

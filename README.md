@@ -8,10 +8,12 @@ Pbench Dashboard is a web-based platform for consuming indexed performance bench
 ├── public
 │   └── favicon.ico                 # favicon
 ├── mock
-│   └── datastoreConfig.js.example  # datastore configuration
+│   ├── api.js                      # mocked api
+│   └── user.js                     # mocked user api
 ├── config
 │   ├── config.js                   # webpack configuration
-│   └── router.config.js            # webpack routing configuration
+│   ├── router.config.js            # webpack routing configuration
+│   └── endpoints.js                # api endpoint configuration
 ├── src
 │   ├── assets                      # local static files
 │   ├── common                      # common configurations (navigation, menu, etc.)
@@ -66,20 +68,18 @@ This will automatically open the application on [http://localhost:8000](http://l
 
 ## Local Development
 
-Both the production and development builds of the dashboard require specific configurations in order to run on their respective environment.
+Both the production and development builds of the dashboard require API endpoint configurations in order to query data from specific datastores.
 
-Copy the `datastoreConfig.js.example` file in the `mock/` directory to `datastoreConfig.js` and modify the configuration fields within the route definition. Please reference the following example for required configuration fields.
+`endpoints.js` in the `config/` directory contains references to datastores required to visualize data in the dashboard. Please reference the following example for required configuration fields.
 
 ```JavaScript
 export default {
-  '/dev/datastoreConfig': {
-      "elasticsearch": "http://elasticsearch.example.com",
-      "results": "http://results.example.com",
-      "graphql": "http://graphql.example.com",
-      "prefix": "example.prefix",
-      "run_index": "example.index",
-      "result_index": "example.index"
-  },
+  "elasticsearch": "http://elasticsearch.example.com",
+  "results": "http://results.example.com",
+  "graphql": "http://graphql.example.com",
+  "prefix": "example.prefix",
+  "run_index": "example.index",
+  "result_index": "example.index"
 }
 ```
 

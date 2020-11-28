@@ -5,18 +5,6 @@
 # directory.
 cd $(dirname ${0})
 
-# Setup the mock'd data store configuration.
-cat > mock/datastoreConfig.js <<EOF
-export default {
-  '/dev/datastoreConfig': {
-    elasticsearch: 'http://test_domain.com',
-    results: 'http://test_domain.com',
-    graphql: 'http://test_domain.com',
-    prefix: 'test_prefix.',
-    run_index: 'test_index.',
-  },
-};
-EOF
 # Make sure the yarn environment is all up-to-date, or perform the
 # install ahead of actually running the tests.
 printf -- "Running \"yarn install\" command ...\n" 

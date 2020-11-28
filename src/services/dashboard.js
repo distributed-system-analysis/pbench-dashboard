@@ -4,22 +4,10 @@
 import request from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
-function parseMonths(datastoreConfig, index, selectedIndices) {
-  let indices = '';
+const { endpoints } = process.env;
 
-  selectedIndices.forEach(value => {
-    if (index === datastoreConfig.result_index) {
-      indices += `${datastoreConfig.prefix + index + value}-*,`;
-    } else {
-      indices += `${datastoreConfig.prefix + index + value},`;
-    }
-  });
-
-  return indices;
-}
-
-function scrollUntilEmpty(datastoreConfig, data) {
-  const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
+function scrollUntilEmpty(data) {
+  const endpoint = `${endpoints.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
 
   if (allData.hits.total !== allData.hits.hits.length) {
@@ -28,7 +16,7 @@ function scrollUntilEmpty(datastoreConfig, data) {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
       allData.hits.hits = [...allData.hits.hits, ...response.hits.hits];
-      return scrollUntilEmpty(datastoreConfig, allData);
+      return scrollUntilEmpty(endpoints, allData);
     });
   }
   return allData;
@@ -36,11 +24,11 @@ function scrollUntilEmpty(datastoreConfig, data) {
 
 export async function queryControllers(params) {
   try {
-    const { datastoreConfig, selectedDateRange } = params;
+    const { selectedDateRange } = params;
 
-    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-      datastoreConfig,
-      datastoreConfig.run_index,
+    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+      endpoints,
+      endpoints.run_index,
       selectedDateRange
     )}/_search`;
 
@@ -87,11 +75,11 @@ export async function queryControllers(params) {
 
 export async function queryResults(params) {
   try {
-    const { datastoreConfig, selectedDateRange, controller } = params;
+    const { selectedDateRange, controller } = params;
 
-    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-      datastoreConfig,
-      datastoreConfig.run_index,
+    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+      endpoints,
+      endpoints.run_index,
       selectedDateRange
     )}/_search`;
 
@@ -133,11 +121,11 @@ export async function queryResults(params) {
 }
 
 export async function queryResult(params) {
-  const { datastoreConfig, selectedDateRange, result } = params;
+  const { selectedDateRange, result } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-    datastoreConfig,
-    datastoreConfig.run_index,
+  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    endpoints,
+    endpoints.run_index,
     selectedDateRange
   )}/_search?source=`;
 
@@ -157,11 +145,11 @@ export async function queryResult(params) {
 }
 
 export async function queryTocResult(params) {
-  const { datastoreConfig, selectedDateRange, id } = params;
+  const { selectedDateRange, id } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-    datastoreConfig,
-    datastoreConfig.run_index,
+  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    endpoints,
+    endpoints.run_index,
     selectedDateRange
   )}/_search?q=_parent:"${id}"`;
 
@@ -173,11 +161,11 @@ export async function queryTocResult(params) {
 }
 
 export async function queryIterationSamples(params) {
-  const { datastoreConfig, selectedDateRange, selectedResults } = params;
+  const { selectedDateRange, selectedResults } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-    datastoreConfig,
-    datastoreConfig.result_index,
+  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    endpoints,
+    endpoints.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
@@ -259,7 +247,7 @@ export async function queryIterationSamples(params) {
   return Promise.all(iterationSampleRequests).then(async iterations => {
     return Promise.all(
       iterations.map(async iteration => {
-        iteration = await scrollUntilEmpty(datastoreConfig, iteration);
+        iteration = await scrollUntilEmpty(iteration);
       })
     ).then(() => {
       return iterations;
@@ -268,11 +256,11 @@ export async function queryIterationSamples(params) {
 }
 
 export async function queryTimeseriesData(payload) {
-  const { datastoreConfig, selectedDateRange, selectedIterations } = payload;
+  const { selectedDateRange, selectedIterations } = payload;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
-    datastoreConfig,
-    datastoreConfig.result_index,
+  const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+    endpoints,
+    endpoints.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
@@ -325,7 +313,7 @@ export async function queryTimeseriesData(payload) {
   return Promise.all(timeseriesRequests).then(timeseries => {
     return Promise.all(
       timeseries.map(async timeseriesSet => {
-        timeseriesSet = await scrollUntilEmpty(datastoreConfig, timeseriesSet);
+        timeseriesSet = await scrollUntilEmpty(timeseriesSet);
       })
     ).then(() => {
       return timeseries;
