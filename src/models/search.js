@@ -19,9 +19,10 @@ export default {
     },
     *fetchIndexMapping({ payload }, { call, put }) {
       const response = yield call(queryIndexMapping, payload);
-      const { datastoreConfig, indices } = payload;
+      const { indices } = payload;
+      const { endpoints } = process.env;
 
-      const index = datastoreConfig.prefix + datastoreConfig.run_index + indices[0];
+      const index = endpoints.prefix + endpoints.run_index + indices[0];
       const mapping = response[index].mappings['pbench-run'].properties;
       const fields = [];
       const filters = {};

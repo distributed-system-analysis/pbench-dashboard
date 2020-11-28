@@ -29,7 +29,6 @@ import AntdDatePicker from '@/components/DatePicker';
   selectedDateRange: global.selectedDateRange,
   selectedResults: global.selectedResults,
   indices: datastore.indices,
-  datastoreConfig: datastore.datastoreConfig,
   loadingMapping: loading.effects['search/fetchIndexMapping'],
   loadingSearchResults: loading.effects['search/fetchSearchResults'],
 }))
@@ -53,7 +52,7 @@ class SearchList extends Component {
       selectedDateRange.start === '' ||
       selectedDateRange.end === ''
     ) {
-      this.queryDatastoreConfig();
+      this.fetchMonthIndices();
     }
   }
 
@@ -71,34 +70,22 @@ class SearchList extends Component {
     }
   }
 
-  queryDatastoreConfig = async () => {
+  fetchMonthIndices = async () => {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'datastore/fetchDatastoreConfig',
-    }).then(() => {
-      this.fetchMonthIndices();
-    });
-  };
-
-  fetchMonthIndices = async () => {
-    const { dispatch, datastoreConfig } = this.props;
-
-    dispatch({
       type: 'datastore/fetchMonthIndices',
-      payload: { datastoreConfig },
     }).then(() => {
       this.fetchIndexMapping();
     });
   };
 
   fetchIndexMapping = () => {
-    const { dispatch, datastoreConfig, indices } = this.props;
+    const { dispatch, indices } = this.props;
 
     dispatch({
       type: 'search/fetchIndexMapping',
       payload: {
-        datastoreConfig,
         indices,
       },
     });
@@ -178,13 +165,12 @@ class SearchList extends Component {
 
   fetchSearchQuery = () => {
     const { searchQuery } = this.state;
-    const { dispatch, datastoreConfig, selectedFields, selectedDateRange } = this.props;
+    const { dispatch, selectedFields, selectedDateRange } = this.props;
 
     this.commitRunSelections().then(() => {
       dispatch({
         type: 'search/fetchSearchResults',
         payload: {
-          datastoreConfig,
           selectedDateRange,
           selectedFields,
           query: searchQuery,

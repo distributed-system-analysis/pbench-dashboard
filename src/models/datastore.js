@@ -1,34 +1,20 @@
 import getDefaultDateRange from '../utils/moment_constants';
-import { queryDatastoreConfig, queryMonthIndices } from '../services/datastore';
+import queryMonthIndices from '../services/datastore';
 
 export default {
   namespace: 'datastore',
 
   state: {
-    datastoreConfig: {},
     indices: [],
   },
 
   effects: {
-    *fetchDatastoreConfig({ payload }, { call, put }) {
-      const response = yield call(queryDatastoreConfig, payload);
-
-      // Remove the trailing slashes if present, we'll take care of adding
-      // them back in the proper context.
-      response.elasticsearch = response.elasticsearch.replace(/\/+$/, '');
-      response.results = response.results.replace(/\/+$/, '');
-
-      yield put({
-        type: 'getDatastoreConfig',
-        payload: response,
-      });
-    },
     *fetchMonthIndices({ payload }, { call, put }) {
       const response = yield call(queryMonthIndices, payload);
-      const { datastoreConfig } = payload;
+      const { endpoints } = process.env;
       const indices = [];
 
-      const prefix = datastoreConfig.prefix + datastoreConfig.run_index.slice(0, -1);
+      const prefix = endpoints.prefix + endpoints.run_index.slice(0, -1);
       Object.keys(response).forEach(index => {
         if (index.includes(prefix)) {
           indices.push(index.split('.').pop());
@@ -49,12 +35,6 @@ export default {
   },
 
   reducers: {
-    getDatastoreConfig(state, { payload }) {
-      return {
-        ...state,
-        datastoreConfig: payload,
-      };
-    },
     getMonthIndices(state, { payload }) {
       return {
         ...state,

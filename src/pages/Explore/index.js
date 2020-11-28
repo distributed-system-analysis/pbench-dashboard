@@ -18,9 +18,8 @@ import Table from '@/components/Table';
 
 const { TextArea } = Input;
 
-@connect(({ datastore, explore, loading }) => ({
+@connect(({ explore, loading }) => ({
   sharedSessions: explore.sharedSessions,
-  datastoreConfig: datastore.datastoreConfig,
   loadingSharedSessions: loading.effects['explore/fetchSharedSessions'],
 }))
 class Explore extends Component {
@@ -36,7 +35,7 @@ class Explore extends Component {
   }
 
   componentDidMount() {
-    this.fetchDatastoreConfig();
+    this.fetchSharedSessions();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -47,22 +46,11 @@ class Explore extends Component {
     }
   }
 
-  fetchDatastoreConfig = () => {
+  fetchSharedSessions = () => {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'datastore/fetchDatastoreConfig',
-    }).then(() => {
-      this.fetchSharedSessions();
-    });
-  };
-
-  fetchSharedSessions = () => {
-    const { dispatch, datastoreConfig } = this.props;
-
-    dispatch({
       type: 'explore/fetchSharedSessions',
-      payload: { datastoreConfig },
     });
   };
 
@@ -73,10 +61,10 @@ class Explore extends Component {
   };
 
   editDescription = (id, value) => {
-    const { dispatch, datastoreConfig } = this.props;
+    const { dispatch } = this.props;
     dispatch({
       type: 'explore/editDescription',
-      payload: { datastoreConfig, id, value },
+      payload: { id, value },
     }).then(() => {
       this.fetchSharedSessions();
     });
@@ -110,11 +98,11 @@ class Explore extends Component {
   };
 
   deleteSharedSession = record => {
-    const { dispatch, datastoreConfig } = this.props;
+    const { dispatch } = this.props;
     const { id } = record;
     dispatch({
       type: 'explore/deleteSharedSessions',
-      payload: { datastoreConfig, id },
+      payload: { id },
     }).then(() => {
       this.fetchSharedSessions();
     });

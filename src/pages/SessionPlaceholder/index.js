@@ -4,22 +4,11 @@ import { routerRedux } from 'dva/router';
 import { Spin } from 'antd';
 
 @connect(store => ({
-  datastoreConfig: store.datastore.datastoreConfig,
   store,
 }))
 class SessionPlaceholder extends React.Component {
   componentDidMount = () => {
-    this.queryDatastoreConfig();
-  };
-
-  queryDatastoreConfig = async () => {
-    const { dispatch } = this.props;
-
-    dispatch({
-      type: 'datastore/fetchDatastoreConfig',
-    }).then(() => {
-      this.persistCurrentSession();
-    });
+    this.persistCurrentSession();
   };
 
   persistCurrentSession = () => {
@@ -34,7 +23,7 @@ class SessionPlaceholder extends React.Component {
   };
 
   queryUserSession = async () => {
-    const { dispatch, datastoreConfig } = this.props;
+    const { dispatch } = this.props;
     const path = window.location.href;
     const id = path.substring(path.lastIndexOf('/') + 1);
 
@@ -42,7 +31,6 @@ class SessionPlaceholder extends React.Component {
       type: 'global/fetchUserSession',
       payload: {
         id,
-        datastoreConfig,
       },
     }).then(response => {
       this.rehydrateNamespaces(response.sessionConfig, response.sessionMetadata);

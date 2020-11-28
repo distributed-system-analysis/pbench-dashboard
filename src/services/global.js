@@ -1,8 +1,10 @@
 import request from '../utils/request';
 
+const { endpoints } = process.env;
+
 export async function saveUserSession(params) {
-  const { sessionConfig, description, datastoreConfig } = params;
-  return request.post(datastoreConfig.graphql, {
+  const { sessionConfig, description } = params;
+  return request.post(endpoints.graphql, {
     data: {
       query: `
             mutation($config: String!, $description: String!) {
@@ -22,8 +24,8 @@ export async function saveUserSession(params) {
 }
 
 export async function queryUserSession(params) {
-  const { id, datastoreConfig } = params;
-  return request.post(datastoreConfig.graphql, {
+  const { id } = params;
+  return request.post(endpoints.graphql, {
     data: {
       query: `
         query($id: ID!) {

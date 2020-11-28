@@ -17,7 +17,6 @@ _roadhog-api-doc
 .DS_Store
 npm-debug.log*
 yarn-error.log
-/mock/datastoreConfig.js
 
 /coverage
 .idea
@@ -30,3 +29,6 @@ package-lock.json
 
 # jest tests
 __snapshots__
+
+# config
+/config/endpoints.js

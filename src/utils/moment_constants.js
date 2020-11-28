@@ -12,7 +12,7 @@ export default function getDefaultDateRange(lastIndex) {
 }
 
 // Gets all months within a specified date range
-export function getAllMonthsWithinRange(datastoreConfig, index, selectedDateRange) {
+export function getAllMonthsWithinRange(endpoints, index, selectedDateRange) {
   const startDate = moment(selectedDateRange.start);
   const endDate = moment(selectedDateRange.end);
   const referenceDate = startDate.clone();
@@ -28,10 +28,10 @@ export function getAllMonthsWithinRange(datastoreConfig, index, selectedDateRang
     monthResults.push(referenceDate.format('YYYY-MM'));
   }
   monthResults.forEach(monthValue => {
-    if (index === datastoreConfig.result_index) {
-      queryString += `${datastoreConfig.prefix + index + monthValue}-*,`;
+    if (index === endpoints.result_index) {
+      queryString += `${endpoints.prefix + index + monthValue}-*,`;
     } else {
-      queryString += `${datastoreConfig.prefix + index + monthValue},`;
+      queryString += `${endpoints.prefix + index + monthValue},`;
     }
   });
   return queryString;

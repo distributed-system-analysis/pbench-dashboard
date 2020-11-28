@@ -1,10 +1,10 @@
 import request from '../utils/request';
 
-// queries all the available shared sessions from the database to display
-export async function querySharedSessions(params) {
-  const { datastoreConfig } = params;
+const { endpoints } = process.env;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+// queries all the available shared sessions from the database to display
+export async function querySharedSessions() {
+  const endpoint = `${endpoints.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -23,9 +23,9 @@ export async function querySharedSessions(params) {
 
 // Updates the description of shared session, provided by the user in the database.
 export async function updateDescription(params) {
-  const { datastoreConfig, id, value } = params;
+  const { id, value } = params;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+  const endpoint = `${endpoints.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -50,9 +50,9 @@ export async function updateDescription(params) {
 
 // Deletes a shared session.
 export async function deleteSharedSessions(params) {
-  const { datastoreConfig, id } = params;
+  const { id } = params;
 
-  const endpoint = `${datastoreConfig.graphql}`;
+  const endpoint = `${endpoints.graphql}`;
 
   return request.post(endpoint, {
     data: {

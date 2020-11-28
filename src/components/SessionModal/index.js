@@ -48,7 +48,7 @@ class SessionModal extends Component {
   };
 
   onGenerate = () => {
-    const { dispatch, datastoreConfig } = this.props;
+    const { dispatch } = this.props;
     let { sessionConfig } = this.props;
     const { description } = this.state;
     sessionConfig = JSON.stringify(sessionConfig);
@@ -58,7 +58,6 @@ class SessionModal extends Component {
       payload: {
         sessionConfig,
         description,
-        datastoreConfig,
       },
     }).then(result => {
       this.setState({

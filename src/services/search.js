@@ -1,23 +1,24 @@
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
+const { endpoints } = process.env;
+
 export async function queryIndexMapping(params) {
-  const { datastoreConfig, indices } = params;
+  const { indices } = params;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${datastoreConfig.prefix}${
-    datastoreConfig.run_index
-  }${indices[0]}/_mappings`;
-
+  const endpoint = `${endpoints.elasticsearch}/${endpoints.prefix}${endpoints.run_index}${
+    indices[0]
+  }/_mappings`;
   return request.get(endpoint);
 }
 
 export async function searchQuery(params) {
   try {
-    const { datastoreConfig, selectedFields, selectedDateRange, query } = params;
+    const { selectedFields, selectedDateRange, query } = params;
 
-    const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
-      datastoreConfig,
-      datastoreConfig.run_index,
+    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
+      endpoints,
+      endpoints.run_index,
       selectedDateRange
     )}/_search`;
 

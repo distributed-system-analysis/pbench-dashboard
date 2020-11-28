@@ -23,12 +23,11 @@ import Button from '@/components/Button';
 import Table from '@/components/Table';
 import { filterIterations } from '../../utils/parse';
 
-@connect(({ datastore, global, dashboard, loading }) => ({
+@connect(({ global, dashboard, loading }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
   results: dashboard.results,
   controllers: dashboard.controllers,
-  datastoreConfig: datastore.datastoreConfig,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
   selectedDateRange: global.selectedDateRange,
@@ -47,11 +46,11 @@ class ComparisonSelect extends React.Component {
   }
 
   componentDidMount() {
-    const { selectedResults, selectedDateRange, datastoreConfig, dispatch } = this.props;
+    const { selectedResults, selectedDateRange, dispatch } = this.props;
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
-      payload: { selectedResults, selectedDateRange, datastoreConfig },
+      payload: { selectedResults, selectedDateRange },
     });
   }
 

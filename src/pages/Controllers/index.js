@@ -25,12 +25,9 @@ const { TabPane } = Tabs;
   controllers: dashboard.controllers,
   indices: datastore.indices,
   selectedDateRange: global.selectedDateRange,
-  datastoreConfig: datastore.datastoreConfig,
   favoriteControllers: user.favoriteControllers,
   loadingControllers:
-    loading.effects['dashboard/fetchControllers'] ||
-    loading.effects['datastore/fetchMonthIndices'] ||
-    loading.effects['datastore/fetchDatastoreConfig'],
+    loading.effects['dashboard/fetchControllers'] || loading.effects['datastore/fetchMonthIndices'],
 }))
 class Controllers extends Component {
   constructor(props) {
@@ -51,7 +48,7 @@ class Controllers extends Component {
       selectedDateRange.start === '' ||
       selectedDateRange.end === ''
     ) {
-      this.queryDatastoreConfig();
+      this.fetchMonthIndices();
     }
   }
 
@@ -63,32 +60,21 @@ class Controllers extends Component {
     }
   }
 
-  queryDatastoreConfig = async () => {
+  fetchMonthIndices = async () => {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'datastore/fetchDatastoreConfig',
-    }).then(() => {
-      this.fetchMonthIndices();
-    });
-  };
-
-  fetchMonthIndices = async () => {
-    const { dispatch, datastoreConfig } = this.props;
-
-    dispatch({
       type: 'datastore/fetchMonthIndices',
-      payload: { datastoreConfig },
     }).then(() => {
       this.fetchControllers();
     });
   };
 
   fetchControllers = () => {
-    const { dispatch, datastoreConfig, selectedDateRange } = this.props;
+    const { dispatch, selectedDateRange } = this.props;
     dispatch({
       type: 'dashboard/fetchControllers',
-      payload: { datastoreConfig, selectedDateRange },
+      payload: { selectedDateRange },
     });
   };
 
