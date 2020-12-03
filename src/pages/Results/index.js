@@ -17,14 +17,17 @@ import SearchBar from '@/components/SearchBar';
 import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
+import { isLoggedInUser } from '@/utils/utils';
+import styles from './index.less';
 
 const { TabPane } = Tabs;
 
-@connect(({ global, dashboard, loading, user }) => ({
+@connect(({ global, dashboard, loading, user, auth }) => ({
   selectedDateRange: global.selectedDateRange,
   results: dashboard.results[global.selectedControllers[0]]
     ? dashboard.results[global.selectedControllers[0]]
     : [],
+  auth: auth.auth,
   selectedControllers: global.selectedControllers,
   favoriteResults: user.favoriteResults,
   loading: loading.effects['dashboard/fetchResults'],
@@ -145,12 +148,11 @@ class Results extends Component {
 
   render() {
     const { results, selectedRows } = this.state;
-    const { selectedControllers, loading, favoriteResults } = this.props;
+    const { selectedControllers, loading, favoriteResults, auth } = this.props;
     const rowSelection = {
       // eslint-disable-next-line no-shadow
       onSelect: (record, selected, selectedRows) => this.onSelectChange(selectedRows),
     };
-
     const columns = [
       {
         title: 'Result',
@@ -187,6 +189,7 @@ class Results extends Component {
       {
         title: 'Actions',
         dataIndex: 'actions',
+        className: isLoggedInUser(auth) ? null : styles.hide,
         key: 'actions',
         render: (value, row) => {
           // if already favorited return a filled star,
