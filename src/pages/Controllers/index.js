@@ -18,14 +18,17 @@ import SearchBar from '@/components/SearchBar';
 import AntdDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
+import { isLoggedInUser } from '@/utils/utils';
+import styles from './index.less';
 
 const { TabPane } = Tabs;
 
-@connect(({ datastore, global, dashboard, loading, user }) => ({
+@connect(({ datastore, global, dashboard, loading, user, auth }) => ({
   controllers: dashboard.controllers,
   indices: datastore.indices,
   selectedDateRange: global.selectedDateRange,
   favoriteControllers: user.favoriteControllers,
+  auth: auth.auth,
   loadingControllers:
     loading.effects['dashboard/fetchControllers'] || loading.effects['datastore/fetchMonthIndices'],
 }))
@@ -141,7 +144,7 @@ class Controllers extends Component {
 
   render() {
     const { controllers } = this.state;
-    const { loadingControllers, favoriteControllers } = this.props;
+    const { loadingControllers, favoriteControllers, auth } = this.props;
     const columns = [
       {
         title: 'Controller',
@@ -170,6 +173,7 @@ class Controllers extends Component {
         title: 'Actions',
         dataIndex: 'actions',
         key: 'actions',
+        className: isLoggedInUser(auth) ? null : styles.hide,
         render: (value, row) => {
           // if already favorited return a filled star,
           // else allow user to favorite a record

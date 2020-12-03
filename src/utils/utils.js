@@ -97,3 +97,10 @@ export const insertTocTreeData = (tocResult, items = [], [head, ...tail]) => {
   }
   return items;
 };
+
+export const isLoggedInUser = authObject => {
+  if (authObject.username) {
+    return true;
+  }
+  return false;
+};
