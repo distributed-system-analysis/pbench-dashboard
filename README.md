@@ -70,17 +70,17 @@ This will automatically open the application on [http://localhost:8000](http://l
 
 Both the production and development builds of the dashboard require API endpoint configurations in order to query data from specific datastores.
 
-`endpoints.js` in the `config/` directory contains references to datastores required to visualize data in the dashboard. Please reference the following example for required configuration fields.
+`public/endpoints.js` contains references to datastores required to visualize data in the dashboard. Please reference the following example for required configuration fields:
 
 ```JavaScript
-export default {
-  "elasticsearch": "http://elasticsearch.example.com",
-  "results": "http://results.example.com",
-  "graphql": "http://graphql.example.com",
-  "prefix": "example.prefix",
-  "run_index": "example.index",
-  "result_index": "example.index"
-}
+window.endpoints = {
+  elasticsearch: 'http://test_domain.com',
+  results: 'http://test_domain.com',
+  graphql: 'http://test_domain.com',
+  prefix: 'test_prefix.',
+  result_index: 'test_index.',
+  run_index: 'test_index.'
+};
 ```
 
 ## Storage Config

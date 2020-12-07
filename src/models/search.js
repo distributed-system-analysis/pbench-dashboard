@@ -20,7 +20,7 @@ export default {
     *fetchIndexMapping({ payload }, { call, put }) {
       const response = yield call(queryIndexMapping, payload);
       const { indices } = payload;
-      const { endpoints } = process.env;
+      const { endpoints } = window;
 
       const index = endpoints.prefix + endpoints.run_index + indices[0];
       const mapping = response[index].mappings['pbench-run'].properties;

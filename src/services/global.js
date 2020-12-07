@@ -1,6 +1,6 @@
 import request from '../utils/request';
 
-const { endpoints } = process.env;
+const { endpoints } = window;
 
 export async function saveUserSession(params) {
   const { sessionConfig, description } = params;

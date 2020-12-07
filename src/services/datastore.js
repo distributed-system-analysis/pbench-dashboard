@@ -1,6 +1,6 @@
 import request from '../utils/request';
 
-const { endpoints } = process.env;
+const { endpoints } = window;
 
 export default async function queryMonthIndices() {
   const endpoint = `${endpoints.elasticsearch}/_aliases`;

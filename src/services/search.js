@@ -1,7 +1,7 @@
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
-const { endpoints } = process.env;
+const { endpoints } = window;
 
 export async function queryIndexMapping(params) {
   const { indices } = params;
