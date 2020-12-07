@@ -4,7 +4,7 @@
 import request from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
-const { endpoints } = process.env;
+const { endpoints } = window;
 
 function scrollUntilEmpty(data) {
   const endpoint = `${endpoints.elasticsearch}/_search/scroll?scroll=1m`;

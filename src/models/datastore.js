@@ -11,7 +11,7 @@ export default {
   effects: {
     *fetchMonthIndices({ payload }, { call, put }) {
       const response = yield call(queryMonthIndices, payload);
-      const { endpoints } = process.env;
+      const { endpoints } = window;
       const indices = [];
 
       const prefix = endpoints.prefix + endpoints.run_index.slice(0, -1);

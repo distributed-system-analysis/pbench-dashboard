@@ -1,6 +1,6 @@
 import request from '../utils/request';
 
-const { endpoints } = process.env;
+const { endpoints } = window;
 
 // queries all the available shared sessions from the database to display
 export async function querySharedSessions() {

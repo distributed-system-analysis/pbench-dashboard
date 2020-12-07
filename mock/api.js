@@ -1,6 +1,10 @@
-// eslint-disable-next-line import/no-unresolved
-import endpoints from '../config/endpoints';
 import constants from '../config/constants';
+
+// Mocked test index components
+const endpoints = {
+  prefix: 'test_prefix.',
+  run_index: 'test_index.',
+};
 
 // Generate controllers as per max page size options
 const maxTableSize = parseInt(constants.tableSizeOptions.pop(), 10);
