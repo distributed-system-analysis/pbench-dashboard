@@ -8,6 +8,7 @@ import Results from './index';
 
 const mockProps = {
   selectedControllers: ['controller1'],
+  auth: { username: '' },
 };
 
 const mockDispatch = jest.fn();
