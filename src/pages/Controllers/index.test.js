@@ -10,6 +10,7 @@ import AntdDatePicker from '@/components/DatePicker';
 const mockProps = {
   controllers: [],
   indices: [],
+  auth: { username: '' },
 };
 
 const mockDispatch = jest.fn();
