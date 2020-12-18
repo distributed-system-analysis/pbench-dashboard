@@ -23,14 +23,14 @@ export default {
       const { endpoints } = window;
 
       const index = endpoints.prefix + endpoints.run_index + indices[0];
-      const mapping = response[index].mappings['pbench-run'].properties;
-      const fields = [];
+      const mapping = response[index].mappings.properties;
+      let fields = [];
       const filters = {};
 
       Object.entries(mapping).forEach(([key, value]) => {
         if (typeof value.properties !== 'undefined') {
           filters[key] = Object.keys(value.properties);
-          fields.concat(Object.keys(value.properties));
+          fields = fields.concat(Object.keys(value.properties));
         }
       });
 
@@ -52,21 +52,40 @@ export default {
       const { selectedFields } = payload;
 
       const searchResults = {};
-      searchResults.resultCount = response.hits.total;
+      searchResults.resultCount = response.hits.total.value;
       const parsedResults = [];
+
+      const getValue = (data, keys) => {
+        let value;
+        if (typeof data[keys[0]] === 'undefined') {
+          value = undefined;
+        } else if (keys.length === 1) {
+          value = data[keys[0]];
+        } else {
+          value = getValue(data[keys[0]], keys.slice(1));
+        }
+        return value;
+      };
 
       response.hits.hits.forEach(result => {
         const parsedResult = {};
-
         selectedFields.forEach(field => {
-          if (typeof result.fields[field] !== 'undefined') {
-            const fieldValue = result.fields[field][0];
-            parsedResult[field] = fieldValue;
+          const value = getValue(result._source, field.split('.'));
+          if (typeof value !== 'undefined') {
+            parsedResult[field] = value;
           }
         });
 
+        /*
+         * NOTE: these make the output of searchQuery compatible with the
+         * expectations of fetchIterationSamples, as it would normally get
+         * from fetchResults
+         */
         if (typeof result._id !== 'undefined') {
-          parsedResult.key = result._id;
+          parsedResult.id = result._id;
+        }
+        if (typeof result._source.run.name !== 'undefined') {
+          parsedResult.key = result._source.run.name;
         }
 
         parsedResults.push(parsedResult);

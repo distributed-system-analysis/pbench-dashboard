@@ -10,7 +10,7 @@ function scrollUntilEmpty(data) {
   const endpoint = `${endpoints.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
 
-  if (allData.hits.total !== allData.hits.hits.length) {
+  if (allData.hits.total.value !== allData.hits.hits.length && allData._scroll_id) {
     const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
@@ -26,46 +26,14 @@ export async function queryControllers(params) {
   try {
     const { selectedDateRange } = params;
 
-    const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
-      endpoints,
-      endpoints.run_index,
-      selectedDateRange
-    )}/_search`;
-
-    return request.post(endpoint, {
-      params: {
-        ignore_unavailable: true,
-      },
+    return request.post(`${endpoints.pbench_server}/controllers/list`, {
       data: {
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: selectedDateRange.start,
-              lte: selectedDateRange.end,
-            },
-          },
-        },
-        aggs: {
-          controllers: {
-            terms: {
-              field: 'controller',
-              size: 0,
-              order: [{ runs: 'desc' }, { runs_preV1: 'desc' }],
-            },
-            aggs: {
-              runs_preV1: {
-                max: {
-                  field: 'run.start_run',
-                },
-              },
-              runs: {
-                max: {
-                  field: 'run.start',
-                },
-              },
-            },
-          },
-        },
+        user: 'username', // TODO: Will need to get user context here
+        start: selectedDateRange.start,
+        end: selectedDateRange.end,
+      },
+      headers: {
+        Authorization: 'Bearer xyzzy', // TODO: real auth token
       },
     });
   } catch (err) {
@@ -88,27 +56,26 @@ export async function queryResults(params) {
         ignore_unavailable: true,
       },
       data: {
-        fields: [
-          '@metadata.controller_dir',
-          '@metadata.satellite',
-          'run.controller',
-          'run.start',
-          'run.start_run', // For pre-v1 run mapping version
-          'run.end',
-          'run.end_run', // For pre-v1 run mapping version
-          'run.name',
-          'run.config',
-          'run.prefix',
-          'run.id',
-        ],
+        _source: {
+          includes: [
+            '@metadata.controller_dir',
+            '@metadata.satellite',
+            'run.controller',
+            'run.start',
+            'run.end',
+            'run.name',
+            'run.config',
+            'run.prefix',
+            'run.id',
+          ],
+        },
         sort: {
           'run.end': {
             order: 'desc',
-            ignore_unmapped: true,
           },
         },
         query: {
-          term: {
+          match: {
             'run.controller': controller[0],
           },
         },
@@ -127,7 +94,7 @@ export async function queryResult(params) {
     endpoints,
     endpoints.run_index,
     selectedDateRange
-  )}/_search?source=`;
+  )}/_search`;
 
   return request.post(endpoint, {
     params: {
@@ -149,9 +116,9 @@ export async function queryTocResult(params) {
 
   const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
     endpoints,
-    endpoints.run_index,
+    endpoints.run_toc_index,
     selectedDateRange
-  )}/_search?q=_parent:"${id}"`;
+  )}/_search?q=run_data_parent:"${id}"`;
 
   return request.post(endpoint, {
     params: {
@@ -179,18 +146,8 @@ export async function queryIterationSamples(params) {
         data: {
           size: 1000,
           query: {
-            filtered: {
-              query: {
-                multi_match: {
-                  query: run.id,
-                  fields: ['run.id'],
-                },
-              },
-              filter: {
-                term: {
-                  _type: 'pbench-result-data-sample',
-                },
-              },
+            match: {
+              'run.id': run.id,
             },
           },
           aggs: {
@@ -206,7 +163,7 @@ export async function queryIterationSamples(params) {
                   aggs: {
                     title: {
                       terms: {
-                        field: 'sample.measurement_title',
+                        field: 'sample.measurement_title.raw',
                       },
                       aggs: {
                         uid: {
@@ -260,7 +217,7 @@ export async function queryTimeseriesData(payload) {
 
   const endpoint = `${endpoints.elasticsearch}/${getAllMonthsWithinRange(
     endpoints,
-    endpoints.result_index,
+    endpoints.result_data_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
@@ -277,21 +234,17 @@ export async function queryTimeseriesData(payload) {
               data: {
                 size: 1000,
                 query: {
-                  filtered: {
-                    query: {
-                      query_string: {
-                        query: `_type:pbench-result-data AND run.id:${runId} AND iteration.name:${
-                          iteration.name
-                        } AND sample.measurement_type:${
-                          sample.sample.measurement_type
-                        } AND sample.measurement_title:${
-                          sample.sample.measurement_title
-                        } AND sample.measurement_idx:${
-                          sample.sample.measurement_idx
-                        } AND sample.name:${sample.sample.name}`,
-                        analyze_wildcard: true,
-                      },
-                    },
+                  query_string: {
+                    query: `run.id:${runId} AND iteration.name:${
+                      iteration.name
+                    } AND sample.measurement_type:${
+                      sample.sample.measurement_type
+                    } AND sample.measurement_title:${
+                      sample.sample.measurement_title
+                    } AND sample.measurement_idx:${sample.sample.measurement_idx} AND sample.name:${
+                      sample.sample.name
+                    }`,
+                    analyze_wildcard: true,
                   },
                 },
                 sort: [

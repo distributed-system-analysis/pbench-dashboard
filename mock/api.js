@@ -3,7 +3,10 @@ import constants from '../config/constants';
 // Mocked test index components
 const endpoints = {
   prefix: 'test_prefix.',
-  run_index: 'test_index.',
+  run_index: 'vn.run-data.',
+  run_toc_index: 'vn.run-toc.',
+  result_index: 'vn.result-data-sample.',
+  result_data_index: 'vn.result-data.',
 };
 
 // Generate controllers as per max page size options
@@ -13,48 +16,48 @@ generatedBuckets = generatedBuckets.map((val, index) => {
   const key = index + 1;
   return {
     key: `controller_${key}`,
-    doc_count: key,
-    runs_prev1: { value: null },
-    runs: { value: key, value_as_string: key.toString() },
+    controller: `controller_${key}`,
+    results: key,
+    last_modified_value: key,
+    last_modified_string: key.toString(),
   };
 });
-export const generateMockControllerAggregation = {
-  aggregations: {
-    controllers: {
-      buckets: generatedBuckets,
-    },
-  },
-};
+export const generateMockControllerAggregation = generatedBuckets;
 
 const prefix = endpoints.prefix + endpoints.run_index.slice(0, -1);
-export const mockIndices = {
-  [`${prefix}.2019-08-01`]: {},
-  [`${prefix}.2019-09-01`]: {},
-};
+export const mockIndices = ['2019-09', '2019-08'];
 
 export const mockResults = {
   hits: {
     hits: [
       {
-        fields: {
-          'run.name': ['a_test_run'],
-          '@metadata.controller_dir': ['test_run.test_domain.com'],
-          'run.start': ['1111-11-11T11:11:11+00:00'],
-          'run.id': ['1111'],
-          'run.end': ['1111-11-11T11:11:12+00:00'],
-          'run.controller': ['test_run.test_domain.com'],
-          'run.config': ['test_size_1'],
+        _source: {
+          run: {
+            name: 'a_test_run',
+            start: '1111-11-11T11:11:11+00:00',
+            id: '1111',
+            end: '1111-11-11T11:11:12+00:00',
+            controller: 'test_run.test_domain.com',
+            config: 'test_size_1',
+          },
+          '@metadata': {
+            controller_dir: 'test_run.test_domain.com',
+          },
         },
       },
       {
-        fields: {
-          'run.name': ['b_test_run'],
-          '@metadata.controller_dir': ['b_test_run.test_domain.com'],
-          'run.start': ['1111-11-11T11:11:13+00:00'],
-          'run.id': ['2222'],
-          'run.end': ['1111-11-11T11:11:14+00:00'],
-          'run.controller': ['b_test_run.test_domain.com'],
-          'run.config': ['test_size_2'],
+        _source: {
+          run: {
+            name: 'b_test_run',
+            start: '1111-11-11T11:11:13+00:00',
+            id: '2222',
+            end: '1111-11-11T11:11:14+00:00',
+            controller: 'b_test_run.test_domain.com',
+            config: 'test_size_2',
+          },
+          '@metadata': {
+            controller_dir: 'b_test_run.test_domain.com',
+          },
         },
       },
     ],
@@ -62,22 +65,20 @@ export const mockResults = {
 };
 
 export const mockMappings = {
-  [`${prefix}.2019-09-01`]: {
+  [`${prefix}.2019-09`]: {
     mappings: {
-      'pbench-run': {
-        properties: {
-          run: {
-            properties: {
-              config: { type: 'string', index: 'not_analyzed' },
-              name: { type: 'string', index: 'not_analyzed' },
-              script: { type: 'string', index: 'not_analyzed' },
-              user: { type: 'string', index: 'not_analyzed' },
-            },
+      properties: {
+        run: {
+          properties: {
+            config: { type: 'keyword' },
+            name: { type: 'keyword' },
+            script: { type: 'keyword' },
+            user: { type: 'keyword' },
           },
-          '@metadata': {
-            properties: {
-              controller_dir: { type: 'string', index: 'not_analyzed' },
-            },
+        },
+        '@metadata': {
+          properties: {
+            controller_dir: { type: 'keyword' },
           },
         },
       },
@@ -91,12 +92,14 @@ export const mockSearch = {
     hits: [
       {
         _id: '1111',
-        fields: {
-          'run.config': ['test-size-1'],
-          'run.name': ['test_run'],
-          'run.script': ['test_controller'],
-          'run.user': ['test_user'],
-          '@metadata.controller_dir': ['test_controller'],
+        _source: {
+          run: {
+            config: 'test-size-1',
+            name: 'test_run',
+            script: 'test_controller',
+            user: 'test_user',
+          },
+          '@metadata.controller_dir': 'test_controller',
         },
       },
     ],

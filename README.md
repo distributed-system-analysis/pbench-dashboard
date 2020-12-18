@@ -70,16 +70,19 @@ This will automatically open the application on [http://localhost:8000](http://l
 
 Both the production and development builds of the dashboard require API endpoint configurations in order to query data from specific datastores.
 
-`public/endpoints.js` contains references to datastores required to visualize data in the dashboard. Please reference the following example for required configuration fields:
+`public/endpoints.js` contains references to datastores and metadata required to visualize data in the dashboard. Please reference the following example for required configuration fields:
 
 ```JavaScript
 window.endpoints = {
   elasticsearch: 'http://test_domain.com',
   results: 'http://test_domain.com',
   graphql: 'http://test_domain.com',
+  pbench_server: 'http://test_domain.com:8001/api/v1',
   prefix: 'test_prefix.',
-  result_index: 'test_index.',
-  run_index: 'test_index.'
+  result_index: 'v.result-data-sample.',
+  result_data_index: 'v.result-data.',
+  run_index: 'v.run-data.',
+  run_toc_index: 'v.run-toc.'
 };
 ```
 

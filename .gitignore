@@ -31,4 +31,4 @@ package-lock.json
 __snapshots__
 
 # config
-public/endpoints.js
+#public/endpoints.js

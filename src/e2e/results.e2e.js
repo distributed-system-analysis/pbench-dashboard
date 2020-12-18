@@ -15,14 +15,14 @@ beforeAll(async () => {
   // Intercept network requests
   await page.setRequestInterception(true);
   page.on('request', request => {
-    if (request.method() === 'POST' && request.postData().includes('controllers')) {
+    if (request.method() === 'POST' && request.url().includes('/controllers/list')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(generateMockControllerAggregation),
       });
-    } else if (request.method() === 'GET' && request.url().includes('aliases')) {
+    } else if (request.method() === 'GET' && request.url().includes('/controllers/months')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
