@@ -28,11 +28,21 @@ export async function searchQuery(params) {
       },
       data: {
         size: 10000,
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: selectedDateRange.start,
-              lte: selectedDateRange.end,
+        query: {
+          bool: {
+            filter: {
+              range: {
+                '@timestamp': {
+                  gte: selectedDateRange.start,
+                  lte: selectedDateRange.end,
+                },
+              },
+            },
+            must: {
+              query_string: {
+                query: `*${query}*`,
+                analyze_wildcard: true,
+              },
             },
           },
         },
@@ -44,17 +54,7 @@ export async function searchQuery(params) {
             },
           },
         ],
-        query: {
-          filtered: {
-            query: {
-              query_string: {
-                query: `*${query}*`,
-                analyze_wildcard: true,
-              },
-            },
-          },
-        },
-        fields: selectedFields,
+        _source: { include: selectedFields },
       },
     });
   } catch (error) {

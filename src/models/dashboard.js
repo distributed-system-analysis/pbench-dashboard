@@ -34,31 +34,7 @@ export default {
       });
     },
     *fetchControllers({ payload }, { call, put }) {
-      const response = yield call(queryControllers, payload);
-      const controllers = [];
-
-      if (response.aggregations) {
-        response.aggregations.controllers.buckets.forEach(controller => {
-          let lastModVal;
-          let lastModStr;
-          if (controller.runs.value) {
-            // Look for v1 data
-            lastModVal = controller.runs.value;
-            lastModStr = controller.runs.value_as_string;
-          } else {
-            // Fall back to pre-v1 data
-            lastModVal = controller.runs_preV1.value;
-            lastModStr = controller.runs_preV1.value_as_string;
-          }
-          controllers.push({
-            key: controller.key,
-            controller: controller.key,
-            results: controller.doc_count,
-            last_modified_value: lastModVal,
-            last_modified_string: lastModStr,
-          });
-        });
-      }
+      const controllers = yield call(queryControllers, payload);
 
       yield put({
         type: 'getControllers',
@@ -70,18 +46,10 @@ export default {
       const runs = [];
 
       response.hits.hits.forEach(result => {
-        const { fields } = result;
-        const name = fields['run.name'].shift();
-        const controller = fields['run.controller'].shift();
-        const id = fields['run.id'].shift();
-        const start =
-          typeof fields['run.start'] !== 'undefined'
-            ? fields['run.start'][0]
-            : fields['run.start_run'][0];
-        const end =
-          typeof fields['run.end'] !== 'undefined'
-            ? fields['run.end'][0]
-            : fields['run.end_run'][0];
+        const { _source } = result;
+        const { run } = _source;
+        const { name, controller, id, start, end } = run;
+        const metadata = _source['@metadata'];
 
         const record = {
           key: name,
@@ -93,17 +61,19 @@ export default {
           id,
         };
 
-        if (typeof fields['run.config'] !== 'undefined') {
-          record['run.config'] = fields['run.config'].shift();
+        if (typeof run.config !== 'undefined') {
+          record['run.config'] = run.config;
         }
-        if (typeof fields['run.prefix'] !== 'undefined') {
-          record['run.prefix'] = fields['run.prefix'].shift();
+        if (typeof run.prefix !== 'undefined') {
+          record['run.prefix'] = run.prefix;
         }
-        if (typeof fields['@metadata.controller_dir'] !== 'undefined') {
-          record['@metadata.controller_dir'] = fields['@metadata.controller_dir'].shift();
-        }
-        if (typeof fields['@metadata.satellite'] !== 'undefined') {
-          record['@metadata.satellite'] = fields['@metadata.satellite'].shift();
+        if (typeof metadata !== 'undefined') {
+          if (typeof metadata.controller_dir !== 'undefined') {
+            record['@metadata.controller_dir'] = metadata.controller_dir;
+          }
+          if (typeof metadata.satellite !== 'undefined') {
+            record['@metadata.satellite'] = metadata.satellite;
+          }
         }
         runs.push(record);
       });

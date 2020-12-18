@@ -26,14 +26,14 @@ beforeAll(async () => {
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(mockSearch),
       });
-    } else if (request.method() === 'GET' && request.url().includes('aliases')) {
+    } else if (request.method() === 'GET' && request.url().includes('/controllers/months')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(mockIndices),
       });
-    } else if (request.method() === 'GET' && request.url().includes('mappings')) {
+    } else if (request.method() === 'GET' && request.url().includes('_mappings')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
