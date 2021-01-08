@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { mockIndices, mockMappings, mockSearch } from '../../mock/api';
+import { mockIndices, mockMappings, mockSearch, mockEndpoints } from '../../mock/api';
 
 let browser;
 let page;
@@ -20,7 +20,13 @@ beforeAll(async () => {
   // Intercept network requests
   await page.setRequestInterception(true);
   page.on('request', request => {
-    if (request.method() === 'POST' && request.postData().includes('query_string')) {
+    if (request.method() === 'GET' && request.url().includes('/endpoints')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockEndpoints),
+      });
+    } else if (request.method() === 'POST' && request.postData().includes('query_string')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
