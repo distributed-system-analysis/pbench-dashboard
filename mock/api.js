@@ -3,7 +3,7 @@ import casual from 'casual';
 
 const DEFAULT_SIZE = 100;
 
-export const mockIndices = new Array(DEFAULT_SIZE).fill().map(() => moment().format('YYYY-MM'));
+export const mockIndices = new Array(1).fill().map(() => moment().format('YYYY-MM'));
 
 export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
   controller: `${casual.word}.${casual.word}.com`,
@@ -242,6 +242,12 @@ export const mockMappings = {
   },
 };
 
+export const mockTimeseries = {
+  // TODO: need to figure out how to mock the series of queries we make
+  // in queryTimeseriesData. This doesn't appear to have been mocked before
+  // and maybe isn't tested (seems to be used only in the Compare function)
+};
+
 export const mockSearch = {
   hits: {
     total: DEFAULT_SIZE,
@@ -281,7 +287,44 @@ export const mockSession = {
   },
 };
 
+export const mockEndpoints = {
+  api: {
+    controllers_list: '/controllers/list',
+    controllers_months: '/controllers/months',
+    datasets_list: '/datasets/list',
+    datasets_detail: '/datasets/detail',
+
+    // NOTE: these are not implemented in the server yet, but are defined
+    // below as mocks for testing
+    datasets_toc: '/datasets/toc',
+    datasets_samples: '/datasets/samples',
+    datasets_timeseries: '/datasets/timeseries',
+    mappings: '/mappings',
+    search: '/search',
+    // END test-only mock endpoints
+
+    elasticsearch: '/elasticsearch',
+    endpoints: '/endpoints',
+    graphql: '/graphql',
+    host_info: '/host_info',
+    login: '/login',
+    logout: '/logout',
+    register: '/register',
+    results: '/results',
+    upload_ctrl: '/upload/ctrl/',
+    user: '/user/',
+  },
+  identification: 'Pbench MOCK server 0.71.0-xxxxx',
+  indices: {
+    result_data_index: 'test.v5.result-data.',
+    result_index: 'test.v5.result-data-sample.',
+    run_index: 'test.v6.run-data.',
+    run_toc_index: 'test.v6.run-toc.',
+  },
+};
+
 export default {
+  'GET /api/v1/endpoints': mockEndpoints,
   'GET /controllers/months': mockIndices,
   'POST /controllers/list': mockControllers,
   'POST /datasets/list': (req, res) => {
@@ -294,6 +337,7 @@ export default {
   },
   'POST /datasets/toc': mockTableContents,
   'POST /datasets/samples': mockSamples,
+  'POST /datasets/timeseries': mockTimeseries,
   'POST /mappings': mockMappings,
   'POST /search': mockSearch,
   'POST /sessions/list': mockSessions,

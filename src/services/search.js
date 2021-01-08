@@ -7,11 +7,11 @@ const { endpoints } = window;
 export async function queryIndexMapping(params) {
   const { indices } = params;
 
-  const mappings = `${endpoints.prefix}${endpoints.run_index}${indices[0]}/_mappings`;
+  const mappings = `${endpoints.indices.run_index}${indices[0]}/_mappings`;
 
   const endpoint = MOCK_UI
-    ? `${endpoints.pbench_server}/mappings`
-    : `${endpoints.pbench_server}/elasticsearch`;
+    ? endpoints.api.mappings
+    : endpoints.api.elasticsearch;
 
   return request.post(endpoint, { data: { indices: mappings } });
 }
@@ -27,8 +27,8 @@ export async function searchQuery(params) {
     )}/_search`;
 
     const endpoint = MOCK_UI
-      ? `${endpoints.pbench_server}/search`
-      : `${endpoints.pbench_server}/elasticsearch`;
+      ? endpoints.api.search
+      : endpoints.api.elasticsearch;
 
     return request.post(endpoint, {
       data: {
