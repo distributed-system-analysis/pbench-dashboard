@@ -1,17 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import {
-  Grid,
-  GridItem,
-  Title,
-  Flex,
-  FlexItem,
-  Dropdown,
-  DropdownToggle,
-  DropdownItem,
-  Button,
-} from '@patternfly/react-core';
+import { Grid, GridItem, Title, Flex, FlexItem, Button } from '@patternfly/react-core';
 import { connect } from 'dva';
-import { CaretDownIcon } from '@patternfly/react-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { routerRedux } from 'dva/router';
@@ -43,9 +32,9 @@ class AuthLayout extends Component {
     });
   };
 
-  navigateToHome = () => {
+  navigateToLogin = () => {
     const { dispatch } = this.props;
-    dispatch(routerRedux.push(`/`));
+    dispatch(routerRedux.push(`/auth`));
   };
 
   navigate = page => {
@@ -56,19 +45,20 @@ class AuthLayout extends Component {
   render() {
     let { heading } = this.props;
     const { backOpt, toPreview } = this.props;
-    const { isOpen } = this.state;
 
-    const dropdownItems = [
-      <DropdownItem key="german" className={styles.form}>
-        German
-      </DropdownItem>,
-      <DropdownItem key="hindi" className={styles.form}>
-        Hindi
-      </DropdownItem>,
-      <DropdownItem key="french" className={styles.form}>
-        French
-      </DropdownItem>,
-    ];
+    // P.S. : Will be added later with drpdown for language localization
+    // const { isOpen } = this.state;
+    // const dropdownItems = [
+    //   <DropdownItem key="german" className={styles.form}>
+    //     German
+    //   </DropdownItem>,
+    //   <DropdownItem key="hindi" className={styles.form}>
+    //     Hindi
+    //   </DropdownItem>,
+    //   <DropdownItem key="french" className={styles.form}>
+    //     French
+    //   </DropdownItem>,
+    // ];
 
     const back = (
       <Button
@@ -77,7 +67,7 @@ class AuthLayout extends Component {
         icon={<FontAwesomeIcon icon={faAngleLeft} />}
         className={styles.inlineLink}
         style={{ padding: '0 0 20px 5px' }}
-        onClick={() => this.navigateToHome()}
+        onClick={() => this.navigateToLogin()}
       >
         Back
       </Button>
@@ -88,7 +78,9 @@ class AuthLayout extends Component {
           {backOpt === 'true' ? back : <Fragment />}
           <br />
           {heading === undefined ? (heading = 'login with...') : heading}
-          <Dropdown
+
+          {/* P.S. : will be added later along with localization for react */}
+          {/* <Dropdown
             style={{ float: 'right' }}
             id="toggle"
             onSelect={this.onSelect}
@@ -104,7 +96,7 @@ class AuthLayout extends Component {
             }
             isOpen={isOpen}
             dropdownItems={dropdownItems}
-          />
+          /> */}
         </Title>
       </div>
     );
@@ -142,11 +134,7 @@ class AuthLayout extends Component {
         </GridItem>
         <GridItem>
           <Title headingLevel="h4" size="xl">
-            <Button
-              variant="link"
-              className={styles.inlineLink}
-              onClick={() => this.navigate('password')}
-            >
+            <Button variant="link" onClick={() => this.navigate('password')}>
               Forgot your password?
             </Button>
           </Title>
