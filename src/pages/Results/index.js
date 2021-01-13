@@ -146,6 +146,17 @@ class Results extends Component {
     });
   };
 
+  removeResultFromFavorites = (event, value, record) => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+    const { dispatch } = this.props;
+    // dispatch an action to favorite controller
+    dispatch({
+      type: 'user/removeResultFromFavorites',
+      payload: record,
+    });
+  };
+
   render() {
     const { results, selectedRows } = this.state;
     const { selectedControllers, loading, favoriteResults, auth } = this.props;
@@ -201,7 +212,11 @@ class Results extends Component {
             }
           });
           if (isFavorite) {
-            return <Icon type="star" theme="filled" />;
+            return (
+              <a onClick={e => this.removeResultFromFavorites(e, null, row)}>
+                <Icon type="star" theme="filled" />
+              </a>
+            );
           }
           return (
             <a onClick={e => this.favoriteRecord(e, null, row)}>

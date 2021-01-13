@@ -142,6 +142,17 @@ class Controllers extends Component {
     });
   };
 
+  removeControllerFromFavorites = (event, value, controller) => {
+    // Stop propagation from going to the next page
+    event.stopPropagation();
+    const { dispatch } = this.props;
+    // dispatch an action to favorite controller
+    dispatch({
+      type: 'user/removeControllerFromFavorites',
+      payload: controller,
+    });
+  };
+
   render() {
     const { controllers } = this.state;
     const { loadingControllers, favoriteControllers, auth } = this.props;
@@ -184,7 +195,11 @@ class Controllers extends Component {
             }
           });
           if (isFavorite) {
-            return <Icon type="star" theme="filled" />;
+            return (
+              <a onClick={e => this.removeControllerFromFavorites(e, null, row)}>
+                <Icon type="star" theme="filled" />
+              </a>
+            );
           }
           return (
             <a onClick={e => this.favoriteRecord(e, null, row)}>
