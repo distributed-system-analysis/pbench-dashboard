@@ -5,7 +5,7 @@ jobs:
       name: "dashboard-unit-tests"
       language: node_js
       node_js:
-        - "13"
+        - "14"
       sudo: required
       before_install:
         # Remove /usr/local/bin/yarn to avoid conflicts with installed version
@@ -21,7 +21,7 @@ jobs:
       name: "dashboard-e2e-tests"
       language: node_js
       node_js:
-        - "13"
+        - "14"
       sudo: required
       services:
         # allow headless browser tests
