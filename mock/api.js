@@ -106,10 +106,12 @@ export const mockSearch = {
   },
 };
 
-export const mockSessionUrl = {
+export const mockSession = {
   data: {
-    createUrl: {
-      id: 'test_id',
+    createSession: {
+      id: '1',
+      config: '{}',
+      description: 'test_description',
     },
   },
 };

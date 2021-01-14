@@ -75,9 +75,9 @@ module.exports = [
         component: './Search',
       },
       {
-        path: '/explore',
-        name: 'explore',
-        component: './Explore',
+        path: '/sessions',
+        name: 'sessions',
+        component: './Sessions',
       },
       {
         path: '/private',

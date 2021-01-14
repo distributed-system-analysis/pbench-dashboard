@@ -13,14 +13,12 @@ import {
   DropdownToggle,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
-import { Alert, Badge } from 'antd';
 import { connect } from 'dva';
 import pbenchLogo from '../../assets/pbench_logo.svg';
 import imgAvatar from '../../assets/avatar.svg';
 import SessionModal from '../SessionModal';
 
-@connect(({ store, auth }) => ({
-  store,
+@connect(({ auth }) => ({
   auth: auth.auth,
 }))
 class GlobalHeader extends Component {
@@ -38,22 +36,7 @@ class GlobalHeader extends Component {
     });
   };
 
-  exitUserSession = () => {
-    const { dispatch } = this.props;
-    const sessionConfig = window.localStorage.getItem('persist:session');
-
-    dispatch({
-      type: 'global/exitUserSession',
-    });
-    dispatch({
-      type: 'global/rehydrateSession',
-      payload: JSON.parse(sessionConfig),
-    });
-    window.localStorage.removeItem('persist:session');
-    dispatch(routerRedux.push('/'));
-  };
-
-  logoutSession = () => {
+  logoutUser = () => {
     const { dispatch } = this.props;
     dispatch({
       type: 'auth/logoutUser',
@@ -72,36 +55,17 @@ class GlobalHeader extends Component {
   };
 
   render() {
-    const {
-      savingSession,
-      sessionBannerVisible,
-      sessionDescription,
-      sessionId,
-      dispatch,
-      store,
-      auth,
-    } = this.props;
+    const { savingSession, dispatch, auth } = this.props;
     const { isProfileDropdownOpen } = this.state;
 
     const profileDropdownItems = [
       <DropdownItem onClick={() => this.navigateToProfile()}>Profile</DropdownItem>,
-      <DropdownItem onClick={() => this.logoutSession()}>Logout</DropdownItem>,
+      <DropdownItem onClick={() => this.logoutUser()}>Logout</DropdownItem>,
     ];
 
     const PageToolbar = (
       <PageHeaderTools>
-        {sessionBannerVisible && (
-          <Alert
-            message={sessionDescription}
-            type="info"
-            description={`Session ID: ${sessionId}`}
-            closeText="Exit Session"
-            icon={<Badge status="processing" />}
-            onClose={this.exitUserSession}
-            banner
-          />
-        )}
-        <SessionModal savingSession={savingSession} sessionConfig={store} dispatch={dispatch} />
+        <SessionModal savingSession={savingSession} dispatch={dispatch} />
         <PageHeaderToolsGroup>
           <PageHeaderToolsItem>
             <Button

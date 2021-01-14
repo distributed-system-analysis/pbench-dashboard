@@ -10,10 +10,10 @@ const typeDefs = gql`
     username: String!
   }
 
-  type Url {
+  type Session {
     id: ID!
-    created: DateTime!
-    updated: DateTime!
+    createdAt: DateTime!
+    updatedAt: DateTime!
     config: String!
     description: String
   }
@@ -25,7 +25,12 @@ const typeDefs = gql`
   type Mutation {
     register(firstName: String!, lastName: String!, username: String!, password: String!): User!
     login(username: String!, password: String!): LoginResponse!
-    createUrl(created: DateTime!, updated: DateTime!, config: String!, description: String!): Url!
+    createSession(
+      createdAt: DateTime!
+      updatedAt: DateTime!
+      config: String!
+      description: String
+    ): Session!
   }
 
   type LoginResponse {

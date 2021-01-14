@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DocumentTitle from 'react-document-title';
+import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
@@ -8,7 +9,19 @@ import pathToRegexp from 'path-to-regexp';
 import memoizeOne from 'memoize-one';
 import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
-import { Page, Spinner } from '@patternfly/react-core';
+import {
+  Page,
+  Spinner,
+  Alert,
+  AlertActionLink,
+  DescriptionList,
+  DescriptionListTerm,
+  DescriptionListGroup,
+  DescriptionListDescription,
+  Button,
+  Modal,
+  ModalVariant,
+} from '@patternfly/react-core';
 import SiderMenu from '../components/SiderMenu';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
@@ -44,11 +57,11 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   return routerMap;
 }, deepEqual);
 
-@connect(({ global, loading, auth }) => ({
-  sessionBannerVisible: global.sessionBannerVisible,
-  sessionDescription: global.sessionDescription,
-  sessionId: global.sessionId,
-  savingSession: loading.effects['global/saveUserSession'],
+@connect(({ sessions, loading, auth }) => ({
+  sessionBannerVisible: sessions.sessionBannerVisible,
+  sessionDescription: sessions.sessionDescription,
+  sessionId: sessions.sessionId,
+  savingSession: loading.effects['sessions/saveSession'],
   auth: auth.auth,
 }))
 class BasicLayout extends React.PureComponent {
@@ -65,6 +78,10 @@ class BasicLayout extends React.PureComponent {
     this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
     // eslint-disable-next-line no-underscore-dangle
     this.persistor = persistStore(window.g_app._store);
+
+    this.state = {
+      sessionExitModalVisible: false,
+    };
   }
 
   getChildContext() {
@@ -91,6 +108,30 @@ class BasicLayout extends React.PureComponent {
     return `${currRouterData.name} - Pbench Dashboard`;
   };
 
+  exitSession = () => {
+    const { dispatch } = this.props;
+    const sessionConfig = window.localStorage.getItem('persist:session');
+
+    dispatch({
+      type: 'sessions/exitSession',
+    });
+    dispatch({
+      type: 'global/rehydrateSession',
+      payload: JSON.parse(sessionConfig),
+    });
+    window.localStorage.removeItem('persist:session');
+    dispatch(routerRedux.push('/'));
+    window.location.reload();
+  };
+
+  toggleSessionExitModal = () => {
+    const { sessionExitModalVisible } = this.state;
+
+    this.setState({
+      sessionExitModalVisible: !sessionExitModalVisible,
+    });
+  };
+
   render() {
     const {
       savingSession,
@@ -102,22 +143,60 @@ class BasicLayout extends React.PureComponent {
       auth,
     } = this.props;
 
+    const { sessionExitModalVisible } = this.state;
+
     return (
       <React.Fragment>
         <DocumentTitle title={this.getPageTitle(pathname)}>
           <Page
-            header={
-              <GlobalHeader
-                savingSession={savingSession}
-                sessionBannerVisible={sessionBannerVisible}
-                sessionDescription={sessionDescription}
-                sessionId={sessionId}
-              />
-            }
+            header={<GlobalHeader savingSession={savingSession} />}
             sidebar={<SiderMenu location={pathname} />}
             isManagedSidebar
           >
+            {sessionBannerVisible && (
+              <Alert
+                variant="info"
+                isInline
+                title="Viewing Session"
+                actionLinks={
+                  <React.Fragment>
+                    <AlertActionLink onClick={() => this.toggleSessionExitModal()}>
+                      Exit Session
+                    </AlertActionLink>
+                  </React.Fragment>
+                }
+              >
+                <DescriptionList
+                  columnModifier={{
+                    default: '2Col',
+                  }}
+                >
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>ID</DescriptionListTerm>
+                    <DescriptionListDescription>{sessionId}</DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>Description</DescriptionListTerm>
+                    <DescriptionListDescription>{sessionDescription}</DescriptionListDescription>
+                  </DescriptionListGroup>
+                </DescriptionList>
+              </Alert>
+            )}
             {auth.username === 'admin' ? '' : <LoginHint />}
+            <Modal
+              variant={ModalVariant.small}
+              title="Confirm session exit"
+              isOpen={sessionExitModalVisible}
+              onClose={this.sessionExitModalVisible}
+              actions={[
+                <Button key="submit" variant="primary" onClick={this.exitSession}>
+                  Exit
+                </Button>,
+                <Button key="back" variant="link" onClick={this.toggleShareModal}>
+                  Cancel
+                </Button>,
+              ]}
+            />
             <PersistGate
               persistor={this.persistor}
               loading={

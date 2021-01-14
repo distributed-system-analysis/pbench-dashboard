@@ -1,10 +1,18 @@
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Modal, Form, Input, message } from 'antd';
-import { ToolbarItem, Button } from '@patternfly/react-core';
+import {
+  Alert,
+  AlertGroup,
+  Modal,
+  ModalVariant,
+  Form,
+  FormGroup,
+  TextArea,
+  TextInput,
+  ToolbarItem,
+  Button,
+} from '@patternfly/react-core';
 import { ShareAltIcon } from '@patternfly/react-icons';
-
-const { TextArea } = Input;
 
 class SessionModal extends Component {
   constructor(props) {
@@ -12,108 +20,128 @@ class SessionModal extends Component {
 
     this.state = {
       description: '',
-      visible: false,
+      shareModalVisible: false,
+      successModalVisible: false,
+      copyLinkAlertVisible: false,
       sessionUrl: '',
     };
   }
 
-  showSuccess = () => {
-    const { sessionUrl } = this.state;
+  toggleShareModal = () => {
+    const { shareModalVisible } = this.state;
 
-    Modal.success({
-      title: 'Generated session link',
-      content: (
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'row' }}>
-          <Input value={sessionUrl} />
-          <CopyToClipboard text={sessionUrl}>
-            <Button style={{ marginLeft: 8 }} onClick={this.copyLink}>
-              Copy Link
-            </Button>
-          </CopyToClipboard>
-        </div>
-      ),
-    });
-  };
-
-  handleCancel = () => {
     this.setState({
-      visible: false,
+      shareModalVisible: !shareModalVisible,
     });
   };
 
-  showModal = () => {
+  toggleSuccessModal = () => {
+    const { successModalVisible } = this.state;
+
     this.setState({
-      visible: true,
+      successModalVisible: !successModalVisible,
     });
   };
 
-  onGenerate = () => {
+  onGenerateUrl = () => {
     const { dispatch } = this.props;
-    let { sessionConfig } = this.props;
     const { description } = this.state;
-    sessionConfig = JSON.stringify(sessionConfig);
+
+    // eslint-disable-next-line no-underscore-dangle
+    const { routing, global, dashboard, search } = window.g_app._store.getState();
+    const sessionConfig = JSON.stringify({ routing, global, dashboard, search });
 
     dispatch({
-      type: 'global/saveUserSession',
+      type: 'sessions/saveSession',
       payload: {
         sessionConfig,
         description,
       },
     }).then(result => {
       this.setState({
-        visible: false,
-        sessionUrl: `${window.location.origin}/#/dashboard/share/${result.data.createUrl.id}`,
+        shareModalVisible: false,
+        sessionUrl: `${window.location.origin}/dashboard/share/${result.data.createSession.id}`,
       });
-      this.showSuccess();
+      this.toggleSuccessModal();
     });
   };
 
   copyLink = () => {
-    const { sessionUrl } = this.state;
-    message.success(`Copied the link: ${sessionUrl}`);
+    this.setState({ copyLinkAlertVisible: true });
   };
 
-  changeDescription = e => {
+  updateDescription = value => {
     this.setState({
-      description: e.target.value,
+      description: value,
     });
   };
 
   render() {
-    const { visible, description } = this.state;
+    const {
+      shareModalVisible,
+      successModalVisible,
+      copyLinkAlertVisible,
+      description,
+      sessionUrl,
+    } = this.state;
     const { savingSession } = this.props;
 
     return (
       <span>
         <ToolbarItem>
-          <Button onClick={this.showModal} variant="plain">
+          <Button onClick={this.toggleShareModal} variant="plain">
             <ShareAltIcon />
           </Button>
         </ToolbarItem>
         <Modal
+          variant={ModalVariant.small}
           title="Share Session Link"
-          visible={visible}
-          onOk={this.onGenerate}
-          onCancel={this.handleCancel}
-          footer={[
-            <Button key="back" onClick={this.handleCancel}>
-              Cancel
-            </Button>,
-            <Button key="submit" type="primary" onClick={this.onGenerate} loading={savingSession}>
+          isOpen={shareModalVisible}
+          onClose={this.toggleShareModal}
+          actions={[
+            <Button
+              key="submit"
+              type="primary"
+              onClick={this.onGenerateUrl}
+              loading={savingSession}
+            >
               Save
+            </Button>,
+            <Button key="back" variant="link" onClick={this.toggleShareModal}>
+              Cancel
             </Button>,
           ]}
         >
-          <Form layout="vertical">
-            <Form.Item label="Description">
+          <Form>
+            <FormGroup label="Description">
               <TextArea
-                rows={2}
                 id="description"
-                placeholder={description}
-                onChange={this.changeDescription}
+                name="description"
+                value={description}
+                onChange={this.updateDescription}
               />
-            </Form.Item>
+            </FormGroup>
           </Form>
+        </Modal>
+        <Modal
+          variant={ModalVariant.small}
+          title="Generated session link"
+          isOpen={successModalVisible}
+          onClose={this.toggleSuccessModal}
+        >
+          {copyLinkAlertVisible && (
+            <AlertGroup isToast>
+              <Alert title={`Copied the link: ${sessionUrl}`} />
+            </AlertGroup>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <TextInput value={sessionUrl} />
+            <CopyToClipboard text={sessionUrl}>
+              <Button style={{ marginLeft: 8 }} onClick={this.copyLink}>
+                Copy Link
+              </Button>
+            </CopyToClipboard>
+          </div>
         </Modal>
       </span>
     );

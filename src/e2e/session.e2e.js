@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { generateMockControllerAggregation, mockIndices, mockSessionUrl } from '../../mock/api';
+import { generateMockControllerAggregation, mockIndices, mockSession } from '../../mock/api';
 
 let browser;
 let page;
@@ -15,7 +15,14 @@ beforeAll(async () => {
   // Intercept network requests
   await page.setRequestInterception(true);
   page.on('request', request => {
-    if (request.method() === 'POST' && request.url().includes('/controllers/list')) {
+    if (request.method() === 'POST' && request.postData().includes('createSession')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(mockSession),
+      });
+    } else if (request.method() === 'POST' && request.url().includes('/controllers/list')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
@@ -28,13 +35,6 @@ beforeAll(async () => {
         contentType: 'application/json',
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(mockIndices),
-      });
-    } else if (request.method() === 'POST' && request.postData().includes('config')) {
-      request.respond({
-        status: 200,
-        contentType: 'application/json',
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify(mockSessionUrl),
       });
     } else {
       request.continue();
@@ -60,19 +60,17 @@ describe('session flow', () => {
   );
 
   test('should generate user session', async () => {
-    await page.waitForSelector(
-      '#root > div > header > div.pf-c-page__header-tools > span > div > button'
-    );
-    await page.click('#root > div > header > div.pf-c-page__header-tools > span > div > button');
+    await page.waitForSelector('span > .pf-c-toolbar__item > .pf-c-button > svg > path');
+    await page.click('span > .pf-c-toolbar__item > .pf-c-button > svg > path');
 
-    await page.waitForSelector('.ant-input');
-    await page.type('.ant-input', 'controller page test', { delay: 50 });
+    await page.waitForSelector('#pf-modal-part-2 #description');
+    await page.click('#pf-modal-part-2 #description');
 
     await page.waitForSelector(
-      'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
+      '.pf-c-backdrop > .pf-l-bullseye > #pf-modal-part-0 > .pf-c-modal-box__footer > .pf-m-primary'
     );
     await page.click(
-      'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > button:nth-child(2)'
+      '.pf-c-backdrop > .pf-l-bullseye > #pf-modal-part-0 > .pf-c-modal-box__footer > .pf-m-primary'
     );
   });
 
@@ -80,11 +78,9 @@ describe('session flow', () => {
     'should copy session link',
     async () => {
       await page.waitForSelector(
-        'body > div:nth-child(5) > div > div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
+        '.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button'
       );
-      await page.click(
-        'body > div:nth-child(5) > div > div.ant-modal-wrap > div > div.ant-modal-content > div > div > div.ant-modal-confirm-body > div > div > button'
-      );
+      await page.click('.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button');
     },
     30000
   );
