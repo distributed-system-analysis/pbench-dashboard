@@ -1,12 +1,7 @@
-import { saveUserSession, queryUserSession } from '../services/global';
-
 export default {
   namespace: 'global',
 
   state: {
-    sessionBannerVisible: false,
-    sessionDescription: '',
-    sessionId: '',
     selectedIndices: [],
     selectedDateRange: {
       start: '',
@@ -26,11 +21,11 @@ export default {
       });
       yield put({
         type: 'dashboard/rehydrate',
-        payload: payload.global,
+        payload: payload.dashboard,
       });
       yield put({
         type: 'search/rehydrate',
-        payload: payload.global,
+        payload: payload.search,
       });
     },
     *updateSelectedDateRange({ payload }, { put }) {
@@ -63,19 +58,6 @@ export default {
         payload,
       });
     },
-    *saveUserSession({ payload }, { call }) {
-      const response = yield call(saveUserSession, payload);
-      return response;
-    },
-    *fetchUserSession({ payload }, { call }) {
-      const response = yield call(queryUserSession, payload);
-      const { config } = response.data.url;
-      const parsedSessionConfig = JSON.parse(config);
-      return {
-        sessionConfig: parsedSessionConfig,
-        sessionMetadata: response.data.url,
-      };
-    },
   },
 
   reducers: {
@@ -83,22 +65,6 @@ export default {
       return {
         ...state,
         ...payload,
-      };
-    },
-    startUserSession(state, { payload }) {
-      return {
-        ...state,
-        sessionBannerVisible: payload.render,
-        sessionDescription: payload.sessionDescription,
-        sessionId: payload.sessionId,
-      };
-    },
-    exitUserSession(state) {
-      return {
-        ...state,
-        sessionBannerVisible: false,
-        sessionDescription: '',
-        sessionId: '',
       };
     },
     modifySelectedDateRange(state, { payload }) {

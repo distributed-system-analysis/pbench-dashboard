@@ -3,7 +3,6 @@ import { isUrl } from '../utils/utils';
 const menuData = [
   {
     name: 'Dashboard',
-    icon: 'dashboard',
     path: '/private',
     routes: [
       {
@@ -30,13 +29,11 @@ const menuData = [
   },
   {
     name: 'Search',
-    icon: 'search',
     path: '/search',
   },
   {
-    name: 'Explore',
-    icon: 'global',
-    path: '/explore',
+    name: 'Sessions',
+    path: '/sessions',
   },
 ];
 

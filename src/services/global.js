@@ -8,7 +8,7 @@ export async function saveUserSession(params) {
     data: {
       query: `
             mutation($config: String!, $description: String!) {
-              createUrl(data: {config: $config, description: $description}) {
+              createSession(data: {config: $config, description: $description}) {
                 id
                 config
                 description
@@ -29,7 +29,7 @@ export async function queryUserSession(params) {
     data: {
       query: `
         query($id: ID!) {
-            url(where: {id: $id}) {
+            session(where: {id: $id}) {
                 id
                 config
                 description

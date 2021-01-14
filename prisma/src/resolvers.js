@@ -59,14 +59,14 @@ const resolvers = {
       });
       return user;
     },
-    createUrl: async (parent, { created, updated, config, description }, ctx) => {
-      const url = await ctx.prisma.createUrl({
-        created,
-        updated,
+    createSession: async (parent, { createdAt, updatedAt, config, description }, ctx) => {
+      const session = await ctx.prisma.createSession({
+        createdAt,
+        updatedAt,
         config,
         description,
       });
-      return url;
+      return session;
     },
   },
 };
