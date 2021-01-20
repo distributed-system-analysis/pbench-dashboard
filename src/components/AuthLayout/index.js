@@ -45,21 +45,6 @@ class AuthLayout extends Component {
   render() {
     let { heading } = this.props;
     const { backOpt, toPreview } = this.props;
-
-    // P.S. : Will be added later with drpdown for language localization
-    // const { isOpen } = this.state;
-    // const dropdownItems = [
-    //   <DropdownItem key="german" className={styles.form}>
-    //     German
-    //   </DropdownItem>,
-    //   <DropdownItem key="hindi" className={styles.form}>
-    //     Hindi
-    //   </DropdownItem>,
-    //   <DropdownItem key="french" className={styles.form}>
-    //     French
-    //   </DropdownItem>,
-    // ];
-
     const back = (
       <Button
         id="backBtn"
@@ -78,25 +63,6 @@ class AuthLayout extends Component {
           {backOpt === 'true' ? back : <Fragment />}
           <br />
           {heading === undefined ? (heading = 'login with...') : heading}
-
-          {/* P.S. : will be added later along with localization for react */}
-          {/* <Dropdown
-            style={{ float: 'right' }}
-            id="toggle"
-            onSelect={this.onSelect}
-            toggle={
-              <DropdownToggle
-                id="toggle-id"
-                onToggle={this.onToggle}
-                iconComponent={CaretDownIcon}
-                style={{ padding: '5px' }}
-              >
-                English
-              </DropdownToggle>
-            }
-            isOpen={isOpen}
-            dropdownItems={dropdownItems}
-          /> */}
         </Title>
       </div>
     );
@@ -133,7 +99,7 @@ class AuthLayout extends Component {
           </Title>
         </GridItem>
         <GridItem>
-          <Title headingLevel="h4" size="xl">
+          <Title headingLevel="h6" size="lg">
             <Button variant="link" onClick={() => this.navigate('password')}>
               Forgot your password?
             </Button>
