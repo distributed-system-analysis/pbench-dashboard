@@ -1,7 +1,6 @@
 import React from 'react';
 import { shallow, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { Dropdown } from '@patternfly/react-core';
 import AuthLayout from './index';
 
 const mockProps = {
@@ -21,19 +20,6 @@ const wrapper = shallow(<AuthLayout.WrappedComponent dispatch={mockDispatch} {..
 describe('test Explore page component', () => {
   it('render with empty props', () => {
     expect(wrapper).toMatchSnapshot();
-  });
-});
-
-describe('check Dropdown interaction', () => {
-  it('check components', () => {
-    expect(wrapper.find(Dropdown).length).toEqual(1);
-  });
-  it('check on Select function', () => {
-    const mockonSelect = jest.spyOn(wrapper.instance(), 'onSelect');
-    wrapper.setProps({ onSelect: mockonSelect });
-    wrapper.find(Dropdown).prop('onSelect')({ value: ['val'] });
-    expect(mockonSelect).toHaveBeenCalled();
-    expect(wrapper.state('isOpen')).toEqual(true);
   });
 });
 
