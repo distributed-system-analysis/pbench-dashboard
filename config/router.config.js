@@ -97,6 +97,11 @@ module.exports = [
           },
         ],
       },
+      {
+        path: '/system-comparisions',
+        name: 'system-comparisons',
+        component: './SystemComparisions',
+      },
     ],
   },
 ];

@@ -35,6 +35,11 @@ const menuData = [
     name: 'Sessions',
     path: '/sessions',
   },
+  {
+    name: 'System Comparisions',
+    icon: 'control',
+    path: '/system-comparisions',
+  },
 ];
 
 function formatter(data, parentPath = '', parentAuthority) {
