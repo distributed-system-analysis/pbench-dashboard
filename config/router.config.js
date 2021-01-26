@@ -20,21 +20,6 @@ module.exports = [
     component: './PasswordHandler',
   },
   {
-    path: '/exception/403',
-    name: 'exception-403',
-    component: './Exception/403',
-  },
-  {
-    path: '/exception/404',
-    name: 'exception-404',
-    component: './Exception/404',
-  },
-  {
-    path: '/exception/500',
-    name: 'exception-500',
-    component: './Exception/500',
-  },
-  {
     path: '/share/:id',
     name: 'share',
     component: './SessionPlaceholder',
@@ -96,6 +81,21 @@ module.exports = [
             component: './Profile',
           },
         ],
+      },
+      {
+        path: '/exception/403',
+        name: 'exception-403',
+        component: './Exception/403',
+      },
+      {
+        path: '/exception/404',
+        name: 'exception-404',
+        component: './Exception/404',
+      },
+      {
+        path: '/exception/500',
+        name: 'exception-500',
+        component: './Exception/500',
       },
     ],
   },
