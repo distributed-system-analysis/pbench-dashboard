@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
+import AuthLayout from '@/components/AuthLayout';
+import { CheckIcon, CloseIcon } from '@patternfly/react-icons';
+import { connect } from 'dva';
 import {
   Form,
   FormGroup,
@@ -9,265 +12,300 @@ import {
   SplitItem,
   Title,
 } from '@patternfly/react-core';
-import { CheckIcon, CloseIcon } from '@patternfly/react-icons';
-import AuthLayout from '@/components/AuthLayout';
 import { routerRedux } from 'dva/router';
-import { connect } from 'dva';
 import styles from './index.less';
 
-@connect(auth => ({
-  auth: auth.auth,
-}))
-class SignupHandler extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      password: '',
-      confPassword: '',
-      email: '',
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
-      charLength: ['block', 'none'],
-      specialChar: ['block', 'none'],
-      number: ['block', 'none'],
-      upperCaseChar: ['block', 'none'],
-      passwordMatch: '',
-      emailValidation: '',
-    };
-  }
+const mapStateToProps = state => {
+  const { auth } = state;
+  return auth;
+};
 
-  componentDidMount = () => {
-    this.disableSubmitBtn();
-  };
+const SignupHandler = props => {
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    passwordConstraints: '',
+    passwordConfirm: '',
+  });
+  const [constraints, setConstraints] = useState({
+    passwordLength: 'unmet',
+    passwordSpecialChars: 'unmet',
+    passwordContainsNumber: 'unmet',
+    passwordBlockLetter: 'unmet',
+  });
 
-  enableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'primary',
-      btnColor: 'white',
-      btnDisabled: 'false',
-    });
-  };
+  // Form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [enableSubmitBtn, setEnableSubmitButton] = useState(false);
 
-  disableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
-    });
-  };
-
-  handleNameInputChange = username => {
-    const { email, password, confPassword } = this.state;
-    this.setState({
-      username,
-    });
-    if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-      this.enableSubmitBtn();
-    } else {
-      this.disableSubmitBtn();
+  /* eslint-disable no-restricted-syntax */
+  const validateForm = () => {
+    // return early.
+    if (
+      firstName === '' ||
+      lastName === '' ||
+      email === '' ||
+      password === '' ||
+      confirmPassword === ''
+    ) {
+      return false;
     }
+    // check if no errors.
+    for (const dep of Object.entries(errors)) {
+      if (dep[1].length > 0) {
+        return false;
+      }
+    }
+    // check if all constraints are met.
+    for (const ct of Object.entries(constraints)) {
+      if (ct[1] !== 'met') {
+        return false;
+      }
+    }
+    // if we reach here, it means
+    // we have covered all of the edge cases.
+    return true;
   };
 
-  handleEmailInputChange = email => {
-    const { username, password, confPassword } = this.state;
-    this.setState({
-      email,
-    });
+  useEffect(
+    () => {
+      if (validateForm()) {
+        setEnableSubmitButton(true);
+      } else {
+        setEnableSubmitButton(false);
+      }
+    },
+    [firstName, lastName, email, password, confirmPassword]
+  );
+
+  // We have certain constraints on the password.
+  // Depending upon if these are met, we either display
+  // or hide them.
+  const getSplitDisplayProperty = (name, type) => {
+    if (constraints[name] === 'met' && type === 'check') {
+      return 'block';
+    }
+    if (constraints[name] === 'unmet' && type === 'close') {
+      return 'block';
+    }
+    return 'none';
+  };
+
+  const handleFirstNameInputChange = val => {
+    setFirstName(val);
+  };
+
+  const handleLastNameInputChange = val => {
+    setLastName(val);
+  };
+
+  const handleEmailInputChange = val => {
+    setEmail(val);
+    // validate email.
     const re = /\S+@\S+\.\S+/;
-    if (!re.test(email) && email !== '') {
-      this.setState({ emailValidation: 'Enter a valid Email' });
+    if (email !== '' && !re.test(email)) {
+      setErrors({ ...errors, email: 'Enter a valid Email' });
     } else {
-      this.setState({ emailValidation: '' });
-      if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-        this.enableSubmitBtn();
-      } else {
-        this.disableSubmitBtn();
-      }
+      setErrors({ ...errors, email: '' });
     }
   };
 
-  handlePassWordInputChange = password => {
-    const { username, email, confPassword } = this.state;
-    this.setState({
-      password,
+  const handlePasswordInputChange = pwd => {
+    setPassword(pwd);
+    setConstraints({
+      ...constraints,
+      passwordLength: pwd.length >= 8 ? 'met' : 'unmet',
+      passwordSpecialChars: !/^[A-Za-z0-9 ]+$/.test(pwd) ? 'met' : 'unmet',
+      passwordContainsNumber: /\d/.test(pwd) ? 'met' : 'unmet',
+      passwordBlockLetter: /[A-Z]/.test(pwd) ? 'met' : 'unmet',
     });
-    if (username !== '' && email !== '' && password !== '' && confPassword !== '') {
-      this.enableSubmitBtn();
+    // edge case where user deliberately
+    // edits the password field, even when
+    // confirm password is not empty.
+    if (pwd === confirmPassword) {
+      setErrors({ ...errors, passwordConfirm: '' });
     } else {
-      this.disableSubmitBtn();
-    }
-    if (password.length >= 8) {
-      this.setState({ charLength: ['none', 'block'] });
-    }
-    const specRegex = /^[A-Za-z0-9 ]+$/;
-    if (!specRegex.test(password) && password !== '') {
-      this.setState({ specialChar: ['none', 'block'] });
-    }
-    const hasNumber = /\d/;
-    if (hasNumber.test(password)) {
-      this.setState({ number: ['none', 'block'] });
-    }
-    const upperCase = /[A-Z]/;
-    if (upperCase.test(password)) {
-      this.setState({ upperCaseChar: ['none', 'block'] });
+      setErrors({ ...errors, passwordConfirm: 'The above passwords do not match!' });
     }
   };
 
-  checkConfirmPassword = newpassword => {
-    const { username, email, password } = this.state;
-    if (password !== newpassword && newpassword !== '') {
-      this.setState({ passwordMatch: "Password doesn't match" });
+  const checkConfirmPassword = cfPassword => {
+    setConfirmPassword(cfPassword);
+    if (password !== cfPassword) {
+      setErrors({ ...errors, passwordConfirm: 'The above passwords do not match!' });
     } else {
-      this.setState({ passwordMatch: '' });
-      if (username !== '' && email !== '' && password !== '' && newpassword !== '') {
-        this.enableSubmitBtn();
-      } else {
-        this.disableSubmitBtn();
-      }
+      setErrors({ ...errors, passwordConfirm: '' });
     }
   };
 
-  handleSignupSubmit = () => {
-    const { dispatch } = this.props;
-    const { username, password, email } = this.state;
-    this.setState({
-      password,
-      username,
-      email,
-    });
-    dispatch(routerRedux.push(`/login`));
+  const handleSignupSubmit = () => {
+    const { dispatch } = props;
+    dispatch(routerRedux.push('/login'));
   };
 
-  render() {
-    const {
-      variantVal,
-      btnColor,
-      btnDisabled,
-      charLength,
-      number,
-      specialChar,
-      upperCaseChar,
-      passwordMatch,
-      emailValidation,
-    } = this.state;
-
-    const form = (
-      <Form className={styles.section}>
-        <FormGroup label="First name" isRequired fieldId="horizontal-form-first-name">
-          <TextInput
-            isRequired
-            type="text"
-            id="horizontal-form-first-name"
-            aria-describedby="horizontal-form-name-helper"
-            name="horizontal-form-name"
-            onChange={this.handleNameInputChange}
-          />
-        </FormGroup>
-        <FormGroup label="Last name" fieldId="horizontal-form-last-name">
-          <TextInput
-            type="text"
-            id="horizontal-form-last-name"
-            aria-describedby="horizontal-form-name-helper"
-            name="horizontal-form-name"
-          />
-        </FormGroup>
-        <FormGroup label="Email address" isRequired fieldId="horizontal-form-email">
-          <TextInput
-            isRequired
-            type="text"
-            id="horizontal-form-email"
-            aria-describedby="horizontal-form-email-helper"
-            name="horizontal-form-name"
-            onChange={this.handleEmailInputChange}
-          />
-          <p className={styles.error}>{emailValidation}</p>
-        </FormGroup>
-        <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
-          <TextInput
-            isRequired
-            type="password"
-            id="horizontal-form-password"
-            name="horizontal-form-password"
-            onChange={this.handlePassWordInputChange}
-          />
-        </FormGroup>
-        <FormGroup label="Confirm password" isRequired fieldId="horizontal-form-password">
-          <TextInput
-            isRequired
-            type="password"
-            id="horizontal-form-confirm-password"
-            name="horizontal-form-confirm-password"
-            onChange={this.checkConfirmPassword}
-          />
-          <p className={styles.error}>{passwordMatch}</p>
-        </FormGroup>
-        <div id="passworkCheck">
-          <h4>Password must contain at least</h4>
-          <Split>
-            <SplitItem style={{ marginTop: '2px', display: charLength[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: charLength[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
-            <SplitItem isFilled style={{ marginLeft: '15px' }}>
-              8 characters
-            </SplitItem>
-          </Split>
-          <Split>
-            <SplitItem style={{ marginTop: '2px', display: specialChar[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: specialChar[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
-            <SplitItem isFilled style={{ marginLeft: '15px' }}>
-              1 special character (!,/,@,#,$,%,?)
-            </SplitItem>
-          </Split>
-          <Split>
-            <SplitItem style={{ marginTop: '2px', display: number[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: number[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
-            <SplitItem isFilled style={{ marginLeft: '15px' }}>
-              1 number
-            </SplitItem>
-          </Split>
-          <Split>
-            <SplitItem style={{ marginTop: '2px', display: upperCaseChar[0] }}>
-              <CloseIcon style={{ color: 'red' }} />
-            </SplitItem>
-            <SplitItem style={{ marginTop: '2px', display: upperCaseChar[1] }}>
-              <CheckIcon style={{ color: 'green' }} />
-            </SplitItem>
-            <SplitItem isFilled style={{ marginLeft: '15px' }}>
-              1 uppercase letter
-            </SplitItem>
-          </Split>
-        </div>
-        <ActionGroup>
-          <Button
-            isBlock
-            variant={variantVal}
-            onClick={() => this.handleSignupSubmit()}
-            className={styles.btn}
-            id="submitBtn"
-            {...(btnDisabled === 'true' ? { isDisabled: 'true' } : {})}
+  const form = (
+    <Form className={styles.section}>
+      <FormGroup label="First name" isRequired fieldId="horizontal-form-first-name">
+        <TextInput
+          isRequired
+          type="text"
+          id="horizontal-form-first-name"
+          aria-describedby="horizontal-form-name-helper"
+          name="horizontal-form-name"
+          onChange={handleFirstNameInputChange}
+        />
+      </FormGroup>
+      <FormGroup label="Last name" fieldId="horizontal-form-last-name">
+        <TextInput
+          type="text"
+          id="horizontal-form-last-name"
+          aria-describedby="horizontal-form-name-helper"
+          name="horizontal-form-name"
+          onChange={handleLastNameInputChange}
+        />
+      </FormGroup>
+      <FormGroup label="Email address" isRequired fieldId="horizontal-form-email">
+        <TextInput
+          isRequired
+          type="text"
+          id="horizontal-form-email"
+          aria-describedby="horizontal-form-email-helper"
+          name="horizontal-form-name"
+          onChange={handleEmailInputChange}
+        />
+        <p className={styles.error}>{errors.email}</p>
+      </FormGroup>
+      <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
+        <TextInput
+          isRequired
+          type="password"
+          id="horizontal-form-password"
+          name="horizontal-form-password"
+          onChange={handlePasswordInputChange}
+        />
+        <p className={styles.error}>{errors.passwordConstraints}</p>
+      </FormGroup>
+      <FormGroup label="Confirm password" isRequired fieldId="horizontal-form-confirm-password">
+        <TextInput
+          isRequired
+          type="password"
+          id="horizontal-form-confirm-password"
+          name="horizontal-form-confirm-password"
+          onChange={checkConfirmPassword}
+        />
+        <p className={styles.error}>{errors.passwordConfirm}</p>
+      </FormGroup>
+      <div>
+        <h4>Password must contain at least</h4>
+        <Split>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordLength', 'close'),
+            }}
           >
-            <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
-              Create account
-            </Title>
-          </Button>
-        </ActionGroup>
-      </Form>
-    );
-    return <AuthLayout toPreview={form} heading="Create an account" backOpt="true" />;
-  }
-}
+            <CloseIcon style={{ color: 'red' }} />
+          </SplitItem>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordLength', 'check'),
+            }}
+          >
+            <CheckIcon style={{ color: 'green' }} />
+          </SplitItem>
+          <SplitItem isFilled style={{ marginLeft: '15px' }}>
+            8 characters
+          </SplitItem>
+        </Split>
+        <Split>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordSpecialChars', 'close'),
+            }}
+          >
+            <CloseIcon style={{ color: 'red' }} />
+          </SplitItem>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordSpecialChars', 'check'),
+            }}
+          >
+            <CheckIcon style={{ color: 'green' }} />
+          </SplitItem>
+          <SplitItem isFilled style={{ marginLeft: '15px' }}>
+            1 special character (!,/,@,#,$,%,?)
+          </SplitItem>
+        </Split>
+        <Split>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordContainsNumber', 'close'),
+            }}
+          >
+            <CloseIcon style={{ color: 'red' }} />
+          </SplitItem>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordContainsNumber', 'check'),
+            }}
+          >
+            <CheckIcon style={{ color: 'green' }} />
+          </SplitItem>
+          <SplitItem isFilled style={{ marginLeft: '15px' }}>
+            1 number
+          </SplitItem>
+        </Split>
+        <Split>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordBlockLetter', 'close'),
+            }}
+          >
+            <CloseIcon style={{ color: 'red' }} />
+          </SplitItem>
+          <SplitItem
+            style={{
+              marginTop: '2px',
+              display: getSplitDisplayProperty('passwordBlockLetter', 'check'),
+            }}
+          >
+            <CheckIcon style={{ color: 'green' }} />
+          </SplitItem>
+          <SplitItem isFilled style={{ marginLeft: '15px' }}>
+            1 uppercase letter
+          </SplitItem>
+        </Split>
+      </div>
+      <ActionGroup>
+        <Button
+          isBlock
+          onClick={handleSignupSubmit}
+          id="submitBtn"
+          {...(!enableSubmitBtn ? { isDisabled: true } : {})}
+        >
+          <Title headingLevel="h4" size="xl">
+            Create account
+          </Title>
+        </Button>
+      </ActionGroup>
+    </Form>
+  );
+  return (
+    <Fragment>
+      <AuthLayout toPreview={form} heading="Create an account" backOpt="true" />
+    </Fragment>
+  );
+};
 
-export default SignupHandler;
+export default connect(mapStateToProps)(SignupHandler);
