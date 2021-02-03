@@ -6,6 +6,7 @@ import {
   TableVariant,
 } from '@patternfly/react-table';
 import { Spinner } from '@patternfly/react-core';
+import SearchBar from '../SearchBar';
 
 export default class Table extends PureComponent {
   constructor(props) {
@@ -57,12 +58,31 @@ export default class Table extends PureComponent {
     });
   };
 
+  onSearch = searchValue => {
+    const { dataSource } = this.props;
+    const rows = this.parseRows(dataSource);
+    const reg = new RegExp(searchValue, 'gi');
+    const rowSearch = rows.slice();
+    this.setState({
+      rows: rowSearch
+        .map(record => {
+          const match = record.cells[0].match(reg);
+          if (!match) {
+            return null;
+          }
+          return record;
+        })
+        .filter(record => record !== null),
+    });
+  };
+
   render() {
     const { loading, onRow, ...childProps } = this.props;
     const { cells, rows, actions } = this.state;
 
     return (
       <React.Fragment>
+        <SearchBar style={{ marginRight: 32 }} placeholder="Search" onSearch={this.onSearch} />
         <PatternFlyTable
           aria-label="Table"
           variant={TableVariant.compact}
