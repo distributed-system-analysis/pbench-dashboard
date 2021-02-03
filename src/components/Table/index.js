@@ -5,7 +5,7 @@ import {
   TableBody,
   TableVariant,
 } from '@patternfly/react-table';
-import { Checkbox } from '@patternfly/react-core';
+import { Spinner } from '@patternfly/react-core';
 
 export default class Table extends PureComponent {
   constructor(props) {
@@ -17,7 +17,6 @@ export default class Table extends PureComponent {
       cells: this.parseColumns(columns),
       rows: this.parseRows(dataSource),
       actions,
-      canSelectAll: true,
     };
   }
 
@@ -58,15 +57,9 @@ export default class Table extends PureComponent {
     });
   };
 
-  toggleSelect = checked => {
-    this.setState({
-      canSelectAll: checked,
-    });
-  };
-
   render() {
     const { loading, onRow, ...childProps } = this.props;
-    const { canSelectAll, cells, rows, actions } = this.state;
+    const { cells, rows, actions } = this.state;
 
     return (
       <React.Fragment>
@@ -76,21 +69,19 @@ export default class Table extends PureComponent {
           cells={cells}
           rows={rows}
           actions={actions}
-          canSelectAll={canSelectAll}
+          canSelectAll
           onSelect={this.onSelect}
           {...childProps}
         >
-          <TableHeader />
-          <TableBody />
+          {loading ? (
+            <Spinner />
+          ) : (
+            <React.Fragment>
+              <TableHeader />
+              <TableBody />
+            </React.Fragment>
+          )}
         </PatternFlyTable>
-        <Checkbox
-          label="canSelectAll"
-          isChecked={canSelectAll}
-          onChange={this.toggleSelect}
-          aria-label="toggle select all checkbox"
-          id="toggle-select-all"
-          name="toggle-select-all"
-        />
       </React.Fragment>
     );
   }
