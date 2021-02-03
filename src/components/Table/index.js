@@ -4,6 +4,8 @@ import {
   TableHeader,
   TableBody,
   TableVariant,
+  sortable,
+  SortByDirection,
 } from '@patternfly/react-table';
 import { Spinner } from '@patternfly/react-core';
 import SearchBar from '../SearchBar';
@@ -18,6 +20,7 @@ export default class Table extends PureComponent {
       cells: this.parseColumns(columns),
       rows: this.parseRows(dataSource),
       actions,
+      sortBy: {},
     };
   }
 
@@ -25,6 +28,7 @@ export default class Table extends PureComponent {
     const parsedColumns = columns.map(column => {
       return {
         title: column.title,
+        transforms: [sortable],
       };
     });
     return parsedColumns;
@@ -76,9 +80,27 @@ export default class Table extends PureComponent {
     });
   };
 
+  onSort = (event, index, direction) => {
+    const { dataSource } = this.props;
+    const rows = this.parseRows(dataSource);
+    const sortedRows = rows.sort(
+      (a, b) =>
+        typeof a.cells[index - 1] === 'string'
+          ? a.cells[index - 1].localeCompare(b.cells[index - 1])
+          : a.cells[index - 1] - b.cells[index - 1]
+    );
+    this.setState({
+      sortBy: {
+        index,
+        direction,
+      },
+      rows: direction === SortByDirection.asc ? sortedRows : sortedRows.reverse(),
+    });
+  };
+
   render() {
     const { loading, onRow, ...childProps } = this.props;
-    const { cells, rows, actions } = this.state;
+    const { cells, rows, actions, sortBy } = this.state;
 
     return (
       <React.Fragment>
@@ -89,6 +111,8 @@ export default class Table extends PureComponent {
           cells={cells}
           rows={rows}
           actions={actions}
+          sortBy={sortBy}
+          onSort={this.onSort}
           canSelectAll
           onSelect={this.onSelect}
           {...childProps}
