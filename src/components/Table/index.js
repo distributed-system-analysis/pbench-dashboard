@@ -98,8 +98,13 @@ export default class Table extends PureComponent {
     });
   };
 
+  onRowClick = (event, row) => {
+    const { onRowClick } = this.props;
+    onRowClick(row[0]);
+  };
+
   render() {
-    const { loading, onRow, ...childProps } = this.props;
+    const { loading, ...childProps } = this.props;
     const { cells, rows, actions, sortBy } = this.state;
 
     return (
@@ -122,7 +127,7 @@ export default class Table extends PureComponent {
           ) : (
             <React.Fragment>
               <TableHeader />
-              <TableBody />
+              <TableBody onRowClick={this.onRowClick} />
             </React.Fragment>
           )}
         </PatternFlyTable>
