@@ -104,11 +104,6 @@ export default class Table extends PureComponent {
     });
   };
 
-  onRowClick = (event, row) => {
-    const { onRowClick } = this.props;
-    onRowClick(row[0]);
-  };
-
   parseColumns = columns => {
     const parsedColumns = columns.map(column => {
       return {
@@ -120,9 +115,21 @@ export default class Table extends PureComponent {
   };
 
   parseRows = rows => {
+    const { onRowClick } = this.props;
+
     const parsedRows = rows.map(row => {
+      const rowArray = Object.values(row).map((cell, index) => {
+        if (index === 0) {
+          return {
+            title: <a onClick={() => onRowClick(cell)}>{cell}</a>,
+          };
+        }
+        return {
+          title: <p>{cell}</p>,
+        };
+      });
       return {
-        cells: Object.values(row),
+        cells: rowArray,
         favorited: true,
       };
     });
@@ -170,7 +177,7 @@ export default class Table extends PureComponent {
           ) : (
             <React.Fragment>
               <TableHeader />
-              <TableBody onRowClick={this.onRowClick} />
+              <TableBody />
             </React.Fragment>
           )}
         </PatternFlyTable>
