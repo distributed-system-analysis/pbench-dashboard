@@ -7,7 +7,7 @@ import {
   sortable,
   SortByDirection,
 } from '@patternfly/react-table';
-import { Spinner, Pagination } from '@patternfly/react-core';
+import { Bullseye, Spinner, Pagination } from '@patternfly/react-core';
 import SearchBar from '../SearchBar';
 
 export default class Table extends PureComponent {
@@ -173,7 +173,9 @@ export default class Table extends PureComponent {
           {...childProps}
         >
           {loading ? (
-            <Spinner />
+            <Bullseye>
+              <Spinner size="xl" />
+            </Bullseye>
           ) : (
             <React.Fragment>
               <TableHeader />
