@@ -1,3 +1,5 @@
+import queryRegisterUser from '../services/auth';
+
 export default {
   namespace: 'auth',
 
@@ -11,6 +13,10 @@ export default {
         type: 'modifyUser',
         payload,
       });
+    },
+    *registerUser({ payload }, { call }) {
+      const response = yield call(queryRegisterUser, payload);
+      return response;
     },
     *logoutUser({ payload }, { put }) {
       yield put({

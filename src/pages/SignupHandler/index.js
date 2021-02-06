@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from 'react';
 import AuthLayout from '@/components/AuthLayout';
 import { connect } from 'dva';
 import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
-import { routerRedux } from 'dva/router';
 import styles from './index.less';
 import { validateEmail, validatePassword } from '@/utils/validator';
 import PasswordConstraints from '@/components/PasswordConstraints';
@@ -119,9 +118,19 @@ const SignupHandler = props => {
     }
   };
 
-  const handleSignupSubmit = () => {
+  const handleSignupSubmit = async () => {
     const { dispatch } = props;
-    dispatch(routerRedux.push('/login'));
+    const response = await dispatch({
+      type: 'auth/registerUser',
+      payload: {
+        firstName,
+        lastName,
+        username: firstName.toLowerCase(),
+        password,
+        email,
+      },
+    });
+    console.log(response);
   };
 
   const form = (
