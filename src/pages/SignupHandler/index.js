@@ -14,6 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { routerRedux } from 'dva/router';
 import styles from './index.less';
+import { validateEmail, validatePassword } from '@/utils/validator';
 
 const mapStateToProps = state => {
   const { auth } = state;
@@ -45,13 +46,13 @@ const SignupHandler = props => {
 
   /* eslint-disable no-restricted-syntax */
   const validateForm = () => {
-    // return early.
+    // return early for null responses.
     if (
-      firstName === '' ||
-      lastName === '' ||
-      email === '' ||
-      password === '' ||
-      confirmPassword === ''
+      firstName.trim() === '' ||
+      lastName.trim() === '' ||
+      email.trim() === '' ||
+      password.trim() === '' ||
+      confirmPassword.trim() === ''
     ) {
       return false;
     }
@@ -107,27 +108,24 @@ const SignupHandler = props => {
   const handleEmailInputChange = val => {
     setEmail(val);
     // validate email.
-    const re = /\S+@\S+\.\S+/;
-    if (email !== '' && !re.test(email)) {
-      setErrors({ ...errors, email: 'Enter a valid Email' });
-    } else {
-      setErrors({ ...errors, email: '' });
-    }
+    const validEmail = validateEmail(val);
+    setErrors({
+      ...errors,
+      ...validEmail,
+    });
   };
 
-  const handlePasswordInputChange = pwd => {
-    setPassword(pwd);
+  const handlePasswordInputChange = val => {
+    setPassword(val);
+    const validPassword = validatePassword(val);
     setConstraints({
       ...constraints,
-      passwordLength: pwd.length >= 8 ? 'met' : 'unmet',
-      passwordSpecialChars: !/^[A-Za-z0-9 ]+$/.test(pwd) ? 'met' : 'unmet',
-      passwordContainsNumber: /\d/.test(pwd) ? 'met' : 'unmet',
-      passwordBlockLetter: /[A-Z]/.test(pwd) ? 'met' : 'unmet',
+      ...validPassword,
     });
     // edge case where user deliberately
     // edits the password field, even when
     // confirm password is not empty.
-    if (pwd === confirmPassword) {
+    if (val === confirmPassword) {
       setErrors({ ...errors, passwordConfirm: '' });
     } else {
       setErrors({ ...errors, passwordConfirm: 'The above passwords do not match!' });
