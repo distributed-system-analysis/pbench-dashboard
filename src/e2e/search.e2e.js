@@ -13,7 +13,7 @@ beforeAll(async () => {
   await page.goto('http://localhost:8000/dashboard/');
 
   await page.click('#nav-toggle > svg');
-  await page.click('#page-sidebar > div > nav > ul > li:nth-child(2) > a');
+  await page.click('#page-sidebar > div > nav > ul > li:nth-child(3) > a');
   await page.click('#nav-toggle > svg');
 
   // Intercept network requests
