@@ -28,6 +28,10 @@ const menuData = [
     ],
   },
   {
+    name: 'Analysis',
+    path: '/private/analysis',
+  },
+  {
     name: 'Search',
     path: '/search',
   },

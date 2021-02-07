@@ -75,6 +75,11 @@ module.exports = [
             component: './Overview',
           },
           {
+            path: '/private/analysis',
+            name: 'analysis',
+            component: './Analysis',
+          },
+          {
             path: '/private/profile',
             name: 'profile',
             exact: true,
