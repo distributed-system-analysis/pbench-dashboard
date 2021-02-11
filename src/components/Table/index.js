@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import _ from 'lodash';
 import {
   Table as PatternFlyTable,
   TableHeader,
@@ -14,19 +15,52 @@ export default class Table extends PureComponent {
   constructor(props) {
     super(props);
 
-    const { dataSource, columns, actions } = props;
+    const { actions } = props;
 
     this.defaultPerPage = 20;
-    this.defaultRows = this.parseRows(dataSource);
     this.state = {
-      cells: this.parseColumns(columns),
-      rows: this.defaultRows.slice(0, this.defaultPerPage),
+      cells: [],
+      rows: [],
+      rowsLength: 0,
       actions,
       sortBy: {},
       page: 1,
       perPage: this.defaultPerPage,
     };
   }
+
+  componentDidMount = () => {
+    const { dataSource, columns } = this.props;
+    const { perPage } = this.state;
+
+    const parsedColumns = this.parseColumns(columns);
+    const parsedRows = this.parseRows(dataSource);
+
+    this.setState({
+      cells: parsedColumns,
+      rows: parsedRows.slice(0, perPage),
+      rowsLength: parsedRows.length,
+    });
+  };
+
+  componentDidUpdate = prevProps => {
+    const { dataSource, columns } = this.props;
+    const { perPage } = this.state;
+
+    if (!_.isEqual(prevProps.dataSource, dataSource)) {
+      const parsedRows = this.parseRows(dataSource);
+      this.setState({
+        rows: parsedRows.slice(0, perPage),
+        rowsLength: parsedRows.length,
+      });
+    }
+
+    if (!_.isEqual(prevProps.columns, columns)) {
+      this.setState({
+        cells: this.parseColumns(columns),
+      });
+    }
+  };
 
   onSetPage = (event, newPage, perPage, startIdx, endIdx) => {
     const { dataSource } = this.props;
@@ -138,14 +172,14 @@ export default class Table extends PureComponent {
 
   render() {
     const { loading, ...childProps } = this.props;
-    const { cells, rows, actions, sortBy, page, perPage } = this.state;
+    const { cells, rows, rowsLength, actions, sortBy, page, perPage } = this.state;
 
     return (
       <React.Fragment>
         <SearchBar style={{ marginRight: 32 }} placeholder="Search" onSearch={this.onSearch} />
         <Pagination
           isCompact
-          itemCount={this.defaultRows.length}
+          itemCount={rowsLength}
           page={page}
           perPage={perPage}
           onSetPage={this.onSetPage}
