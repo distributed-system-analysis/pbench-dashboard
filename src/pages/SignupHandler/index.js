@@ -1,20 +1,11 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import AuthLayout from '@/components/AuthLayout';
-import { CheckIcon, CloseIcon } from '@patternfly/react-icons';
 import { connect } from 'dva';
-import {
-  Form,
-  FormGroup,
-  TextInput,
-  ActionGroup,
-  Button,
-  Split,
-  SplitItem,
-  Title,
-} from '@patternfly/react-core';
+import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
 import { routerRedux } from 'dva/router';
 import styles from './index.less';
 import { validateEmail, validatePassword } from '@/utils/validator';
+import PasswordConstraints from '@/components/PasswordConstraints';
 
 const mapStateToProps = state => {
   const { auth } = state;
@@ -83,19 +74,6 @@ const SignupHandler = props => {
     },
     [firstName, lastName, email, password, confirmPassword]
   );
-
-  // We have certain constraints on the password.
-  // Depending upon if these are met, we either display
-  // or hide them.
-  const getSplitDisplayProperty = (name, type) => {
-    if (constraints[name] === 'met' && type === 'check') {
-      return 'block';
-    }
-    if (constraints[name] === 'unmet' && type === 'close') {
-      return 'block';
-    }
-    return 'none';
-  };
 
   const handleFirstNameInputChange = val => {
     setFirstName(val);
@@ -198,93 +176,7 @@ const SignupHandler = props => {
         />
         <p className={styles.error}>{errors.passwordConfirm}</p>
       </FormGroup>
-      <div>
-        <h4>Password must contain at least</h4>
-        <Split>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordLength', 'close'),
-            }}
-          >
-            <CloseIcon style={{ color: 'red' }} />
-          </SplitItem>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordLength', 'check'),
-            }}
-          >
-            <CheckIcon style={{ color: 'green' }} />
-          </SplitItem>
-          <SplitItem isFilled style={{ marginLeft: '15px' }}>
-            8 characters
-          </SplitItem>
-        </Split>
-        <Split>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordSpecialChars', 'close'),
-            }}
-          >
-            <CloseIcon style={{ color: 'red' }} />
-          </SplitItem>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordSpecialChars', 'check'),
-            }}
-          >
-            <CheckIcon style={{ color: 'green' }} />
-          </SplitItem>
-          <SplitItem isFilled style={{ marginLeft: '15px' }}>
-            1 special character (!,/,@,#,$,%,?)
-          </SplitItem>
-        </Split>
-        <Split>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordContainsNumber', 'close'),
-            }}
-          >
-            <CloseIcon style={{ color: 'red' }} />
-          </SplitItem>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordContainsNumber', 'check'),
-            }}
-          >
-            <CheckIcon style={{ color: 'green' }} />
-          </SplitItem>
-          <SplitItem isFilled style={{ marginLeft: '15px' }}>
-            1 number
-          </SplitItem>
-        </Split>
-        <Split>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordBlockLetter', 'close'),
-            }}
-          >
-            <CloseIcon style={{ color: 'red' }} />
-          </SplitItem>
-          <SplitItem
-            style={{
-              marginTop: '2px',
-              display: getSplitDisplayProperty('passwordBlockLetter', 'check'),
-            }}
-          >
-            <CheckIcon style={{ color: 'green' }} />
-          </SplitItem>
-          <SplitItem isFilled style={{ marginLeft: '15px' }}>
-            1 uppercase letter
-          </SplitItem>
-        </Split>
-      </div>
+      <PasswordConstraints constraints={constraints} />
       <ActionGroup>
         <Button
           isBlock
