@@ -34,3 +34,8 @@ export const queryLoginUser = params => {
     },
   });
 };
+
+export const queryLogoutUser = () => {
+  // const endpoint = `${endpoints.pbench_server}/logout`;
+  return { status: 'success', message: 'successfully logged out' };
+};

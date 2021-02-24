@@ -182,7 +182,7 @@ class BasicLayout extends React.PureComponent {
                 </DescriptionList>
               </Alert>
             )}
-            {auth.username === 'admin' ? '' : <LoginHint />}
+            {auth.username ? '' : <LoginHint />}
             <Modal
               variant={ModalVariant.small}
               title="Confirm session exit"

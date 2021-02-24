@@ -1,11 +1,10 @@
-import { queryRegisterUser, queryLoginUser } from '../services/auth';
+import { queryRegisterUser, queryLoginUser, queryLogoutUser } from '../services/auth';
 
 export default {
   namespace: 'auth',
 
   state: {
     auth: { username: '' },
-    token: '',
   },
 
   effects: {
@@ -24,9 +23,16 @@ export default {
       const response = yield call(queryRegisterUser, payload);
       return response;
     },
-    *logoutUser({ payload }, { put }) {
+    *logoutUser({ payload }, { call }) {
+      const response = yield call(queryLogoutUser, payload);
+      // TODO: Must be removed from the backend through
+      // the response header.
+      localStorage.removeItem('token');
+      return response;
+    },
+    *removeUserFromStore({ payload }, { put }) {
       yield put({
-        type: 'removeUser',
+        type: 'modifyUser',
         payload,
       });
     },
@@ -37,11 +43,6 @@ export default {
       return {
         ...state,
         auth: payload,
-      };
-    },
-    removeUser() {
-      return {
-        auth: { username: '' },
       };
     },
   },

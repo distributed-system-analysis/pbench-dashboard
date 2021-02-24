@@ -36,12 +36,22 @@ class GlobalHeader extends Component {
     });
   };
 
-  logoutUser = () => {
-    const { dispatch } = this.props;
-    dispatch({
+  logoutUser = async () => {
+    const {
+      dispatch,
+      auth: { username },
+    } = this.props;
+    const response = await dispatch({
       type: 'auth/logoutUser',
+      payload: username,
     });
-    dispatch(routerRedux.push('/'));
+    const { status } = response;
+    if (status === 'success') {
+      dispatch({
+        type: 'auth/removeUserFromStore',
+        payload: '',
+      }).then(() => dispatch(routerRedux.push(`/`)));
+    }
   };
 
   navigateToProfile = () => {
