@@ -24,16 +24,13 @@ function scrollUntilEmpty(data) {
 
 export async function queryControllers(params) {
   try {
-    const { selectedDateRange } = params;
+    const { selectedDateRange, username } = params;
 
     return request.post(`${endpoints.pbench_server}/controllers/list`, {
       data: {
-        user: 'username', // TODO: Will need to get user context here
+        user: username,
         start: selectedDateRange.start,
         end: selectedDateRange.end,
-      },
-      headers: {
-        Authorization: 'Bearer xyzzy', // TODO: real auth token
       },
     });
   } catch (err) {
