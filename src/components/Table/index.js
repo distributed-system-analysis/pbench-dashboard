@@ -1,223 +1,336 @@
-import React, { PureComponent } from 'react';
-import _ from 'lodash';
+import React from 'react';
 import {
-  Table as PatternFlyTable,
-  TableHeader,
-  TableBody,
-  TableVariant,
-  sortable,
-  SortByDirection,
-} from '@patternfly/react-table';
-import { Bullseye, Spinner, Pagination } from '@patternfly/react-core';
-import SearchBar from '../SearchBar';
+  useTable,
+  usePagination,
+  useSortBy,
+  useFilters,
+  useGroupBy,
+  useExpanded,
+  useRowSelect,
+  useGlobalFilter,
+  useAsyncDebounce,
+} from 'react-table';
+import matchSorter from 'match-sorter';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@patternfly/patternfly/patternfly.css';
 
-export default class Table extends PureComponent {
-  constructor(props) {
-    super(props);
+// Define a default UI for filtering
+function GlobalFilter({ preGlobalFilteredRows, globalFilter, setGlobalFilter }) {
+  const count = preGlobalFilteredRows.length;
+  const [value, setValue] = React.useState(globalFilter);
+  const onChange = useAsyncDebounce(result => {
+    setGlobalFilter(result || undefined);
+  }, 200);
 
-    const { actions } = props;
-
-    this.defaultPerPage = 20;
-    this.state = {
-      cells: [],
-      rows: [],
-      rowsLength: 0,
-      actions,
-      sortBy: {},
-      page: 1,
-      perPage: this.defaultPerPage,
-    };
-  }
-
-  componentDidMount = () => {
-    const { dataSource, columns } = this.props;
-    const { perPage } = this.state;
-
-    const parsedColumns = this.parseColumns(columns);
-    const parsedRows = this.parseRows(dataSource);
-
-    this.setState({
-      cells: parsedColumns,
-      rows: parsedRows.slice(0, perPage),
-      rowsLength: parsedRows.length,
-    });
-  };
-
-  componentDidUpdate = prevProps => {
-    const { dataSource, columns } = this.props;
-    const { perPage } = this.state;
-
-    if (!_.isEqual(prevProps.dataSource, dataSource)) {
-      const parsedRows = this.parseRows(dataSource);
-      this.setState({
-        rows: parsedRows.slice(0, perPage),
-        rowsLength: parsedRows.length,
-      });
-    }
-
-    if (!_.isEqual(prevProps.columns, columns)) {
-      this.setState({
-        cells: this.parseColumns(columns),
-      });
-    }
-  };
-
-  onSetPage = (event, newPage, perPage, startIdx, endIdx) => {
-    const { dataSource } = this.props;
-    const rows = this.parseRows(dataSource);
-
-    this.setState({
-      page: newPage,
-      rows: rows.slice(startIdx, endIdx),
-    });
-  };
-
-  onPerPageSelect = (event, newPerPage, newPage, startIdx, endIdx) => {
-    const { dataSource } = this.props;
-    const rows = this.parseRows(dataSource);
-
-    this.setState({
-      perPage: newPerPage,
-      page: newPage,
-      rows: rows.slice(startIdx, endIdx),
-    });
-  };
-
-  onSelect = (event, isSelected, rowId) => {
-    const { rows } = this.state;
-
-    let selectedRows;
-    if (rowId === -1) {
-      selectedRows = rows.map(oneRow => {
-        // eslint-disable-next-line no-param-reassign
-        oneRow.selected = isSelected;
-        return oneRow;
-      });
-    } else {
-      selectedRows = [...rows];
-      selectedRows[rowId].selected = isSelected;
-    }
-    this.setState({
-      rows: selectedRows,
-    });
-  };
-
-  onSearch = searchValue => {
-    const { dataSource } = this.props;
-    const rows = this.parseRows(dataSource);
-    const reg = new RegExp(searchValue, 'gi');
-    const rowSearch = rows.slice();
-    this.setState({
-      rows: rowSearch
-        .map(record => {
-          const match = record.cells[0].match(reg);
-          if (!match) {
-            return null;
-          }
-          return record;
-        })
-        .filter(record => record !== null),
-    });
-  };
-
-  onSort = (event, index, direction) => {
-    const { dataSource } = this.props;
-    const rows = this.parseRows(dataSource);
-    const sortedRows = rows.sort(
-      (a, b) =>
-        typeof a.cells[index - 1] === 'string'
-          ? a.cells[index - 1].localeCompare(b.cells[index - 1])
-          : a.cells[index - 1] - b.cells[index - 1]
-    );
-    this.setState({
-      sortBy: {
-        index,
-        direction,
-      },
-      rows: direction === SortByDirection.asc ? sortedRows : sortedRows.reverse(),
-    });
-  };
-
-  parseColumns = columns => {
-    const parsedColumns = columns.map(column => {
-      return {
-        title: column.title,
-        transforms: [sortable],
-      };
-    });
-    return parsedColumns;
-  };
-
-  parseRows = rows => {
-    const { onRowClick } = this.props;
-
-    const parsedRows = rows.map(row => {
-      const rowArray = Object.values(row).map((cell, index) => {
-        if (index === 0) {
-          return {
-            title: <a onClick={() => onRowClick(cell)}>{cell}</a>,
-          };
-        }
-        return {
-          title: <p>{cell}</p>,
-        };
-      });
-      return {
-        cells: rowArray,
-        favorited: true,
-      };
-    });
-    return parsedRows;
-  };
-
-  render() {
-    const { loading, ...childProps } = this.props;
-    const { cells, rows, rowsLength, actions, sortBy, page, perPage } = this.state;
-
-    return (
-      <React.Fragment>
-        <SearchBar style={{ marginRight: 32 }} placeholder="Search" onSearch={this.onSearch} />
-        <Pagination
-          isCompact
-          itemCount={rowsLength}
-          page={page}
-          perPage={perPage}
-          onSetPage={this.onSetPage}
-          onPerPageSelect={this.onPerPageSelect}
-          perPageOptions={[
-            { title: '20', value: 20 },
-            { title: '50', value: 50 },
-            { title: '100', value: 100 },
-            { title: '200', value: 200 },
-          ]}
-          titles={{
-            paginationTitle: `top pagination`,
-          }}
-        />
-        <PatternFlyTable
-          aria-label="Table"
-          variant={TableVariant.compact}
-          cells={cells}
-          rows={rows}
-          actions={actions}
-          sortBy={sortBy}
-          onSort={this.onSort}
-          canSelectAll
-          onSelect={this.onSelect}
-          {...childProps}
-        >
-          {loading ? (
-            <Bullseye>
-              <Spinner size="xl" />
-            </Bullseye>
-          ) : (
-            <React.Fragment>
-              <TableHeader />
-              <TableBody />
-            </React.Fragment>
-          )}
-        </PatternFlyTable>
-      </React.Fragment>
-    );
-  }
+  return (
+    <span style={{ width: 500 }}>
+      Search:{' '}
+      <input
+        value={value || ''}
+        onChange={e => {
+          setValue(e.target.value);
+          onChange(e.target.value);
+        }}
+        placeholder={`${count} records...`}
+        style={{
+          fontSize: '1.1rem',
+          border: '0',
+        }}
+      />
+    </span>
+  );
 }
+
+// Define a default UI for filtering
+function DefaultColumnFilter() {
+  return <></>;
+}
+
+function fuzzyTextFilterFn(rows, id, filterValue) {
+  return matchSorter(rows, filterValue, { keys: [row => row.values[id]] });
+}
+
+// Let the table remove the filter if the string is empty
+fuzzyTextFilterFn.autoRemove = val => !val;
+
+// Be sure to pass our updateMyData and the skipReset option
+function Table({ columns, data, updateMyData, skipReset }) {
+  const filterTypes = React.useMemo(
+    () => ({
+      // Add a new fuzzyTextFilterFn filter type.
+      fuzzyText: fuzzyTextFilterFn,
+      // Or, override the default text filter to use
+      // "startWith"
+      text: (rows, id, filterValue) => {
+        return rows.filter(row => {
+          const rowValue = row.values[id];
+          return rowValue !== undefined
+            ? String(rowValue)
+                .toLowerCase()
+                .startsWith(String(filterValue).toLowerCase())
+            : true;
+        });
+      },
+    }),
+    []
+  );
+
+  const defaultColumn = React.useMemo(
+    () => ({
+      // Let's set up our default Filter UI
+      Filter: DefaultColumnFilter,
+    }),
+    []
+  );
+
+  // Use the state and functions returned from useTable to build your UI
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    prepareRow,
+    page, // Instead of using 'rows', we'll use page,
+    // which has only the rows for the active page
+
+    // The rest of these things are super handy, too ;)
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    preGlobalFilteredRows,
+    setGlobalFilter,
+    state: { pageIndex, pageSize, globalFilter },
+  } = useTable(
+    {
+      columns,
+      data,
+      defaultColumn,
+      filterTypes,
+      // updateMyData isn't part of the API, but
+      // anything we put into these options will
+      // automatically be available on the instance.
+      // That way we can call this function from our
+      // cell renderer!
+      updateMyData,
+      // We also need to pass this so the page doesn't change
+      // when we edit the data.
+      autoResetPage: !skipReset,
+      autoResetSelectedRows: !skipReset,
+      disableMultiSort: true,
+    },
+    useFilters,
+    useGlobalFilter,
+    useGroupBy,
+    useSortBy,
+    useExpanded,
+    usePagination,
+    useRowSelect,
+    // Here we will use a plugin to add our selection column
+    hooks => {
+      hooks.visibleColumns.push(visibleColumns => {
+        return [
+          {
+            id: 'selection',
+            // Make this column a groupByBoundary. This ensures that groupBy columns
+            // are placed after it
+            groupByBoundary: true,
+            // The header can use the table's getToggleAllRowsSelectedProps method
+            // to render a checkbox
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <div>
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+              </div>
+            ),
+            // The cell can use the individual row's getToggleRowSelectedProps method
+            // to the render a checkbox
+            Cell: ({ row }) => (
+              <div>
+                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              </div>
+            ),
+          },
+          ...visibleColumns,
+        ];
+      });
+    }
+  );
+
+  // Render the UI for your table
+  return (
+    <>
+      <GlobalFilter
+        preGlobalFilteredRows={preGlobalFilteredRows}
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+      />
+      <table className="pf-c-table" {...getTableProps()}>
+        <thead>
+          {headerGroups.map(headerGroup => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map(column => (
+                <th {...column.getHeaderProps()}>
+                  <div>
+                    {column.canGroupBy ? (
+                      // If the column can be grouped, let's add a toggle
+                      <span {...column.getGroupByToggleProps()}>
+                        {column.isGrouped ? '* ' : ''}
+                      </span>
+                    ) : null}
+                    <span {...column.getSortByToggleProps()}>
+                      {column.render('Header')}
+                      {/* Add a sort direction indicator */}
+                      {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
+                    </span>
+                  </div>
+                  {/* Render the columns filter UI */}
+                  <div>{column.canFilter ? column.render('Filter') : null}</div>
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {page.map(row => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()} onClick={() => console.log(row.original)}>
+                {row.cells.map(cell => {
+                  return (
+                    <td {...cell.getCellProps()}>
+                      {cell.isGrouped ? (
+                        // If it's a grouped cell, add an expander and row count
+                        <>
+                          <span {...row.getToggleRowExpandedProps()}>
+                            {row.isExpanded ? '↓' : '→'}
+                          </span>{' '}
+                          {cell.render('Cell', { editable: false })} ({row.subRows.length})
+                        </>
+                      ) : cell.isAggregated ? (
+                        // If the cell is aggregated, use the Aggregated
+                        // renderer for cell
+                        cell.render('Aggregated')
+                      ) : cell.isPlaceholder ? null : ( // For cells with repeated values, render null
+                        // Otherwise, just render the regular cell
+                        cell.render('Cell', { editable: false })
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {/*
+        Pagination can be built however you'd like.
+        This is just a very basic UI implementation:
+      */}
+      <div className="pagination">
+        <button type="button" onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          {'<<'}
+        </button>{' '}
+        <button type="button" onClick={() => previousPage()} disabled={!canPreviousPage}>
+          {'<'}
+        </button>{' '}
+        <button type="button" onClick={() => nextPage()} disabled={!canNextPage}>
+          {'>'}
+        </button>{' '}
+        <button type="button" onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          {'>>'}
+        </button>{' '}
+        <span>
+          Page{' '}
+          <strong>
+            {pageIndex + 1} of {pageOptions.length}
+          </strong>{' '}
+        </span>
+        <span>
+          | Go to page:{' '}
+          <input
+            type="number"
+            defaultValue={pageIndex + 1}
+            onChange={e => {
+              const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0;
+              gotoPage(pageNumber);
+            }}
+            style={{ width: '100px' }}
+          />
+        </span>{' '}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(Number(e.target.value));
+          }}
+        >
+          {[10, 20, 30, 40, 50].map(size => (
+            <option key={size} value={size}>
+              Show {size}
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
+  );
+}
+
+// Define a custom filter filter function!
+function filterGreaterThan(rows, id, filterValue) {
+  return rows.filter(row => {
+    const rowValue = row.values[id];
+    return rowValue >= filterValue;
+  });
+}
+
+// This is an autoRemove method on the filter function that
+// when given the new filter value and returns true, the filter
+// will be automatically removed. Normally this is just an undefined
+// check, but here, we want to remove the filter if it's not a number
+filterGreaterThan.autoRemove = val => typeof val !== 'number';
+
+const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref) => {
+  const defaultRef = React.useRef();
+  const resolvedRef = ref || defaultRef;
+
+  React.useEffect(
+    () => {
+      resolvedRef.current.indeterminate = indeterminate;
+    },
+    [resolvedRef, indeterminate]
+  );
+
+  return (
+    <>
+      <input type="checkbox" ref={resolvedRef} {...rest} />
+    </>
+  );
+});
+
+function TableWrapper(props) {
+  const { columns, data } = props;
+
+  // We need to keep the table from resetting the pageIndex when we
+  // Update data. So we can keep track of that flag with a ref.
+  const skipResetRef = React.useRef(false);
+
+  // After data changes, we turn the flag back off
+  // so that if data actually changes when we're not
+  // editing it, the page is reset
+  React.useEffect(
+    () => {
+      skipResetRef.current = false;
+    },
+    [data]
+  );
+
+  return (
+    <React.Fragment>
+      <Table columns={columns} data={data} skipReset={skipResetRef.current} />
+    </React.Fragment>
+  );
+}
+
+export default TableWrapper;
