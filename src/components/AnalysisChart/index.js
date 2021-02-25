@@ -43,8 +43,7 @@ class AnalysisChart extends Component {
         containerComponent={
           <ChartVoronoiContainer
             labels={({ datum }) => `${datum.name}: ${datum.y}`}
-            constrai
-            nToVisibleArea
+            constrainToVisibleArea
           />
         }
         domainPadding={{ x: [50, 50] }}
