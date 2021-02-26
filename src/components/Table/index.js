@@ -10,6 +10,8 @@ import {
   useGlobalFilter,
   useAsyncDebounce,
 } from 'react-table';
+import { Bullseye, Spinner } from '@patternfly/react-core';
+import { AngleDownIcon, AngleUpIcon } from '@patternfly/react-icons';
 import matchSorter from 'match-sorter';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@patternfly/patternfly/patternfly.css';
@@ -44,7 +46,7 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 
 fuzzyTextFilterFn.autoRemove = val => !val;
 
-function Table({ columns, data, onRowClick }) {
+function Table({ columns, data, onRowClick, loadingData }) {
   const filterTypes = React.useMemo(
     () => ({
       fuzzyText: fuzzyTextFilterFn,
@@ -132,57 +134,73 @@ function Table({ columns, data, onRowClick }) {
         setGlobalFilter={setGlobalFilter}
       />
       <br />
-      <table className="pf-c-table pf-m-compact pf-m-grid-md" {...getTableProps()}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps()}>
-                  <div>
-                    {column.canGroupBy ? (
-                      <span {...column.getGroupByToggleProps()}>
-                        {column.isGrouped ? '* ' : ''}
-                      </span>
-                    ) : null}
-                    <span {...column.getSortByToggleProps()}>
-                      {column.render('Header')}
-                      {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
-                    </span>
-                  </div>
-                  <div>{column.canFilter ? column.render('Filter') : null}</div>
-                </th>
+      {loadingData ? (
+        <Bullseye>
+          <Spinner />
+        </Bullseye>
+      ) : (
+        <div className="table-wrapper" style={{ overflowX: 'auto' }}>
+          <table className="pf-c-table pf-m-compact pf-m-grid-md" {...getTableProps()}>
+            <thead>
+              {headerGroups.map(headerGroup => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map(column => (
+                    <th {...column.getHeaderProps()}>
+                      <div>
+                        {column.canGroupBy ? (
+                          <span {...column.getGroupByToggleProps()}>
+                            {column.isGrouped ? '* ' : ''}
+                          </span>
+                        ) : null}
+                        <span {...column.getSortByToggleProps()}>
+                          {column.render('Header')}
+                          {column.isSorted ? (
+                            column.isSortedDesc ? (
+                              <AngleDownIcon />
+                            ) : (
+                              <AngleUpIcon />
+                            )
+                          ) : (
+                            ''
+                          )}
+                        </span>
+                      </div>
+                      <div>{column.canFilter ? column.render('Filter') : null}</div>
+                    </th>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {page.map(row => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()} onClick={() => onRowClick(row.original)}>
-                {row.cells.map(cell => {
-                  return (
-                    <td {...cell.getCellProps()}>
-                      {cell.isGrouped ? (
-                        <>
-                          <span {...row.getToggleRowExpandedProps()}>
-                            {row.isExpanded ? '↓' : '→'}
-                          </span>{' '}
-                          {cell.render('Cell', { editable: false })} ({row.subRows.length})
-                        </>
-                      ) : cell.isAggregated ? (
-                        cell.render('Aggregated')
-                      ) : cell.isPlaceholder ? null : (
-                        cell.render('Cell', { editable: false })
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {page.map(row => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()} onClick={() => onRowClick(row.original)}>
+                    {row.cells.map(cell => {
+                      return (
+                        <td {...cell.getCellProps()}>
+                          {cell.isGrouped ? (
+                            <>
+                              <span {...row.getToggleRowExpandedProps()}>
+                                {row.isExpanded ? '↓' : '→'}
+                              </span>{' '}
+                              {cell.render('Cell', { editable: false })} ({row.subRows.length})
+                            </>
+                          ) : cell.isAggregated ? (
+                            cell.render('Aggregated')
+                          ) : cell.isPlaceholder ? null : (
+                            cell.render('Cell', { editable: false })
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
       <Pagination
         itemCount={data.length}
         onFirstClick={() => gotoPage(0)}
@@ -215,11 +233,11 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref)
 });
 
 function TableWrapper(props) {
-  const { columns, data, onRowClick } = props;
+  const { columns, data, onRowClick, loadingData } = props;
 
   return (
     <React.Fragment>
-      <Table columns={columns} data={data} onRowClick={onRowClick} />
+      <Table columns={columns} data={data} onRowClick={onRowClick} loadingData={loadingData} />
     </React.Fragment>
   );
 }
