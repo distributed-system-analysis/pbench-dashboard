@@ -1,7 +1,17 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import AuthLayout from '@/components/AuthLayout';
+import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
-import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  TextInput,
+  ActionGroup,
+  Button,
+  Title,
+  Alert,
+  AlertActionCloseButton,
+} from '@patternfly/react-core';
 import styles from './index.less';
 import { validateEmail, validatePassword } from '@/utils/validator';
 import PasswordConstraints from '@/components/PasswordConstraints';
@@ -33,6 +43,11 @@ const SignupHandler = props => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [enableSubmitBtn, setEnableSubmitButton] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertComponent, setAlertComponent] = useState({
+    message: '',
+    variant: '',
+  });
 
   /* eslint-disable no-restricted-syntax */
   const validateForm = () => {
@@ -130,11 +145,33 @@ const SignupHandler = props => {
         email,
       },
     });
-    console.log(response);
+    const { status, message } = response;
+    setAlertComponent({
+      message,
+      variant: status === 'failure' ? 'danger' : 'success',
+    });
+    setAlertOpen(true);
+    if (status === 'success') {
+      // wait for a couple
+      // of seconds before taking the
+      // user to login page.
+      setTimeout(() => {
+        dispatch(routerRedux.push('/login'));
+      }, 2000);
+    }
   };
 
   const form = (
     <Form className={styles.section}>
+      {alertOpen ? (
+        <Alert
+          title={alertComponent.message}
+          variant={alertComponent.variant}
+          action={<AlertActionCloseButton onClose={() => setAlertOpen(!alertOpen)} />}
+        />
+      ) : (
+        <></>
+      )}
       <FormGroup label="First name" isRequired fieldId="horizontal-form-first-name">
         <TextInput
           isRequired
