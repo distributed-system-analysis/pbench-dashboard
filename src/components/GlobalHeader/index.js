@@ -81,7 +81,7 @@ class GlobalHeader extends Component {
               <SearchIcon />
             </Button>
           </PageHeaderToolsItem>
-          {auth.username === 'admin' ? (
+          {auth.username ? (
             <PageHeaderToolsGroup>
               <PageHeaderToolsItem>
                 <Dropdown
@@ -90,7 +90,9 @@ class GlobalHeader extends Component {
                   onSelect={this.onDropdownSelect}
                   isOpen={isProfileDropdownOpen}
                   toggle={
-                    <DropdownToggle onToggle={this.onProfileDropdownToggle}>Admin</DropdownToggle>
+                    <DropdownToggle onToggle={this.onProfileDropdownToggle}>
+                      {auth.username}
+                    </DropdownToggle>
                   }
                   dropdownItems={profileDropdownItems}
                 />

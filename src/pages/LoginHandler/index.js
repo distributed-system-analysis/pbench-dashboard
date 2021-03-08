@@ -37,8 +37,9 @@ class LoginHandler extends React.Component {
     dispatch({
       type: 'auth/loadUser',
       payload,
+    }).then(() => {
+      dispatch(routerRedux.push(`/private`));
     });
-    dispatch(routerRedux.push(`/private`));
   };
 
   enableSubmitBtn = () => {
@@ -83,11 +84,19 @@ class LoginHandler extends React.Component {
 
   handleLoginSubmit = () => {
     const { username, password } = this.state;
-    if (username === 'admin' && password === 'admin') {
-      this.setLoggedIn({ username });
-    } else {
-      alert('Wrong username/password pair');
-    }
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'auth/loginUser',
+      payload: {
+        username,
+        password,
+      },
+    }).then(response => {
+      const { status } = response;
+      if (status === 'success') {
+        this.setLoggedIn({ username });
+      }
+    });
   };
 
   render() {

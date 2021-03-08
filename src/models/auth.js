@@ -1,10 +1,11 @@
-import queryRegisterUser from '../services/auth';
+import { queryRegisterUser, queryLoginUser } from '../services/auth';
 
 export default {
   namespace: 'auth',
 
   state: {
     auth: { username: '' },
+    token: '',
   },
 
   effects: {
@@ -13,6 +14,11 @@ export default {
         type: 'modifyUser',
         payload,
       });
+    },
+    *loginUser({ payload }, { call }) {
+      const response = yield call(queryLoginUser, payload);
+      localStorage.setItem('token', response.auth_token);
+      return response;
     },
     *registerUser({ payload }, { call }) {
       const response = yield call(queryRegisterUser, payload);

@@ -3,14 +3,14 @@ import AuthLayout from '@/components/AuthLayout';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 
-@connect(auth => ({
+@connect(({ auth }) => ({
   auth: auth.auth,
 }))
 class PrivateRoute extends Component {
   render() {
     const { children, auth, dispatch } = this.props;
 
-    if (auth.auth.username === 'admin') {
+    if (auth.username) {
       return <Fragment>{children}</Fragment>;
     }
 

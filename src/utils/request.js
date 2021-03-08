@@ -51,4 +51,24 @@ const request = extend({
   errorHandler, // extend default error handler with custom actions
 });
 
+request.interceptors.request.use((url, options) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    return {
+      url,
+      options: {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    };
+  }
+  return {
+    url,
+    options,
+  };
+});
+
 export default request;
