@@ -20,35 +20,58 @@ const codeMessage = {
   504: 'The gateway timed out. ',
 };
 
+const customMessages = new Set([
+  'A user with that name already exists.',
+  'No such user, please register first',
+  'Bad login',
+  'Retry login after some time',
+]);
+
 const errorHandler = error => {
-  const { response = {} } = error;
-  const errortext = codeMessage[response.status] || response.statusText;
+  const {
+    response = {},
+    data: { message },
+  } = error;
+  const errortext = message || codeMessage[response.status];
   const { status } = response;
+
+  // handles special cases where we
+  // do not have to redirect to the
+  // exceptions page.
+  if (customMessages.has(message)) {
+    return {
+      message,
+      status: 'failure',
+    };
+  }
 
   notification.error({
     message: `Request Error ${status}`,
     description: errortext,
   });
 
+  // redirect to the exception page
+  // for general cases
   if (status === 403) {
     router.push('/exception/403');
-    return;
   }
   if (status === 404) {
     router.push('/exception/404');
-    return;
   }
   if (status <= 504 && status >= 500) {
     router.push('/exception/500');
-    return;
   }
   if (status >= 405 && status < 422) {
     router.push('/exception/404');
   }
+  return {
+    message: errortext,
+    status: 'failure',
+  };
 };
 
 const request = extend({
-  errorHandler, // extend default error handler with custom actions
+  errorHandler,
 });
 
 request.interceptors.request.use((url, options) => {
