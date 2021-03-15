@@ -34,3 +34,14 @@ export const queryLoginUser = params => {
     },
   });
 };
+
+export const queryLogoutUser = () => {
+  const endpoint = `${endpoints.pbench_server}/logout`;
+  return request.post(endpoint, {
+    data: {},
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+};
