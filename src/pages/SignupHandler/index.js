@@ -1,15 +1,16 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import AuthLayout from '@/components/AuthLayout';
-import { connect } from 'dva';
-import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
 import { routerRedux } from 'dva/router';
+import { connect } from 'dva';
+import { notification } from 'antd';
+import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
 import styles from './index.less';
 import { validateEmail, validatePassword } from '@/utils/validator';
 import PasswordConstraints from '@/components/PasswordConstraints';
 
 const mapStateToProps = state => {
   const { auth } = state;
-  return auth;
+  return { auth };
 };
 
 const SignupHandler = props => {
@@ -119,9 +120,29 @@ const SignupHandler = props => {
     }
   };
 
-  const handleSignupSubmit = () => {
+  const handleSignupSubmit = async () => {
     const { dispatch } = props;
-    dispatch(routerRedux.push('/login'));
+    const response = await dispatch({
+      type: 'auth/registerUser',
+      payload: {
+        firstName,
+        lastName,
+        username: email,
+        password,
+        email,
+      },
+    });
+    const { message, status } = response;
+    if (status === 'success') {
+      notification.success({
+        message,
+      });
+      dispatch(routerRedux.push(`/login`));
+    } else {
+      notification.error({
+        message,
+      });
+    }
   };
 
   const form = (
@@ -184,7 +205,11 @@ const SignupHandler = props => {
           id="submitBtn"
           {...(!enableSubmitBtn ? { isDisabled: true } : {})}
         >
-          <Title headingLevel="h4" size="xl">
+          <Title
+            headingLevel="h4"
+            size="xl"
+            style={!enableSubmitBtn ? { color: 'black' } : { color: 'white' }}
+          >
             Create account
           </Title>
         </Button>
