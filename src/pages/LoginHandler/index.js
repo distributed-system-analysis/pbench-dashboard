@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Form,
   FormGroup,
@@ -8,139 +8,144 @@ import {
   Button,
   Title,
 } from '@patternfly/react-core';
+import { notification } from 'antd';
 import AuthLayout from '@/components/AuthLayout';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import styles from './index.less';
+import { validateEmail } from '@/utils/validator';
 
-@connect(auth => ({
-  auth: auth.auth,
-}))
-class LoginHandler extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      password: '',
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
-    };
-  }
+const mapStateToProps = state => {
+  const { auth } = state;
+  return auth;
+};
 
-  componentDidMount = () => {
-    this.disableSubmitBtn();
-  };
+const LoginHandler = props => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+  });
+  const [btnDisabled, setBtnDisabled] = useState(true);
 
-  setLoggedIn = payload => {
-    const { dispatch } = this.props;
+  const setLoggedIn = payload => {
+    const { dispatch } = props;
     dispatch({
       type: 'auth/loadUser',
       payload,
-    });
-    dispatch(routerRedux.push(`/private`));
-  };
-
-  enableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'primary',
-      btnColor: 'white',
-      btnDisabled: 'false',
+    }).then(() => {
+      dispatch(routerRedux.push(`/private`));
     });
   };
 
-  disableSubmitBtn = () => {
-    this.setState({
-      variantVal: 'tertiary',
-      btnColor: 'black',
-      btnDisabled: 'true',
+  const handleUsernameChange = val => {
+    setUsername(val);
+    const validEmail = validateEmail(val);
+    setErrors({
+      ...errors,
+      ...validEmail,
     });
   };
 
-  handleUserNameInputChange = username => {
-    const { password } = this.state;
-    this.setState({
-      username,
+  /* eslint-disable camelcase */
+  const handleLoginSubmit = async () => {
+    const { dispatch } = props;
+    const response = await dispatch({
+      type: 'auth/loginUser',
+      payload: {
+        username,
+        password,
+      },
     });
-    if (password !== '' && username !== '') {
-      this.enableSubmitBtn();
-    } else {
-      this.disableSubmitBtn();
+    const { status, message, auth_token } = response;
+    if (status === 'success') {
+      localStorage.setItem('token', auth_token);
+      setLoggedIn(username);
     }
-  };
-
-  handlePassWordInputChange = password => {
-    const { username } = this.state;
-    this.setState({
-      password,
+    // shows a alert on failed
+    // login attempt only.
+    // a success response populates data
+    // on the global header and should be
+    // enough of a visual cue.
+    notification.error({
+      message,
     });
-    if (username !== '' && password !== '') {
-      this.enableSubmitBtn();
-    } else {
-      this.disableSubmitBtn();
-    }
   };
 
-  handleLoginSubmit = () => {
-    const { username, password } = this.state;
-    if (username === 'admin' && password === 'admin') {
-      this.setLoggedIn({ username });
-    } else {
-      alert('Wrong username/password pair');
+  /* eslint-disable no-restricted-syntax */
+  const validateForm = () => {
+    if (username.trim() === '' || password.trim() === '') {
+      return false;
     }
+    for (const dep of Object.entries(errors)) {
+      if (dep[1].length > 0) {
+        return false;
+      }
+    }
+    // if we reach here, it means
+    // we have covered all of the edge cases.
+    return true;
   };
 
-  render() {
-    const { variantVal, btnColor, btnDisabled } = this.state;
-    const form = (
-      <div className={styles.section}>
-        <Form>
-          <FormGroup label="Email address" isRequired fieldId="horizontal-form-name">
-            <TextInput
-              isRequired
-              type="text"
-              id="horizontal-form-name"
-              aria-describedby="horizontal-form-name-helper"
-              name="horizontal-form-name"
-              onChange={this.handleUserNameInputChange}
-            />
-          </FormGroup>
-          <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
-            <TextInput
-              isRequired
-              type="password"
-              id="horizontal-form-password"
-              name="horizontal-form-password"
-              onChange={this.handlePassWordInputChange}
-            />
-          </FormGroup>
-          <FormGroup fieldId="remember-me">
-            <Checkbox
-              label="Keep me logged in"
-              id="alt-form-checkbox-1"
-              name="alt-form-checkbox-1"
-              className={styles.check}
-            />
-          </FormGroup>
-          <ActionGroup>
-            <Button
-              isBlock
-              variant={variantVal}
-              onClick={() => this.handleLoginSubmit()}
-              className={styles.btn}
-              id="submitBtn"
-              {...(btnDisabled === 'true' ? { isDisabled: 'true' } : {})}
-            >
-              <Title headingLevel="h4" size="xl" style={{ color: btnColor }}>
-                Submit
-              </Title>
-            </Button>
-          </ActionGroup>
-        </Form>
-      </div>
-    );
-    return <AuthLayout toPreview={form} heading="Log into your Pbench Acount" backOpt="true" />;
-  }
-}
+  useEffect(
+    () => {
+      if (validateForm()) {
+        setBtnDisabled(false);
+      } else setBtnDisabled(true);
+    },
+    [username, password]
+  );
 
-export default LoginHandler;
+  const form = (
+    <Form className={styles.section}>
+      <FormGroup label="Email address" isRequired fieldId="horizontal-form-name">
+        <TextInput
+          isRequired
+          type="text"
+          id="horizontal-form-name"
+          aria-describedby="horizontal-form-name-helper"
+          name="horizontal-form-name"
+          onChange={handleUsernameChange}
+        />
+        <p className={styles.error}>{errors.email}</p>
+      </FormGroup>
+      <FormGroup label="Password" isRequired fieldId="horizontal-form-password">
+        <TextInput
+          isRequired
+          type="password"
+          id="horizontal-form-password"
+          name="horizontal-form-password"
+          onChange={val => setPassword(val)}
+        />
+      </FormGroup>
+      <FormGroup fieldId="remember-me">
+        <Checkbox
+          label="Keep me logged in"
+          id="alt-form-checkbox-1"
+          name="alt-form-checkbox-1"
+          className={styles.check}
+        />
+      </FormGroup>
+      <ActionGroup>
+        <Button
+          isBlock
+          onClick={handleLoginSubmit}
+          className={styles.btn}
+          id="submitBtn"
+          isDisabled={btnDisabled}
+        >
+          <Title
+            headingLevel="h4"
+            size="xl"
+            style={btnDisabled ? { color: 'black' } : { color: 'white' }}
+          >
+            Submit
+          </Title>
+        </Button>
+      </ActionGroup>
+    </Form>
+  );
+  return <AuthLayout toPreview={form} heading="Log into your Pbench Acount" backOpt="true" />;
+};
+
+export default connect(mapStateToProps)(LoginHandler);
