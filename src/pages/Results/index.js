@@ -10,6 +10,8 @@ import {
   Card,
   CardBody,
 } from '@patternfly/react-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar } from '@fortawesome/free-solid-svg-icons';
 
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
@@ -19,7 +21,7 @@ import { getDiffDate } from '@/utils/moment_constants';
   results: dashboard.results[global.selectedControllers[0]]
     ? dashboard.results[global.selectedControllers[0]]
     : [],
-  auth: auth.auth,
+  username: auth.username,
   selectedControllers: global.selectedControllers,
   favoriteResults: user.favoriteResults,
   loading: loading.effects['dashboard/fetchResults'],
@@ -129,9 +131,7 @@ class Results extends Component {
     );
   };
 
-  favoriteRecord = (event, value, result) => {
-    // Stop propagation from going to the next page
-    event.stopPropagation();
+  favoriteResult = result => {
     const { dispatch } = this.props;
     // dispatch an action to favorite result
     dispatch({
@@ -140,20 +140,18 @@ class Results extends Component {
     });
   };
 
-  removeResultFromFavorites = (event, value, record) => {
-    // Stop propagation from going to the next page
-    event.stopPropagation();
+  unfavoriteResult = result => {
     const { dispatch } = this.props;
     // dispatch an action to favorite controller
     dispatch({
       type: 'user/removeResultFromFavorites',
-      payload: record,
+      payload: result,
     });
   };
 
   render() {
     const { results } = this.state;
-    const { selectedControllers, loading } = this.props;
+    const { selectedControllers, loading, favoriteResults, username } = this.props;
     const columns = [
       {
         Header: 'Result',
@@ -177,6 +175,25 @@ class Results extends Component {
         Header: 'End Time',
         accessor: 'end',
         Cell: row => <span>{getDiffDate(row.value)}</span>,
+      },
+      {
+        Header: 'Favorited',
+        accessor: 'favorited',
+        show: username !== '',
+        Cell: cell =>
+          favoriteResults.includes(cell.row.original.result) ? (
+            <FontAwesomeIcon
+              color="gold"
+              icon={faStar}
+              onClick={() => this.unfavoriteResult(cell.row.original.result)}
+            />
+          ) : (
+            <FontAwesomeIcon
+              color="lightgrey"
+              icon={faStar}
+              onClick={() => this.favoriteResult(cell.row.original.result)}
+            />
+          ),
       },
     ];
 
