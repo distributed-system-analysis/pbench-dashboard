@@ -2,7 +2,7 @@ export default {
   namespace: 'auth',
 
   state: {
-    auth: { username: '' },
+    username: '',
   },
 
   effects: {
@@ -24,12 +24,13 @@ export default {
     modifyUser(state, { payload }) {
       return {
         ...state,
-        auth: payload,
+        username: payload,
       };
     },
-    removeUser() {
+    removeUser(state) {
       return {
-        auth: { username: '' },
+        ...state,
+        username: '',
       };
     },
   },

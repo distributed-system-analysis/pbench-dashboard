@@ -109,7 +109,14 @@ function Table({ columns, data, isCheckable, onCompare, loadingData }) {
       defaultColumn,
       filterTypes,
       disableMultiSort: true,
-      initialState: { pageSize: 20, pageIndex: 0 },
+      initialState: {
+        pageSize: 20,
+        pageIndex: 0,
+        hiddenColumns: columns.map(column => {
+          if (column.show === false) return column.accessor || column.id;
+          return column;
+        }),
+      },
     },
     useFilters,
     useGlobalFilter,

@@ -23,7 +23,7 @@ import { getDiffDate } from '@/utils/moment_constants';
   indices: datastore.indices,
   selectedDateRange: global.selectedDateRange,
   favoriteControllers: user.favoriteControllers,
-  auth: auth.auth,
+  username: auth.username,
   loadingControllers:
     loading.effects['dashboard/fetchControllers'] || loading.effects['datastore/fetchMonthIndices'],
 }))
@@ -146,7 +146,7 @@ class Controllers extends Component {
 
   render() {
     const { controllers } = this.state;
-    const { loadingControllers, favoriteControllers } = this.props;
+    const { loadingControllers, favoriteControllers, username } = this.props;
     const columns = [
       {
         Header: 'Controller',
@@ -169,6 +169,7 @@ class Controllers extends Component {
       {
         Header: 'Favorited',
         accessor: 'favorited',
+        show: username !== '',
         Cell: cell =>
           favoriteControllers.includes(cell.row.original.controller) ? (
             <FontAwesomeIcon

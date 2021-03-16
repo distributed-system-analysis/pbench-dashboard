@@ -19,7 +19,7 @@ import imgAvatar from '../../assets/avatar.svg';
 import SessionModal from '../SessionModal';
 
 @connect(({ auth }) => ({
-  auth: auth.auth,
+  username: auth.username,
 }))
 class GlobalHeader extends Component {
   constructor(props) {
@@ -55,7 +55,7 @@ class GlobalHeader extends Component {
   };
 
   render() {
-    const { savingSession, dispatch, auth } = this.props;
+    const { savingSession, dispatch, username } = this.props;
     const { isProfileDropdownOpen } = this.state;
 
     const profileDropdownItems = [
@@ -81,7 +81,7 @@ class GlobalHeader extends Component {
               <SearchIcon />
             </Button>
           </PageHeaderToolsItem>
-          {auth.username === 'admin' ? (
+          {username ? (
             <PageHeaderToolsGroup>
               <PageHeaderToolsItem>
                 <Dropdown

@@ -62,7 +62,7 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   sessionDescription: sessions.sessionDescription,
   sessionId: sessions.sessionId,
   savingSession: loading.effects['sessions/saveSession'],
-  auth: auth.auth,
+  username: auth.username,
 }))
 class BasicLayout extends React.PureComponent {
   static childContextTypes = {
@@ -140,7 +140,7 @@ class BasicLayout extends React.PureComponent {
       sessionId,
       children,
       location: { pathname },
-      auth,
+      username,
     } = this.props;
 
     const { sessionExitModalVisible } = this.state;
@@ -182,7 +182,7 @@ class BasicLayout extends React.PureComponent {
                 </DescriptionList>
               </Alert>
             )}
-            {auth.username === 'admin' ? '' : <LoginHint />}
+            {username ? '' : <LoginHint />}
             <Modal
               variant={ModalVariant.small}
               title="Confirm session exit"
