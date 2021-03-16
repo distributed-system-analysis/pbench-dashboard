@@ -1,3 +1,5 @@
+import { queryRegisterUser } from '../services/auth.js';
+
 export default {
   namespace: 'auth',
 
@@ -12,9 +14,32 @@ export default {
         payload,
       });
     },
-    *logoutUser({ payload }, { put }) {
+    // TODO: Add a codeMap for general
+    // purpose error messages.
+    *registerUser({ payload }, { call }) {
+      try {
+        const response = yield call(queryRegisterUser, payload);
+        const { message } = response;
+        return {
+          message,
+          status: 'success',
+        };
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        return {
+          message: errortext,
+          status: 'failure',
+        };
+      }
+    },
+    *removeUserFromStore({ payload }, { put }) {
       yield put({
-        type: 'removeUser',
+        type: 'modifyUser',
         payload,
       });
     },
