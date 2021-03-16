@@ -19,3 +19,18 @@ export const queryRegisterUser = async params => {
     },
   });
 };
+
+export const queryLoginUser = params => {
+  const endpoint = `${endpoints.pbench_server}/login`;
+  const { username, password } = params;
+  return request.post(endpoint, {
+    data: {
+      username,
+      password,
+    },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+};

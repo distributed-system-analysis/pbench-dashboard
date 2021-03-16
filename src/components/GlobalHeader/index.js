@@ -90,7 +90,9 @@ class GlobalHeader extends Component {
                   onSelect={this.onDropdownSelect}
                   isOpen={isProfileDropdownOpen}
                   toggle={
-                    <DropdownToggle onToggle={this.onProfileDropdownToggle}>Admin</DropdownToggle>
+                    <DropdownToggle onToggle={this.onProfileDropdownToggle}>
+                      {username}
+                    </DropdownToggle>
                   }
                   dropdownItems={profileDropdownItems}
                 />
