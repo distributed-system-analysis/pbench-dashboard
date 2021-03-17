@@ -92,7 +92,6 @@ class AuthLayout extends Component {
               variant="link"
               onClick={() => this.navigate('signup')}
               className={styles.inlineLink}
-              style={{ paddingLeft: '10px' }}
             >
               Sign up
             </Button>
@@ -155,7 +154,7 @@ class AuthLayout extends Component {
     );
 
     return (
-      <div className={styles.mainDiv}>
+      <div>
         <div className="pf-c-background-image">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -174,7 +173,7 @@ class AuthLayout extends Component {
             </filter>
           </svg>
         </div>
-        <Grid style={{ marginTop: '75px' }}>
+        <Grid className={styles.mainDiv}>
           <GridItem
             sm={8}
             md={4}
@@ -186,6 +185,16 @@ class AuthLayout extends Component {
           >
             {Heading}
             {toPreview || authPreview}
+            <div className={styles.section}>
+              Want to continue without login? Click <space />
+              <Button
+                variant="link"
+                className={styles.continueBtn}
+                onClick={() => this.navigate('controllers')}
+              >
+                here
+              </Button>
+            </div>
           </GridItem>
           <GridItem
             sm={11}
