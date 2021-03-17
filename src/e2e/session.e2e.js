@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { generateMockControllerAggregation, mockIndices, mockSession } from '../../mock/api';
+import { mockControllers, mockIndices, mockSession } from '../../mock/api';
 
 let browser;
 let page;
@@ -27,7 +27,7 @@ beforeAll(async () => {
         status: 200,
         contentType: 'application/json',
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify(generateMockControllerAggregation),
+        body: JSON.stringify(mockControllers),
       });
     } else if (request.method() === 'GET' && request.url().includes('/controllers/months')) {
       request.respond({

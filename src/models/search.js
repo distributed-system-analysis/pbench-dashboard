@@ -22,7 +22,8 @@ export default {
       const { indices } = payload;
       const { endpoints } = window;
 
-      const index = endpoints.prefix + endpoints.run_index + indices[0];
+      // eslint-disable-next-line no-undef
+      const index = MOCK_UI ? 'test_index' : endpoints.prefix + endpoints.run_index + indices[0];
       const mapping = response[index].mappings.properties;
       let fields = [];
       const filters = {};

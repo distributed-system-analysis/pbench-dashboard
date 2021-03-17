@@ -1,10 +1,13 @@
+/* eslint-disable no-undef */
 import request from '../utils/request';
 
 const { endpoints } = window;
 
 export async function getSession(params) {
   const { sessionId } = params;
-  const endpoint = `${endpoints.pbench_server}/graphql`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/sessions/create`
+    : `${endpoints.pbench_server}/graphql`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -24,7 +27,9 @@ export async function getSession(params) {
 
 // queries all the available shared sessions from the database to display
 export async function getAllSessions() {
-  const endpoint = `${endpoints.pbench_server}/graphql`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/sessions/list`
+    : `${endpoints.pbench_server}/graphql`;
 
   return request.post(endpoint, {
     data: {

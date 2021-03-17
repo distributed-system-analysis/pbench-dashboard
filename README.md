@@ -64,6 +64,11 @@ Start Development Server
 $ yarn start
 ```
 
+Start Mock Development Server
+```bash
+$ yarn start:mock
+```
+
 This will automatically open the application on [http://localhost:8000](http://localhost:8000).
 
 ## Local Development
@@ -85,6 +90,8 @@ window.endpoints = {
   run_toc_index: 'v.run-toc.'
 };
 ```
+
+`public/endpoints.mock.js` contains references to the mocked environment. The dashboard will automatically intercept requests made to an external datastore when `pbench_server` is set to `window.origin`. Mocked responses defined in `mock/api.js` will be returned with every intercepted request. 
 
 ## Storage Config
 

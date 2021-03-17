@@ -1,84 +1,253 @@
-import constants from '../config/constants';
+import moment from 'moment';
+import casual from 'casual';
 
-// Mocked test index components
-const endpoints = {
-  prefix: 'test_prefix.',
-  run_index: 'vn.run-data.',
-  run_toc_index: 'vn.run-toc.',
-  result_index: 'vn.result-data-sample.',
-  result_data_index: 'vn.result-data.',
-};
+const DEFAULT_SIZE = 100;
 
-// Generate controllers as per max page size options
-const maxTableSize = parseInt(constants.tableSizeOptions.pop(), 10);
-let generatedBuckets = new Array(maxTableSize).fill({});
-generatedBuckets = generatedBuckets.map((val, index) => {
-  const key = index + 1;
-  return {
-    key: `controller_${key}`,
-    controller: `controller_${key}`,
-    results: key,
-    last_modified_value: key,
-    last_modified_string: key.toString(),
-  };
-});
-export const generateMockControllerAggregation = generatedBuckets;
+export const mockIndices = new Array(DEFAULT_SIZE).fill().map(() => moment().format('YYYY-MM'));
 
-const prefix = endpoints.prefix + endpoints.run_index.slice(0, -1);
-export const mockIndices = ['2019-09', '2019-08'];
+export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+  controller: casual.word,
+  key: casual.word,
+  last_modified_string: moment.utc() + index,
+  last_modified_value: moment.utc() + index,
+  results: casual.integer(1, DEFAULT_SIZE),
+}));
 
 export const mockResults = {
+  took: DEFAULT_SIZE,
+  hits: {
+    total: {
+      value: DEFAULT_SIZE,
+    },
+    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+      _index: moment().format('YYYY-MM'),
+      _type: casual.word,
+      _id: casual.uuid,
+      _score: null,
+      _source: {
+        '@metadata': {
+          controller_dir: casual.word,
+        },
+        run: {
+          controller: casual.word,
+          name: casual.word,
+          start: moment.utc() + index,
+          end: moment.utc() + index,
+          id: casual.uuid,
+          config: casual.word,
+        },
+      },
+      sort: [casual.unix_time],
+    })),
+  },
+};
+
+export const mockSamples = {
+  _scroll_id: casual.uuid,
+  hits: {
+    total: DEFAULT_SIZE,
+    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+      _source: {
+        '@timestamp': moment.utc(),
+        run: {
+          id: 'test_id',
+          controller: 'test_controller',
+          name: 'test_result',
+          script: casual.random_element(['fio', 'uperf']),
+          date: moment.utc() + index,
+          start: moment.utc() + index,
+          end: moment.utc() + index,
+          user: casual.username,
+        },
+        iteration: {
+          name: `iteration${index + 1}`,
+          number: index + 1,
+        },
+        benchmark: {
+          max_stddevpct: casual.integer(1, 5),
+          primary_metric: casual.random_element(['clat', 'iops_sec']),
+          uid: 'benchmark_name:fio-controller_host:test_controller',
+          name: casual.random_element(['fio', 'uperf']),
+          uid_tmpl: 'benchmark_name:%benchmark_name%-controller_host:%controller_host%',
+        },
+        sample: {
+          client_hostname: casual.random_element(['1', '2']),
+          closest_sample: casual.integer(1, 5),
+          description: casual.short_description,
+          mean: casual.integer(1, DEFAULT_SIZE * 100),
+          role: 'client',
+          stddev: casual.integer(1, DEFAULT_SIZE * 100),
+          stddevpct: casual.integer(1, DEFAULT_SIZE),
+          uid: casual.random_element(['client_hostname:1', 'client_hostname:2']),
+          measurement_type: casual.random_element(['latency', 'throughput']),
+          measurement_idx: casual.integer(0, 4),
+          measurement_title: casual.random_element(['clat', 'iops_sec']),
+          uid_tmpl: 'client_hostname:%client_hostname%',
+          '@idx': casual.integer(0, 4),
+          name: `sample${casual.integer(1, 5)}`,
+          start: moment.utc() + index,
+          end: moment.utc() + index,
+        },
+      },
+    })),
+  },
+  aggregations: {
+    id: {
+      buckets: [
+        {
+          key: 'test_id',
+          type: {
+            buckets: [
+              {
+                key: 'latency',
+                title: {
+                  buckets: [
+                    {
+                      key: 'clat',
+                      uid: {
+                        buckets: new Array(2).fill().map((value, index) => ({
+                          key: `client_hostname:${index + 1}`,
+                        })),
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'throughput',
+                title: {
+                  buckets: [
+                    {
+                      key: 'iops_sec',
+                      uid: {
+                        buckets: new Array(2).fill().map((value, index) => ({
+                          key: `client_hostname:${index + 1}`,
+                        })),
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+    name: {
+      buckets: [
+        {
+          key: 'test_result',
+        },
+      ],
+    },
+    controller: {
+      buckets: [
+        {
+          key: 'test_controller',
+        },
+      ],
+    },
+  },
+};
+
+export const mockDetail = {
   hits: {
     hits: [
       {
         _source: {
           run: {
-            name: 'a_test_run',
-            start: '1111-11-11T11:11:11+00:00',
-            id: '1111',
-            end: '1111-11-11T11:11:12+00:00',
-            controller: 'test_run.test_domain.com',
-            config: 'test_size_1',
+            id: 'test_id',
+            controller: 'test_controller',
+            name: 'test_result',
+            script: casual.random_element(['fio', 'uperf']),
+            date: moment.utc(),
+            start: moment.utc(),
+            end: moment.utc(),
+            user: casual.username,
           },
-          '@metadata': {
-            controller_dir: 'test_run.test_domain.com',
-          },
-        },
-      },
-      {
-        _source: {
-          run: {
-            name: 'b_test_run',
-            start: '1111-11-11T11:11:13+00:00',
-            id: '2222',
-            end: '1111-11-11T11:11:14+00:00',
-            controller: 'b_test_run.test_domain.com',
-            config: 'test_size_2',
-          },
-          '@metadata': {
-            controller_dir: 'b_test_run.test_domain.com',
-          },
+          host_tools_info: [
+            {
+              hostname: 'test_host',
+              tools: {
+                iostat: '--interval=3',
+                mpstat: '--interval=3',
+                perf: "--record-opts='record -a --freq=100'",
+                pidstat: '--interval=30',
+                'proc-interrupts': '--interval=3',
+                'proc-vmstat': '--interval=3',
+                sar: '--interval=3',
+                turbostat: '--interval=3',
+              },
+            },
+          ],
         },
       },
     ],
   },
 };
 
+export const mockTableContents = {
+  hits: {
+    total: DEFAULT_SIZE,
+    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+      _source: {
+        parent: `${casual.word}/${casual.word}/${casual.word}/${casual.word}/${casual.word}/${
+          casual.word
+        }`,
+        directory: `${casual.word}/${casual.word}/${casual.word}/${casual.word}/${casual.word}/${
+          casual.word
+        }`,
+        mtime: moment.utc() + index,
+        mode: casual.word,
+        name: casual.word,
+        ancestor_path_elements: [
+          casual.word,
+          casual.word,
+          casual.word,
+          casual.word,
+          casual.word,
+          casual.word,
+        ],
+        files: [
+          {
+            name: casual.uid,
+            mtime: moment.utc() + index,
+            size: casual.integer(1, DEFAULT_SIZE),
+            mode: '0o644',
+            type: casual.random_element([
+              'reg',
+              'areg',
+              'lnk',
+              'sym',
+              'dir',
+              'fifo',
+              'cont',
+              'chr',
+              'blk',
+              'spr',
+            ]),
+          },
+        ],
+      },
+    })),
+  },
+};
+
 export const mockMappings = {
-  [`${prefix}.2019-09`]: {
+  test_index: {
     mappings: {
       properties: {
         run: {
           properties: {
-            config: { type: 'keyword' },
-            name: { type: 'keyword' },
-            script: { type: 'keyword' },
-            user: { type: 'keyword' },
-          },
-        },
-        '@metadata': {
-          properties: {
-            controller_dir: { type: 'keyword' },
+            config: { type: 'string', index: 'not_analyzed' },
+            controller: { type: 'string', index: 'not_analyzed' },
+            date: { type: 'date', format: 'dateOptionalTime' },
+            end: { type: 'date', format: 'dateOptionalTime' },
+            id: { type: 'string', index: 'not_analyzed' },
+            iterations: { type: 'string' },
+            name: { type: 'string', index: 'not_analyzed' },
+            start: { type: 'date', format: 'dateOptionalTime' },
+            user: { type: 'string', index: 'not_analyzed' },
           },
         },
       },
@@ -88,294 +257,52 @@ export const mockMappings = {
 
 export const mockSearch = {
   hits: {
-    total: 1,
-    hits: [
-      {
-        _id: '1111',
-        _source: {
-          run: {
-            config: 'test-size-1',
-            name: 'test_run',
-            script: 'test_controller',
-            user: 'test_user',
-          },
-          '@metadata.controller_dir': 'test_controller',
+    total: DEFAULT_SIZE,
+    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+      _id: index + 1,
+      _source: {
+        run: {
+          config: casual.description,
+          name: casual.word,
+          script: casual.word,
+          user: casual.name,
         },
+        '@metadata.controller_dir': casual.word,
       },
-    ],
+    })),
+  },
+};
+
+export const mockSessions = {
+  data: {
+    urls: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+      id: index + 1,
+      config: '{}',
+      description: casual.description,
+      createdAt: casual.date(),
+    })),
   },
 };
 
 export const mockSession = {
   data: {
     createSession: {
-      id: '1',
+      id: casual.uid,
       config: '{}',
-      description: 'test_description',
+      description: casual.description,
     },
   },
 };
 
-export const mockDataSample = [
-  {
-    hits: {
-      hits: [
-        {
-          _source: {
-            run: {
-              id: 'test_run_id',
-              controller: 'test_controller',
-              name: 'test_run_name',
-              script: 'test_script',
-              config: 'test_config',
-            },
-            iteration: { name: 'test_iteration_1', number: 1 },
-            benchmark: {
-              instances: 1,
-              max_stddevpct: 1,
-              message_size_bytes: 1,
-              primary_metric: 'test_measurement_title',
-              test_type: 'stream',
-            },
-            sample: {
-              closest_sample: 1,
-              mean: 0.1,
-              stddev: 0.1,
-              stddevpct: 1,
-              uid: 'test_measurement_id',
-              measurement_type: 'test_measurement_type',
-              measurement_idx: 0,
-              measurement_title: 'test_measurement_title',
-              '@idx': 0,
-              name: 'sample1',
-            },
-          },
-        },
-        {
-          _source: {
-            run: {
-              id: 'test_run_id',
-              controller: 'test_controller',
-              name: 'test_run_name',
-              script: 'test_script',
-              config: 'test_config',
-            },
-            iteration: { name: 'test_iteration_2', number: 2 },
-            benchmark: {
-              instances: 1,
-              max_stddevpct: 1,
-              message_size_bytes: 1,
-              primary_metric: 'test_measurement_title',
-              test_type: 'stream',
-            },
-            sample: {
-              closest_sample: 1,
-              mean: 0.1,
-              stddev: 0.1,
-              stddevpct: 1,
-              uid: 'test_measurement_id',
-              measurement_type: 'test_measurement_type',
-              measurement_idx: 0,
-              measurement_title: 'diff_measurement_title',
-              '@idx': 1,
-              name: 'sample2',
-            },
-          },
-        },
-      ],
-    },
-    aggregations: {
-      id: {
-        buckets: [
-          {
-            key: 'test_run_name',
-            type: {
-              buckets: [
-                {
-                  key: 'test_measurement_type',
-                  title: {
-                    buckets: [
-                      {
-                        key: 'test_measurement_title',
-                        uid: {
-                          buckets: [
-                            {
-                              key: 'test_measurement_id',
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      name: {
-        buckets: [
-          {
-            key: 'test_run_name',
-          },
-        ],
-      },
-      controller: {
-        buckets: [
-          {
-            key: 'test_controller',
-          },
-        ],
-      },
-    },
-  },
-];
-
-export const expectedSampleData = {
-  runs: {
-    test_run_name: {
-      columns: [
-        { title: 'Iteration Name', dataIndex: 'name', key: 'name' },
-        {
-          title: 'test_measurement_type',
-          children: [
-            {
-              title: 'test_measurement_title',
-              children: [
-                {
-                  title: 'test_measurement_type-test_measurement_title-test_measurement_id',
-                  children: [
-                    {
-                      title: 'mean',
-                      dataIndex:
-                        'test_measurement_type-test_measurement_title-test_measurement_id-mean',
-                      key: 'test_measurement_type-test_measurement_title-test_measurement_id-mean',
-                    },
-                    {
-                      title: 'stddevpct',
-                      dataIndex:
-                        'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct',
-                      key:
-                        'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct',
-                    },
-                    {
-                      title: 'closest_sample',
-                      dataIndex:
-                        'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample',
-                      key:
-                        'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      run_name: 'test_run_name',
-      run_controller: 'test_controller',
-      iterations: {
-        test_iteration_1: {
-          name: 'test_iteration_1',
-          number: 1,
-          closest_sample: 1,
-          'test_measurement_type-test_measurement_title-test_measurement_id-closest_sample': 1,
-          'test_measurement_type-test_measurement_title-test_measurement_id-mean': 0.1,
-          'test_measurement_type-test_measurement_title-test_measurement_id-stddevpct': 1,
-          samples: {
-            'test_measurement_title-sample1': {
-              sample: {
-                closest_sample: 1,
-                mean: 0.1,
-                stddev: 0.1,
-                stddevpct: 1,
-                uid: 'test_measurement_id',
-                measurement_type: 'test_measurement_type',
-                measurement_idx: 0,
-                measurement_title: 'test_measurement_title',
-                '@idx': 0,
-                name: 'sample1',
-              },
-              benchmark: {
-                instances: 1,
-                max_stddevpct: 1,
-                message_size_bytes: 1,
-                primary_metric: 'test_measurement_title',
-                test_type: 'stream',
-              },
-              run: {
-                id: 'test_run_id',
-                controller: 'test_controller',
-                name: 'test_run_name',
-                script: 'test_script',
-                config: 'test_config',
-              },
-            },
-          },
-        },
-      },
-      id: 'test_run_name',
-      primaryMetrics: {},
-    },
-  },
-  iterationParams: {
-    instances: [1],
-    message_size_bytes: [1],
-    primary_metric: ['test_measurement_title'],
-    test_type: ['stream'],
-    closest_sample: [1],
-    uid: ['test_measurement_id'],
-    measurement_type: ['test_measurement_type'],
-    measurement_title: ['test_measurement_title'],
-  },
-};
-
-export const expectedClusterData = {
-  data: {
-    test_measurement_title: [
-      {
-        instances: 1,
-        max_stddevpct: 1,
-        message_size_bytes: 1,
-        primary_metric: 'test_measurement_title',
-        test_type: 'stream',
-        cluster: {
-          test_run_name: 0.1,
-          name_test_run_name: 'sample1',
-          percent_test_run_name: 1,
-          cluster: 1,
-        },
-        test_run_name: {
-          sample: {
-            closest_sample: 1,
-            mean: 0.1,
-            stddev: 0.1,
-            stddevpct: 1,
-            uid: 'test_measurement_id',
-            measurement_type: 'test_measurement_type',
-            measurement_idx: 0,
-            measurement_title: 'test_measurement_title',
-            '@idx': 0,
-            name: 'sample1',
-          },
-          run: {
-            id: 'test_run_id',
-            controller: 'test_controller',
-            name: 'test_run_name',
-            script: 'test_script',
-            config: 'test_config',
-          },
-          benchmark: {
-            instances: 1,
-            max_stddevpct: 1,
-            message_size_bytes: 1,
-            primary_metric: 'test_measurement_title',
-            test_type: 'stream',
-          },
-        },
-      },
-    ],
-  },
-  keys: {},
-  params: {},
+export default {
+  'GET /controllers/months': mockIndices,
+  'POST /controllers/list': mockControllers,
+  'POST /datasets/list': mockResults,
+  'POST /datasets/detail': mockDetail,
+  'POST /datasets/toc': mockTableContents,
+  'POST /datasets/samples': mockSamples,
+  'POST /mappings': mockMappings,
+  'POST /search': mockSearch,
+  'POST /sessions/list': mockSessions,
+  'POST /sessions/create': mockSession,
 };
