@@ -9,7 +9,7 @@
   <link rel="icon" href="<%= context.config.publicPath +'favicon.ico'%>" type="image/x-icon">
   
   <!-- runtime endpoints config -->
-  <script src="<%= context.config.publicPath +'endpoints.js'%>"></script>
+  <script src="<%= context.config.publicPath + context.config.define.ENDPOINTS_ENV%>"></script>
 </head>
 
 <body>

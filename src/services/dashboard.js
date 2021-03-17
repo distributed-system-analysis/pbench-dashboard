@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
@@ -10,7 +11,7 @@ function scrollUntilEmpty(data) {
   const endpoint = `${endpoints.pbench_server}/elasticsearch`;
   const allData = data;
 
-  if (allData.hits.total.value !== allData.hits.hits.length && allData._scroll_id) {
+  if (allData.hits.total.value < allData.hits.hits.length && allData._scroll_id) {
     const indices = `_search/scroll?scroll=1m&scroll_id=${allData._scroll_id}`;
     const scroll = request.post(endpoint, {
       data: { indices },
@@ -19,7 +20,7 @@ function scrollUntilEmpty(data) {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
       allData.hits.hits = [...allData.hits.hits, ...response.hits.hits];
-      return scrollUntilEmpty(endpoints, allData);
+      return scrollUntilEmpty(allData);
     });
   }
   return allData;
@@ -53,8 +54,9 @@ export async function queryResults(params) {
       endpoints.run_index,
       selectedDateRange
     )}/_search`;
-
-    const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+    const endpoint = MOCK_UI
+      ? `${endpoints.pbench_server}/datasets/list`
+      : `${endpoints.pbench_server}/elasticsearch`;
 
     return request.post(endpoint, {
       data: {
@@ -104,7 +106,9 @@ export async function queryResult(params) {
     selectedDateRange
   )}/_search`;
 
-  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/datasets/detail`
+    : `${endpoints.pbench_server}/elasticsearch`;
 
   return request.post(endpoint, {
     data: {
@@ -133,7 +137,9 @@ export async function queryTocResult(params) {
     selectedDateRange
   )}/_search?q=run_data_parent:"${id}"`;
 
-  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/datasets/toc`
+    : `${endpoints.pbench_server}/elasticsearch`;
 
   return request.post(endpoint, {
     data: {
@@ -154,7 +160,9 @@ export async function queryIterationSamples(params) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/datasets/samples`
+    : `${endpoints.pbench_server}/elasticsearch`;
 
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
@@ -244,7 +252,9 @@ export async function queryTimeseriesData(payload) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/datasets/timeseries`
+    : `${endpoints.pbench_server}/elasticsearch`;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {

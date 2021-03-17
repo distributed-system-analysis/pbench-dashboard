@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
@@ -8,7 +9,9 @@ export async function queryIndexMapping(params) {
 
   const mappings = `${endpoints.prefix}${endpoints.run_index}${indices[0]}/_mappings`;
 
-  const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/mappings`
+    : `${endpoints.pbench_server}/elasticsearch`;
 
   return request.post(endpoint, { data: { indices: mappings } });
 }
@@ -23,7 +26,9 @@ export async function searchQuery(params) {
       selectedDateRange
     )}/_search`;
 
-    const endpoint = `${endpoints.pbench_server}/elasticsearch`;
+    const endpoint = MOCK_UI
+      ? `${endpoints.pbench_server}/search`
+      : `${endpoints.pbench_server}/elasticsearch`;
 
     return request.post(endpoint, {
       data: {
@@ -32,35 +37,35 @@ export async function searchQuery(params) {
           ignore_unavailable: true,
         },
         payload: {
-            size: 10000,
-            query: {
-              bool: {
-                filter: {
-                  range: {
-                    '@timestamp': {
-                      gte: selectedDateRange.start,
-                      lte: selectedDateRange.end,
-                    },
+          size: 10000,
+          query: {
+            bool: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: selectedDateRange.start,
+                    lte: selectedDateRange.end,
                   },
                 },
-                must: {
-                  query_string: {
-                    query: `*${query}*`,
-                    analyze_wildcard: true,
-                  },
+              },
+              must: {
+                query_string: {
+                  query: `*${query}*`,
+                  analyze_wildcard: true,
                 },
               },
             },
-            sort: [
-              {
-                '@timestamp': {
-                  order: 'desc',
-                  unmapped_type: 'boolean',
-                },
-              },
-            ],
-            _source: { include: selectedFields },
           },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+                unmapped_type: 'boolean',
+              },
+            },
+          ],
+          _source: { include: selectedFields },
+        },
       },
     });
   } catch (error) {

@@ -1,6 +1,10 @@
 import pageRoutes from './router.config';
 
 export default {
+  define: {
+    MOCK_UI: process.env.MOCK,
+    ENDPOINTS_ENV: process.env.MOCK ? 'endpoints.mock.js' : 'endpoints.js',
+  },
   dynamicImport: undefined,
   base: '/dashboard/',
   publicPath: process.env.NODE_ENV === 'development' ? '/' : '/dashboard/',
