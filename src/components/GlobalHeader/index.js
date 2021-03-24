@@ -36,24 +36,12 @@ class GlobalHeader extends Component {
     });
   };
 
-  logoutUser = async () => {
+  logoutUser = () => {
     const { dispatch, username } = this.props;
-    const response = await dispatch({
+    dispatch({
       type: 'auth/logoutUser',
       payload: username,
     });
-    const { status, message } = response;
-    if (status === 'failure') {
-      console.error(message);
-    }
-    // We do not want users
-    // to be blocking on any issue
-    // regarding logout.
-    localStorage.removeItem('token');
-    dispatch({
-      type: 'auth/removeUserFromStore',
-      payload: '',
-    }).then(() => dispatch(routerRedux.push(`/`)));
   };
 
   navigateToProfile = () => {

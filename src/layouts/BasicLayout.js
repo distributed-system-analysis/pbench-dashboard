@@ -21,6 +21,8 @@ import {
   Button,
   Modal,
   ModalVariant,
+  AlertGroup,
+  AlertActionCloseButton,
 } from '@patternfly/react-core';
 import SiderMenu from '../components/SiderMenu';
 import LoginHint from '../components/LoginHint';
@@ -63,6 +65,7 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   sessionId: sessions.sessionId,
   savingSession: loading.effects['sessions/saveSession'],
   username: auth.username,
+  errorMessage: auth.errorMessage,
 }))
 class BasicLayout extends React.PureComponent {
   static childContextTypes = {
@@ -132,6 +135,14 @@ class BasicLayout extends React.PureComponent {
     });
   };
 
+  closeAlert = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'auth/removeErrorMessage',
+      payload: '',
+    });
+  };
+
   render() {
     const {
       savingSession,
@@ -141,6 +152,7 @@ class BasicLayout extends React.PureComponent {
       children,
       location: { pathname },
       username,
+      errorMessage,
     } = this.props;
 
     const { sessionExitModalVisible } = this.state;
@@ -153,6 +165,15 @@ class BasicLayout extends React.PureComponent {
             sidebar={<SiderMenu location={pathname} />}
             isManagedSidebar
           >
+            {errorMessage && (
+              <AlertGroup isToast>
+                <Alert
+                  title={errorMessage}
+                  variant="danger"
+                  actionClose={<AlertActionCloseButton onClose={() => this.closeAlert()} />}
+                />
+              </AlertGroup>
+            )}
             {sessionBannerVisible && (
               <Alert
                 variant="info"
