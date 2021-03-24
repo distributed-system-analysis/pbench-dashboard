@@ -8,16 +8,14 @@ import {
   Button,
   Title,
 } from '@patternfly/react-core';
-import { notification } from 'antd';
 import AuthLayout from '@/components/AuthLayout';
-import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import styles from './index.less';
 import { validateEmail } from '@/utils/validator';
 
 const mapStateToProps = state => {
   const { auth } = state;
-  return auth;
+  return { auth };
 };
 
 const LoginHandler = props => {
@@ -28,16 +26,6 @@ const LoginHandler = props => {
   });
   const [btnDisabled, setBtnDisabled] = useState(true);
 
-  const setLoggedIn = payload => {
-    const { dispatch } = props;
-    dispatch({
-      type: 'auth/loadUser',
-      payload,
-    }).then(() => {
-      dispatch(routerRedux.push(`/private`));
-    });
-  };
-
   const handleUsernameChange = val => {
     setUsername(val);
     const validEmail = validateEmail(val);
@@ -47,28 +35,14 @@ const LoginHandler = props => {
     });
   };
 
-  /* eslint-disable camelcase */
-  const handleLoginSubmit = async () => {
+  const handleLoginSubmit = () => {
     const { dispatch } = props;
-    const response = await dispatch({
+    dispatch({
       type: 'auth/loginUser',
       payload: {
         username,
         password,
       },
-    });
-    const { status, message, auth_token } = response;
-    if (status === 'success') {
-      localStorage.setItem('token', auth_token);
-      setLoggedIn(username);
-    }
-    // shows a alert on failed
-    // login attempt only.
-    // a success response populates data
-    // on the global header and should be
-    // enough of a visual cue.
-    notification.error({
-      message,
     });
   };
 

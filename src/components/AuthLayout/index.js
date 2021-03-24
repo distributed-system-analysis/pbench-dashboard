@@ -1,5 +1,15 @@
 import React, { Component, Fragment } from 'react';
-import { Grid, GridItem, Title, Flex, FlexItem, Button } from '@patternfly/react-core';
+import {
+  Grid,
+  GridItem,
+  Title,
+  Flex,
+  FlexItem,
+  Button,
+  Alert,
+  AlertGroup,
+  AlertActionCloseButton,
+} from '@patternfly/react-core';
 import { connect } from 'dva';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -7,8 +17,10 @@ import { routerRedux } from 'dva/router';
 import styles from './index.less';
 import logo from '../../assets/white.svg';
 
-@connect(user => ({
+@connect(({ user, auth }) => ({
   user: user.user,
+  errorMessage: auth.errorMessage,
+  successMessage: auth.successMessage,
 }))
 class AuthLayout extends Component {
   constructor(props) {
@@ -42,9 +54,25 @@ class AuthLayout extends Component {
     dispatch(routerRedux.push(`/${page}`));
   };
 
+  closeErrorAlert = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'auth/removeErrorMessage',
+      payload: '',
+    });
+  };
+
+  closeSuccessAlert = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'auth/removeSuccessMessage',
+      payload: '',
+    });
+  };
+
   render() {
     let { heading } = this.props;
-    const { backOpt, toPreview } = this.props;
+    const { backOpt, toPreview, errorMessage, successMessage } = this.props;
     const back = (
       <Button
         id="backBtn"
@@ -184,6 +212,24 @@ class AuthLayout extends Component {
             className={styles.form}
           >
             {Heading}
+            {errorMessage && (
+              <AlertGroup isToast>
+                <Alert
+                  title={errorMessage}
+                  variant="danger"
+                  actionClose={<AlertActionCloseButton onClose={() => this.closeErrorAlert()} />}
+                />
+              </AlertGroup>
+            )}
+            {successMessage && (
+              <AlertGroup isToast>
+                <Alert
+                  title={successMessage}
+                  variant="success"
+                  actionClose={<AlertActionCloseButton onClose={() => this.closeSuccessAlert()} />}
+                />
+              </AlertGroup>
+            )}
             {toPreview || authPreview}
             <div className={styles.section}>
               Want to continue without login? Click <space />

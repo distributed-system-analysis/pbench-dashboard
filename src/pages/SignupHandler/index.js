@@ -1,8 +1,6 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import AuthLayout from '@/components/AuthLayout';
-import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
-import { notification } from 'antd';
 import { Form, FormGroup, TextInput, ActionGroup, Button, Title } from '@patternfly/react-core';
 import styles from './index.less';
 import { validateEmail, validatePassword } from '@/utils/validator';
@@ -120,9 +118,9 @@ const SignupHandler = props => {
     }
   };
 
-  const handleSignupSubmit = async () => {
+  const handleSignupSubmit = () => {
     const { dispatch } = props;
-    const response = await dispatch({
+    dispatch({
       type: 'auth/registerUser',
       payload: {
         firstName,
@@ -132,17 +130,6 @@ const SignupHandler = props => {
         email,
       },
     });
-    const { message, status } = response;
-    if (status === 'success') {
-      notification.success({
-        message,
-      });
-      dispatch(routerRedux.push(`/login`));
-    } else {
-      notification.error({
-        message,
-      });
-    }
   };
 
   const form = (
