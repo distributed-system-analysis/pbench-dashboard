@@ -1,9 +1,10 @@
 import pageRoutes from './router.config';
 
 export default {
+  // Note: typeof(process.env.MOCK) === string
   define: {
-    MOCK_UI: process.env.MOCK,
-    ENDPOINTS_ENV: process.env.MOCK ? 'endpoints.mock.js' : 'endpoints.js',
+    MOCK_UI: process.env.MOCK === 'true',
+    ENDPOINTS_ENV: process.env.MOCK === 'true' ? 'endpoints.mock.js' : 'endpoints.js',
   },
   dynamicImport: undefined,
   base: '/dashboard/',
