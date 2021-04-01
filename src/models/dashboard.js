@@ -52,17 +52,15 @@ export default {
         const metadata = _source['@metadata'];
 
         const record = {
-          key: name,
-          startUnixTimestamp: Date.parse(start),
-          'run.name': name,
-          'run.controller': controller,
-          'run.start': start,
-          'run.end': end,
+          result: name,
+          controller,
+          start,
+          end,
           id,
         };
 
         if (typeof run.config !== 'undefined') {
-          record['run.config'] = run.config;
+          record.config = run.config;
         }
         if (typeof run.prefix !== 'undefined') {
           record['run.prefix'] = run.prefix;

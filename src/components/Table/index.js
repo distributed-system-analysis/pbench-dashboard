@@ -17,6 +17,7 @@ import matchSorter from 'match-sorter';
 import '@patternfly/patternfly/patternfly.css';
 import './index.less';
 
+import RowSelection from '../RowSelection';
 import SearchBar from '../SearchBar';
 import Pagination from '../Pagination';
 
@@ -31,14 +32,29 @@ function GlobalFilter({ preGlobalFilteredRows, setGlobalFilter }) {
       onSearch={searchValue => {
         onChange(searchValue);
       }}
+      style={{ marginBottom: 16 }}
       placeholder={`Search ${count} records...`}
     />
   );
 }
 
-function DefaultColumnFilter() {
-  return <></>;
-}
+const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref) => {
+  const defaultRef = React.useRef();
+  const resolvedRef = ref || defaultRef;
+
+  React.useEffect(
+    () => {
+      resolvedRef.current.indeterminate = indeterminate;
+    },
+    [resolvedRef, indeterminate]
+  );
+
+  return (
+    <>
+      <input type="checkbox" ref={resolvedRef} {...rest} />
+    </>
+  );
+});
 
 function fuzzyTextFilterFn(rows, id, filterValue) {
   return matchSorter(rows, filterValue, { keys: [row => row.values[id]] });
@@ -46,7 +62,7 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 
 fuzzyTextFilterFn.autoRemove = val => !val;
 
-function Table({ columns, data, onRowClick, loadingData }) {
+function Table({ columns, data, isCheckable, onCompare, loadingData }) {
   const filterTypes = React.useMemo(
     () => ({
       fuzzyText: fuzzyTextFilterFn,
@@ -66,12 +82,11 @@ function Table({ columns, data, onRowClick, loadingData }) {
 
   const defaultColumn = React.useMemo(
     () => ({
-      Filter: DefaultColumnFilter,
+      Filter: <></>,
     }),
     []
   );
 
-  // Use the state and functions returned from useTable to build your UI
   const {
     getTableProps,
     getTableBodyProps,
@@ -85,7 +100,8 @@ function Table({ columns, data, onRowClick, loadingData }) {
     setPageSize,
     preGlobalFilteredRows,
     setGlobalFilter,
-    state: { globalFilter },
+    selectedFlatRows,
+    state: { globalFilter, selectedRowIds },
   } = useTable(
     {
       columns,
@@ -93,7 +109,7 @@ function Table({ columns, data, onRowClick, loadingData }) {
       defaultColumn,
       filterTypes,
       disableMultiSort: true,
-      initialState: { pageSize: 20 },
+      initialState: { pageSize: 20, pageIndex: 0 },
     },
     useFilters,
     useGlobalFilter,
@@ -105,23 +121,26 @@ function Table({ columns, data, onRowClick, loadingData }) {
 
     hooks => {
       hooks.visibleColumns.push(visibleColumns => {
-        return [
-          {
-            id: 'selection',
-            groupByBoundary: true,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <div>
-                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-              </div>
-            ),
-            Cell: ({ row }) => (
-              <div>
-                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-              </div>
-            ),
-          },
-          ...visibleColumns,
-        ];
+        if (isCheckable) {
+          return [
+            {
+              id: 'selection',
+              groupByBoundary: true,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <div>
+                  <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                </div>
+              ),
+              Cell: ({ row }) => (
+                <div>
+                  <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                </div>
+              ),
+            },
+            ...visibleColumns,
+          ];
+        }
+        return [...visibleColumns];
       });
     }
   );
@@ -133,7 +152,13 @@ function Table({ columns, data, onRowClick, loadingData }) {
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
       />
-      <br />
+      {isCheckable && (
+        <RowSelection
+          selectedItems={Object.keys(selectedRowIds).length}
+          compareActionName="Compare"
+          onCompare={() => onCompare(selectedFlatRows)}
+        />
+      )}
       {loadingData ? (
         <Bullseye>
           <Spinner />
@@ -147,11 +172,6 @@ function Table({ columns, data, onRowClick, loadingData }) {
                   {headerGroup.headers.map(column => (
                     <th {...column.getHeaderProps()}>
                       <div>
-                        {column.canGroupBy ? (
-                          <span {...column.getGroupByToggleProps()}>
-                            {column.isGrouped ? '* ' : ''}
-                          </span>
-                        ) : null}
                         <span {...column.getSortByToggleProps()}>
                           {column.render('Header')}
                           {column.isSorted ? (
@@ -175,7 +195,7 @@ function Table({ columns, data, onRowClick, loadingData }) {
               {page.map(row => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()} onClick={() => onRowClick(row.original)}>
+                  <tr {...row.getRowProps()}>
                     {row.cells.map(cell => {
                       return (
                         <td {...cell.getCellProps()}>
@@ -203,41 +223,21 @@ function Table({ columns, data, onRowClick, loadingData }) {
       )}
       <Pagination
         itemCount={data.length}
-        onFirstClick={() => gotoPage(0)}
+        onFirstClick={() => gotoPage(1)}
         onPreviousClick={() => previousPage()}
         onNextClick={() => nextPage()}
         onLastClick={() => gotoPage(pageCount - 1)}
         onPerPageSelect={selectedPageSize => setPageSize(selectedPageSize)}
-        onSetPage={pageNumber => gotoPage(pageNumber)}
+        onSetPage={pageNumber => gotoPage(pageNumber - 1)}
       />
     </>
   );
 }
 
-const IndeterminateCheckbox = React.forwardRef(({ indeterminate, ...rest }, ref) => {
-  const defaultRef = React.useRef();
-  const resolvedRef = ref || defaultRef;
-
-  React.useEffect(
-    () => {
-      resolvedRef.current.indeterminate = indeterminate;
-    },
-    [resolvedRef, indeterminate]
-  );
-
-  return (
-    <>
-      <input type="checkbox" ref={resolvedRef} {...rest} />
-    </>
-  );
-});
-
 function TableWrapper(props) {
-  const { columns, data, onRowClick, loadingData } = props;
-
   return (
     <React.Fragment>
-      <Table columns={columns} data={data} onRowClick={onRowClick} loadingData={loadingData} />
+      <Table {...props} />
     </React.Fragment>
   );
 }

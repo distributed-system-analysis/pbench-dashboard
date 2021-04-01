@@ -152,7 +152,7 @@ class ComparisonSelect extends React.Component {
                         <Table
                           rowSelection={rowSelection}
                           columns={run.columns}
-                          dataSource={Object.values(run.iterations)}
+                          data={Object.values(run.iterations)}
                           bordered
                         />
                       </div>

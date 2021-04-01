@@ -155,43 +155,40 @@ class Sessions extends Component {
     const { loadingSessions } = this.props;
     const sessionColumns = [
       {
-        title: 'Session ID',
-        dataIndex: 'id',
-        key: 'id',
+        Header: 'Session ID',
+        accessor: 'id',
       },
       {
-        title: 'Description',
-        dataIndex: 'description',
-        key: 'description',
+        Header: 'Description',
+        accessor: 'description',
       },
       {
-        title: 'Last Updated',
-        dataIndex: 'updatedAt',
-        key: 'updatedAt',
-        defaultSortOrder: 'descend',
-        sorter: (a, b) => Date.parse(a.updatedAt) - Date.parse(b.updatedAt),
-        render: val => (
-          <Tooltip content={val}>
-            <span>{getDiffDate(val)}</span>
+        Header: 'Last Updated',
+        accessor: 'updatedAt',
+        Cell: row => (
+          <Tooltip content={row.value}>
+            <span>{getDiffDate(row.value)}</span>
           </Tooltip>
         ),
       },
       {
-        title: 'Actions',
-        dataIndex: 'actions',
-        key: 'actions',
-        render: (text, record) => (
-          <React.Fragment>
-            <Button variant="link" onClick={() => this.sessionStartModalToggle(record)}>
+        Header: 'Actions',
+        accessor: 'actions',
+        Cell: cell => (
+          <>
+            <Button variant="link" onClick={() => this.sessionStartModalToggle(cell.row.original)}>
               Start Session
             </Button>
-            <Button variant="link" onClick={() => this.sessionDescriptionModalToggle(record)}>
+            <Button
+              variant="link"
+              onClick={() => this.sessionDescriptionModalToggle(cell.row.original)}
+            >
               Edit
             </Button>
-            <Button variant="link" onClick={() => this.sessionDeleteModalToggle(record)}>
+            <Button variant="link" onClick={() => this.sessionDeleteModalToggle(cell.row.original)}>
               Delete
             </Button>
-          </React.Fragment>
+          </>
         ),
       },
     ];
@@ -207,7 +204,7 @@ class Sessions extends Component {
         <PageSection>
           <Card>
             <CardBody>
-              <Table columns={sessionColumns} dataSource={sessions} loading={loadingSessions} />
+              <Table columns={sessionColumns} data={sessions} loading={loadingSessions} />
             </CardBody>
           </Card>
         </PageSection>

@@ -51,40 +51,32 @@ afterAll(() => {
 });
 
 describe('search page component', () => {
-  test(
-    'should load mappings',
-    async () => {
-      await page.waitForSelector(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p'
-      );
-      const testField = await page.$eval(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p',
-        elem => elem.innerHTML
-      );
-      expect(testField).toBe('run');
-    },
-    30000
-  );
+  test('should load mappings', async () => {
+    await page.waitForSelector(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p'
+    );
+    const testField = await page.$eval(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p',
+      elem => elem.innerHTML
+    );
+    expect(testField).toBe('run');
+  });
 
-  test(
-    'should select field tag',
-    async () => {
-      await page.waitForSelector(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
-      );
-      await page.click(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
-      );
+  test('should select field tag', async () => {
+    await page.waitForSelector(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+    );
+    await page.click(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+    );
 
-      await page.waitForSelector(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
-      );
-      await page.click(
-        '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
-      );
-    },
-    30000
-  );
+    await page.waitForSelector(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+    );
+    await page.click(
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+    );
+  });
 
   test('should apply filter changes', async () => {
     await page.waitForSelector(
@@ -110,24 +102,17 @@ describe('search page component', () => {
     );
     await page.type(
       '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > input',
-      'test',
-      { delay: 50 }
+      'test'
     );
   });
 
   test('should execute search query', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button > svg',
-      { visible: true }
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button > svg'
     );
     await page.click(
       '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.pf-c-input-group > button'
     );
-    await page.waitForSelector('.ant-table-tbody > tr > td:nth-child(2)', { visible: true });
-    const testResult = await page.$eval(
-      '.ant-table-tbody > tr > td:nth-child(2)',
-      elem => elem.innerHTML
-    );
-    expect(testResult).toBe('test_run');
+    expect(mockSearch.hits.hits.length).toBe(100);
   });
 });

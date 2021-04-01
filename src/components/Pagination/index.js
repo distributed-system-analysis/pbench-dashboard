@@ -4,6 +4,7 @@ import { Pagination as PatternFlyPagination, PaginationVariant } from '@patternf
 export default class Pagination extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       page: 1,
       perPage: 20,
