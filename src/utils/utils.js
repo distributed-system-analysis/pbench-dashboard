@@ -83,17 +83,17 @@ export const insertTocTreeData = (tocResult, items = [], [head, ...tail]) => {
           key: Math.random(),
           size: fileData[head][0],
           mode: fileData[head][1],
-          children: [],
+          subRows: [],
         })
       );
     } else {
-      items.push((child = { name: head, key: Math.random(), children: [] }));
+      items.push((child = { name: head, key: Math.random(), subRows: [] }));
     }
   }
   if (tail.length > 0) {
-    insertTocTreeData(tocResult, child.children, tail);
+    insertTocTreeData(tocResult, child.subRows, tail);
   } else {
-    delete child.children;
+    delete child.subRows;
   }
   return items;
 };

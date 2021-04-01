@@ -61,9 +61,6 @@ export async function queryResults(params) {
     return request.post(endpoint, {
       data: {
         indices,
-        params: {
-          ignore_unavailable: true,
-        },
         payload: {
           _source: {
             includes: [
@@ -113,9 +110,6 @@ export async function queryResult(params) {
   return request.post(endpoint, {
     data: {
       indices,
-      params: {
-        ignore_unavailable: true,
-      },
       data: {
         query: {
           match: {
@@ -144,9 +138,6 @@ export async function queryTocResult(params) {
   return request.post(endpoint, {
     data: {
       indices,
-      params: {
-        ignore_unavailable: true,
-      },
     },
   });
 }
@@ -170,9 +161,6 @@ export async function queryIterationSamples(params) {
       request.post(endpoint, {
         data: {
           indices,
-          params: {
-            ignore_unavailable: true,
-          },
           payload: {
             size: 1000,
             query: {
@@ -265,9 +253,6 @@ export async function queryTimeseriesData(payload) {
             request.post(endpoint, {
               data: {
                 indices,
-                params: {
-                  ignore_unavailable: true,
-                },
                 payload: {
                   size: 1000,
                   query: {

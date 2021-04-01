@@ -47,17 +47,14 @@ afterAll(() => {
 });
 
 describe('session flow', () => {
-  test(
-    'should load controllers',
-    async () => {
-      await page.waitForSelector('.ant-table-row[data-row-key]', { visible: true });
-      const testController = await page.$eval('.ant-table-row', elem =>
-        elem.getAttribute('data-row-key')
-      );
-      expect(testController).toBe('controller_1');
-    },
-    30000
-  );
+  test('should load controllers', async () => {
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    const testController = await page.$eval(
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      elem => elem.innerHTML
+    );
+    expect(testController).toBe(mockControllers[0].controller);
+  });
 
   test('should generate user session', async () => {
     await page.waitForSelector('span > .pf-c-toolbar__item > .pf-c-button > svg > path');
@@ -74,14 +71,10 @@ describe('session flow', () => {
     );
   });
 
-  test(
-    'should copy session link',
-    async () => {
-      await page.waitForSelector(
-        '.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button'
-      );
-      await page.click('.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button');
-    },
-    30000
-  );
+  test('should copy session link', async () => {
+    await page.waitForSelector(
+      '.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button'
+    );
+    await page.click('.pf-l-bullseye > #pf-modal-part-1 > #pf-modal-part-3 > div > .pf-c-button');
+  });
 });

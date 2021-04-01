@@ -5,7 +5,7 @@ import RowSelection from './index';
 import Button from '../Button';
 
 const mockProps = {
-  selectedItems: ['item-1', 'item-2', 'item-3'],
+  selectedItems: 3,
   compareActionName: 'mockCompareValue',
   style: {},
   onCompare: jest.fn(),

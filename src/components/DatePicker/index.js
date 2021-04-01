@@ -1,9 +1,9 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { DatePicker } from 'antd';
 import { connect } from 'dva';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import styles from './index.less';
+import './index.less';
 
 const { RangePicker } = DatePicker;
 
@@ -51,31 +51,30 @@ class AntdDatePicker extends Component {
   };
 
   render() {
-    const { selectedDateRange } = this.props;
+    const { selectedDateRange, styles } = this.props;
+
     return (
-      <Fragment>
-        <RangePicker
-          separator="to"
-          className={styles.picker}
-          onChange={this.handleChange}
-          value={[
-            selectedDateRange.start ? moment(selectedDateRange.start) : moment().subtract(7, 'day'),
-            selectedDateRange.end ? moment(selectedDateRange.end) : moment(),
-          ]}
-          disabledDate={this.disabledDate}
-          size="default"
-          ranges={{
-            Today: [moment(), moment()],
-            'Last week': [moment().subtract(7, 'day'), moment()],
-            'Last month': [
-              moment()
-                .subtract(1, 'month')
-                .startOf('month'),
-              moment().startOf('month'),
-            ],
-          }}
-        />
-      </Fragment>
+      <RangePicker
+        separator="to"
+        style={styles}
+        onChange={this.handleChange}
+        value={[
+          selectedDateRange.start ? moment(selectedDateRange.start) : moment().subtract(7, 'day'),
+          selectedDateRange.end ? moment(selectedDateRange.end) : moment(),
+        ]}
+        disabledDate={this.disabledDate}
+        size="default"
+        ranges={{
+          Today: [moment(), moment()],
+          'Last week': [moment().subtract(7, 'day'), moment()],
+          'Last month': [
+            moment()
+              .subtract(1, 'month')
+              .startOf('month'),
+            moment().startOf('month'),
+          ],
+        }}
+      />
     );
   }
 }

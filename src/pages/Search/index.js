@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Tag, Spin, Popover, Descriptions } from 'antd';
+import { Spin } from 'antd';
 import {
   Form,
   Flex,
@@ -15,7 +15,6 @@ import { routerRedux } from 'dva/router';
 import _ from 'lodash';
 
 import Button from '@/components/Button';
-import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
 import SearchBar from '@/components/SearchBar';
 import Select from '@/components/Select';
@@ -200,8 +199,13 @@ class SearchList extends Component {
     });
   };
 
-  compareResults = () => {
+  compareResults = selectedRows => {
     const { dispatch } = this.props;
+
+    dispatch({
+      type: 'global/updateSelectedResults',
+      payload: selectedRows.map(row => row.original.result),
+    });
 
     this.commitRunSelections().then(() => {
       dispatch(
@@ -213,7 +217,7 @@ class SearchList extends Component {
   };
 
   render() {
-    const { selectedRuns, updateFiltersDisabled } = this.state;
+    const { updateFiltersDisabled } = this.state;
     const {
       mapping,
       selectedFields,
@@ -225,16 +229,10 @@ class SearchList extends Component {
 
     selectedFields.forEach(field => {
       columns.push({
-        title: field,
-        dataIndex: field,
-        key: field,
+        Header: field,
+        accessor: field,
       });
     });
-
-    const rowSelection = {
-      onSelect: (record, selected, selectedRows) => this.onSelectChange(selectedRows),
-      onSelectAll: (record, selected, selectedRows) => this.onSelectChange(selectedRows),
-    };
 
     return (
       <React.Fragment>
@@ -302,62 +300,13 @@ class SearchList extends Component {
         <PageSection>
           <Card>
             <CardBody>
-              <div>
-                <p style={{ fontWeight: '400', color: 'rgba(0,0,0,.50)' }}>
-                  {searchResults.resultCount !== undefined && `${searchResults.resultCount} hits`}
-                </p>
-                <RowSelection
-                  selectedItems={selectedRuns}
-                  compareActionName="Compare Results"
-                  onCompare={this.compareResults}
-                />
-                <br />
-                <div style={{ display: 'flex', flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {selectedRuns.map(run => {
-                    return (
-                      <div key={run['run.id']}>
-                        <Popover
-                          content={
-                            <Descriptions bordered column={1} size="small">
-                              {columns.map(column => {
-                                return (
-                                  <Descriptions.Item
-                                    key={column.dataIndex}
-                                    label={column.dataIndex}
-                                  >
-                                    {run[column.dataIndex]}
-                                  </Descriptions.Item>
-                                );
-                              })}
-                            </Descriptions>
-                          }
-                        >
-                          <Tag
-                            visible
-                            style={{ marginBottom: 8 }}
-                            closable
-                            onClose={() => this.onRemoveRun(run)}
-                          >
-                            {run['run.name']}
-                          </Tag>
-                        </Popover>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Table
-                  style={{ marginTop: 20 }}
-                  rowSelection={rowSelection}
-                  columns={columns}
-                  dataSource={searchResults.results}
-                  onRow={record => ({
-                    onClick: () => {
-                      this.retrieveResults([record]);
-                    },
-                  })}
-                  loading={loadingSearchResults}
-                />
-              </div>
+              <Table
+                onCompare={selectedRowIds => this.compareResults(selectedRowIds)}
+                columns={columns}
+                data={searchResults.results ? searchResults.results : []}
+                loading={loadingSearchResults}
+                isCheckable
+              />
             </CardBody>
           </Card>
         </PageSection>

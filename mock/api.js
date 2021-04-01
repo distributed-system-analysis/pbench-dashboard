@@ -6,8 +6,8 @@ const DEFAULT_SIZE = 100;
 export const mockIndices = new Array(DEFAULT_SIZE).fill().map(() => moment().format('YYYY-MM'));
 
 export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-  controller: casual.word,
-  key: casual.word,
+  controller: casual.word + index,
+  key: casual.word + index,
   last_modified_string: moment.utc() + index,
   last_modified_value: moment.utc() + index,
   results: casual.integer(1, DEFAULT_SIZE),
@@ -29,7 +29,7 @@ export const mockResults = {
           controller_dir: casual.word,
         },
         run: {
-          controller: casual.word,
+          controller: casual.word + index,
           name: casual.word,
           start: moment.utc() + index,
           end: moment.utc() + index,
@@ -275,7 +275,7 @@ export const mockSearch = {
 
 export const mockSessions = {
   data: {
-    urls: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+    sessions: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
       id: index + 1,
       config: '{}',
       description: casual.description,

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Form, Icon, Tabs } from 'antd';
 import {
   PageSection,
   PageSectionVariants,
@@ -10,17 +9,10 @@ import {
   TextContent,
   Card,
   CardBody,
-  Tooltip,
 } from '@patternfly/react-core';
 
-import SearchBar from '@/components/SearchBar';
-import RowSelection from '@/components/RowSelection';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
-import { isLoggedInUser } from '@/utils/utils';
-import styles from './index.less';
-
-const { TabPane } = Tabs;
 
 @connect(({ global, dashboard, loading, user, auth }) => ({
   selectedDateRange: global.selectedDateRange,
@@ -38,7 +30,6 @@ class Results extends Component {
 
     this.state = {
       results: props.results,
-      selectedRows: [],
     };
   }
 
@@ -66,8 +57,6 @@ class Results extends Component {
 
   onSelectChange = selectedRows => {
     const { dispatch } = this.props;
-
-    this.setState({ selectedRows });
 
     dispatch({
       type: 'global/updateSelectedResults',
@@ -110,8 +99,13 @@ class Results extends Component {
     });
   };
 
-  compareResults = () => {
+  compareResults = selectedRows => {
     const { dispatch } = this.props;
+
+    dispatch({
+      type: 'global/updateSelectedResults',
+      payload: selectedRows.map(row => row.original.result),
+    });
 
     dispatch(
       routerRedux.push({
@@ -125,7 +119,7 @@ class Results extends Component {
 
     dispatch({
       type: 'global/updateSelectedResults',
-      payload: params,
+      payload: [params],
     });
 
     dispatch(
@@ -158,72 +152,31 @@ class Results extends Component {
   };
 
   render() {
-    const { results, selectedRows } = this.state;
-    const { selectedControllers, loading, favoriteResults, auth } = this.props;
-    const rowSelection = {
-      // eslint-disable-next-line no-shadow
-      onSelect: (record, selected, selectedRows) => this.onSelectChange(selectedRows),
-    };
+    const { results } = this.state;
+    const { selectedControllers, loading } = this.props;
     const columns = [
       {
-        title: 'Result',
-        dataIndex: 'run.name',
-        key: 'run.name',
-        sorter: (a, b) => a.key.localeCompare(b.key),
-      },
-      {
-        title: 'Config',
-        dataIndex: 'run.config',
-        key: 'run.config',
-      },
-      {
-        title: 'Start Time',
-        dataIndex: 'run.start',
-        key: 'run.start',
-        sorter: (a, b) => a.startUnixTimestamp - b.startUnixTimestamp,
-        render: val => (
-          <Tooltip content={val}>
-            <span>{getDiffDate(val)}</span>
-          </Tooltip>
+        Header: 'Result',
+        accessor: 'result',
+        Cell: row => (
+          <span>
+            <a onClick={() => this.retrieveResults(row.cell.row)}>{row.value}</a>
+          </span>
         ),
       },
       {
-        title: 'End Time',
-        dataIndex: 'run.end',
-        key: 'run.end',
-        render: val => (
-          <Tooltip content={val}>
-            <span>{getDiffDate(val)}</span>
-          </Tooltip>
-        ),
+        Header: 'Config',
+        accessor: 'config',
       },
       {
-        title: 'Actions',
-        dataIndex: 'actions',
-        className: isLoggedInUser(auth) ? null : styles.hide,
-        key: 'actions',
-        render: (value, row) => {
-          // if already favorited return a filled star,
-          // else allow user to favorite a record
-          let isFavorite = false;
-          favoriteResults.forEach(item => {
-            if (item.key === row.key) {
-              isFavorite = true;
-            }
-          });
-          if (isFavorite) {
-            return (
-              <a onClick={e => this.removeResultFromFavorites(e, null, row)}>
-                <Icon type="star" theme="filled" />
-              </a>
-            );
-          }
-          return (
-            <a onClick={e => this.favoriteRecord(e, null, row)}>
-              <Icon type="star" />
-            </a>
-          );
-        },
+        Header: 'Start Time',
+        accessor: 'start',
+        Cell: row => <span>{getDiffDate(row.value)}</span>,
+      },
+      {
+        Header: 'End Time',
+        accessor: 'end',
+        Cell: row => <span>{getDiffDate(row.value)}</span>,
       },
     ];
 
@@ -234,52 +187,21 @@ class Results extends Component {
             <Text component="h1">{selectedControllers.join(', ')}</Text>
           </TextContent>
         </PageSection>
-        <Divider component="div" />
+        <Divider />
         <PageSection>
           <Card>
             <CardBody>
-              <Form layout="vertical">
-                <SearchBar
-                  style={{ marginBottom: 16 }}
-                  placeholder="Search results"
-                  onSearch={this.onSearch}
-                />
-                <RowSelection
-                  selectedItems={selectedRows}
-                  compareActionName="Compare Results"
-                  onCompare={this.compareResults}
-                />
-              </Form>
-              <Tabs type="card" style={{ marginTop: 16 }}>
-                <TabPane tab="Results" key="results">
-                  <Table
-                    rowSelection={rowSelection}
-                    columns={columns}
-                    dataSource={results}
-                    onRow={record => ({
-                      onClick: () => {
-                        this.retrieveResults([record]);
-                      },
-                    })}
-                    loading={loading}
-                    bordered
-                  />
-                </TabPane>
-                <TabPane tab="Favorites" key="favorites">
-                  <Table
-                    rowSelection={rowSelection}
-                    columns={columns}
-                    dataSource={favoriteResults}
-                    onRow={record => ({
-                      onClick: () => {
-                        this.retrieveResults([record]);
-                      },
-                    })}
-                    loading={loading}
-                    bordered
-                  />
-                </TabPane>
-              </Tabs>
+              <Table
+                onCompare={selectedRowIds => this.compareResults(selectedRowIds)}
+                columns={columns}
+                data={results}
+                onRowClick={record => {
+                  this.retrieveResults(record);
+                }}
+                loadingData={loading}
+                isCheckable
+                bordered
+              />
             </CardBody>
           </Card>
         </PageSection>

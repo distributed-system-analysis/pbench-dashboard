@@ -185,34 +185,33 @@ export const generateSampleTable = response => {
     run.aggregations.id.buckets.forEach(runId => {
       const iterationColumnsData = [
         {
-          title: 'Iteration Name',
-          dataIndex: 'name',
-          key: 'name',
+          Header: 'Iteration Name',
+          accessor: 'name',
         },
       ];
       runId.type.buckets.forEach(type => {
         iterationColumnsData.push({
-          title: type.key,
-          children: type.title.buckets.map(title => {
+          Header: type.key,
+          columns: type.title.buckets.map(title => {
             return {
-              title: title.key,
-              children: title.uid.buckets.map(uid => {
+              Header: title.key,
+              columns: title.uid.buckets.map(uid => {
                 return {
-                  title: `${type.key}-${title.key}-${uid.key}`,
-                  children: [
+                  Header: uid.key,
+                  columns: [
                     {
-                      title: 'mean',
-                      dataIndex: `${type.key}-${title.key}-${uid.key}-mean`,
+                      Header: 'mean',
+                      accessor: `${type.key}-${title.key}-${uid.key}-mean`,
                       key: `${type.key}-${title.key}-${uid.key}-mean`,
                     },
                     {
-                      title: 'stddevpct',
-                      dataIndex: `${type.key}-${title.key}-${uid.key}-stddevpct`,
+                      Header: 'stddevpct',
+                      accessor: `${type.key}-${title.key}-${uid.key}-stddevpct`,
                       key: `${type.key}-${title.key}-${uid.key}-stddevpct`,
                     },
                     {
-                      title: 'closest_sample',
-                      dataIndex: `${type.key}-${title.key}-${uid.key}-closest_sample`,
+                      Header: 'closest_sample',
+                      accessor: `${type.key}-${title.key}-${uid.key}-closest_sample`,
                       key: `${type.key}-${title.key}-${uid.key}-closest_sample`,
                     },
                   ],

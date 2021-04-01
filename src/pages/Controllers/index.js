@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Form, Icon, Tabs } from 'antd';
 import {
   PageSection,
   PageSectionVariants,
@@ -11,17 +10,13 @@ import {
   Card,
   CardBody,
   Spinner,
-  Tooltip,
 } from '@patternfly/react-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar } from '@fortawesome/free-solid-svg-icons';
 
-import SearchBar from '@/components/SearchBar';
 import AntdDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
-import { isLoggedInUser } from '@/utils/utils';
-import styles from './index.less';
-
-const { TabPane } = Tabs;
 
 @connect(({ datastore, global, dashboard, loading, user, auth }) => ({
   controllers: dashboard.controllers,
@@ -121,7 +116,7 @@ class Controllers extends Component {
 
     dispatch({
       type: 'global/updateSelectedControllers',
-      payload: [controller.key],
+      payload: [controller],
     }).then(() => {
       dispatch(
         routerRedux.push({
@@ -131,22 +126,18 @@ class Controllers extends Component {
     });
   };
 
-  favoriteRecord = (event, value, controller) => {
-    // Stop propagation from going to the next page
-    event.stopPropagation();
+  favoriteController = controller => {
     const { dispatch } = this.props;
-    // dispatch an action to favorite controller
+
     dispatch({
       type: 'user/favoriteController',
       payload: controller,
     });
   };
 
-  removeControllerFromFavorites = (event, value, controller) => {
-    // Stop propagation from going to the next page
-    event.stopPropagation();
+  unfavoriteController = controller => {
     const { dispatch } = this.props;
-    // dispatch an action to favorite controller
+
     dispatch({
       type: 'user/removeControllerFromFavorites',
       payload: controller,
@@ -155,58 +146,43 @@ class Controllers extends Component {
 
   render() {
     const { controllers } = this.state;
-    const { loadingControllers, favoriteControllers, auth } = this.props;
+    const { loadingControllers, favoriteControllers } = this.props;
     const columns = [
       {
-        title: 'Controller',
-        dataIndex: 'controller',
-        key: 'controller',
-        sorter: (a, b) => a.key.localeCompare(b.key),
-      },
-      {
-        title: 'Last Modified',
-        dataIndex: 'last_modified_string',
-        key: 'last_modified_string',
-        sorter: (a, b) => a.last_modified_value - b.last_modified_value,
-        render: val => (
-          <Tooltip content={val}>
-            <span>{getDiffDate(val)}</span>
-          </Tooltip>
+        Header: 'Controller',
+        accessor: 'controller',
+        Cell: row => (
+          <span>
+            <a onClick={() => this.retrieveResults(row.value)}>{row.value}</a>
+          </span>
         ),
       },
       {
-        title: 'Results',
-        dataIndex: 'results',
-        key: 'results',
-        sorter: (a, b) => a.results - b.results,
+        Header: 'Last Modified',
+        accessor: 'last_modified_value',
+        Cell: row => <span>{getDiffDate(row.value)}</span>,
       },
       {
-        title: 'Actions',
-        dataIndex: 'actions',
-        key: 'actions',
-        className: isLoggedInUser(auth) ? null : styles.hide,
-        render: (value, row) => {
-          // if already favorited return a filled star,
-          // else allow user to favorite a record
-          let isFavorite = false;
-          favoriteControllers.forEach(item => {
-            if (item.key === row.key) {
-              isFavorite = true;
-            }
-          });
-          if (isFavorite) {
-            return (
-              <a onClick={e => this.removeControllerFromFavorites(e, null, row)}>
-                <Icon type="star" theme="filled" />
-              </a>
-            );
-          }
-          return (
-            <a onClick={e => this.favoriteRecord(e, null, row)}>
-              <Icon type="star" />
-            </a>
-          );
-        },
+        Header: 'Results',
+        accessor: 'results',
+      },
+      {
+        Header: 'Favorited',
+        accessor: 'favorited',
+        Cell: cell =>
+          favoriteControllers.includes(cell.row.original.controller) ? (
+            <FontAwesomeIcon
+              color="gold"
+              icon={faStar}
+              onClick={() => this.unfavoriteController(cell.row.original.controller)}
+            />
+          ) : (
+            <FontAwesomeIcon
+              color="lightgrey"
+              icon={faStar}
+              onClick={() => this.favoriteController(cell.row.original.controller)}
+            />
+          ),
       },
     ];
 
@@ -226,45 +202,19 @@ class Controllers extends Component {
               />
             ) : (
               <CardBody>
-                <Form
-                  layout="inline"
-                  style={{ display: 'flex', flex: 1, alignItems: 'center', marginBottom: 16 }}
-                >
-                  <SearchBar
-                    style={{ marginRight: 32 }}
-                    placeholder="Search controllers"
-                    onSearch={this.onSearch}
-                  />
-                  <AntdDatePicker onChangeCallback={this.fetchControllers} />
-                </Form>
-                <Tabs type="card">
-                  <TabPane tab="Controllers" key="controllers">
-                    <Table
-                      style={{ marginTop: 20 }}
-                      columns={columns}
-                      dataSource={controllers}
-                      onRow={record => ({
-                        onClick: () => {
-                          this.retrieveResults(record);
-                        },
-                      })}
-                      loading={loadingControllers}
-                    />
-                  </TabPane>
-                  <TabPane tab="Favorites" key="favorites">
-                    <Table
-                      style={{ marginTop: 20 }}
-                      columns={columns}
-                      dataSource={favoriteControllers}
-                      onRow={record => ({
-                        onClick: () => {
-                          this.retrieveResults(record);
-                        },
-                      })}
-                      loading={loadingControllers}
-                    />
-                  </TabPane>
-                </Tabs>
+                <AntdDatePicker
+                  style={{ width: 400, marginBottom: 16 }}
+                  onChangeCallback={this.fetchControllers}
+                />
+                <Table
+                  style={{ marginTop: 20 }}
+                  columns={columns}
+                  data={controllers}
+                  onRowClick={record => {
+                    this.retrieveResults(record);
+                  }}
+                  loadingData={loadingControllers}
+                />
               </CardBody>
             )}
           </Card>

@@ -17,27 +17,49 @@ import {
   DataListItemCells,
   DataListCell,
 } from '@patternfly/react-core';
+import { AngleDownIcon, AngleRightIcon } from '@patternfly/react-icons';
 import Table from '@/components/Table';
 import TableFilterSelection from '@/components/TableFilterSelection';
 import { filterIterations } from '../../utils/parse';
 
 const tocColumns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    width: '60%',
+    // Build our expander column
+    id: 'expander', // Make sure it has an ID
+    Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded }) => (
+      <span {...getToggleAllRowsExpandedProps()}>
+        {isAllRowsExpanded ? <AngleDownIcon /> : <AngleRightIcon />}
+      </span>
+    ),
+    Cell: ({ row }) =>
+      // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
+      // to build the toggle for expanding a row
+      row.canExpand ? (
+        <span
+          {...row.getToggleRowExpandedProps({
+            style: {
+              // We can even use the row.depth property
+              // and paddingLeft to indicate the depth
+              // of the row
+              paddingLeft: `${row.depth * 2}rem`,
+            },
+          })}
+        >
+          {row.isExpanded ? <AngleDownIcon /> : <AngleRightIcon />}
+        </span>
+      ) : null,
   },
   {
-    title: 'Size',
-    dataIndex: 'size',
-    key: 'size',
-    width: '20%',
+    Header: 'Name',
+    accessor: 'name',
   },
   {
-    title: 'Mode',
-    dataIndex: 'mode',
-    key: 'mode',
+    Header: 'Size',
+    accessor: 'size',
+  },
+  {
+    Header: 'Mode',
+    accessor: 'mode',
   },
 ];
 
@@ -76,7 +98,7 @@ class Summary extends React.Component {
       type: 'dashboard/fetchResult',
       payload: {
         selectedDateRange,
-        result: selectedResults[0]['run.name'],
+        result: selectedResults[0].result,
       },
     });
     dispatch({
@@ -109,13 +131,21 @@ class Summary extends React.Component {
 
   render() {
     const { activeTabKey, resultIterations } = this.state;
-    const { loadingSummary, iterationParams, selectedControllers, tocResult, result } = this.props;
+    const {
+      loadingSummary,
+      iterationParams,
+      selectedControllers,
+      selectedResults,
+      tocResult,
+      result,
+    } = this.props;
 
     return (
       <React.Fragment>
         <PageSection variant={PageSectionVariants.light}>
           <TextContent>
             <Text component="h1">{selectedControllers.join(', ')}</Text>
+            <Text component="h1">{selectedResults[0].result}</Text>
           </TextContent>
         </PageSection>
         <PageSection padding="noPadding" isFilled>
@@ -135,12 +165,16 @@ class Summary extends React.Component {
                     <Table
                       style={{ marginTop: 16 }}
                       columns={
-                        resultIterations[Object.keys(resultIterations)[0]] &&
-                        resultIterations[Object.keys(resultIterations)[0]].columns
+                        resultIterations[Object.keys(resultIterations)[0]]
+                          ? resultIterations[Object.keys(resultIterations)[0]].columns
+                          : []
                       }
-                      dataSource={
-                        resultIterations[Object.keys(resultIterations)[0]] &&
-                        Object.values(resultIterations[Object.keys(resultIterations)[0]].iterations)
+                      data={
+                        resultIterations[Object.keys(resultIterations)[0]]
+                          ? Object.values(
+                              resultIterations[Object.keys(resultIterations)[0]].iterations
+                            )
+                          : []
                       }
                       bordered
                     />
@@ -151,7 +185,7 @@ class Summary extends React.Component {
             <Tab eventKey={1} title={<TabTitleText>Table of Contents</TabTitleText>}>
               <Card>
                 <CardBody>
-                  <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
+                  <Table columns={tocColumns} data={tocResult} defaultExpandAllRows isExpandable />
                 </CardBody>
               </Card>
             </Tab>
