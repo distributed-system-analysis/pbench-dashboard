@@ -117,43 +117,27 @@ export default {
     },
     *fetchTocResult({ payload }, { call, put }) {
       const response = yield call(queryTocResult, payload);
-      const tocResult = [];
-      const extension = [];
-      const fileNames = [];
-      response.hits.hits.map(result => {
+      const tocResult = {};
+
+      response.hits.hits.forEach(result => {
         // eslint-disable-next-line no-underscore-dangle
         const source = result._source;
+
         if (source.files !== undefined) {
-          source.files.map(path => {
-            fileNames.push(path);
-            const ext = path.name.split('.');
-            if (!extension.includes(ext[ext.length - 1])) {
-              extension.push(ext[ext.length - 1]);
-            }
-            if (source.directory === '/') {
-              source.directory = '/';
-            }
-            const url = `${source.directory}/${path.name}`;
-            tocResult[url] = [path.size, path.mode, url];
-            return tocResult;
+          source.files.forEach(path => {
+            const url = source.directory + path.name;
+            tocResult[url] = [path.size, path.mode];
           });
         }
-        return tocResult;
       });
-      // eslint-disable-next-line
-      const reg = /\/[^\/]*/gm;
-      const tocTree = Object.keys(tocResult)
-        .map(path => path.match(reg))
-        .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
 
-      const summaryTocResult = {
-        tocResult: tocTree,
-        extension,
-        fileNames,
-      };
+      const tocTree = Object.keys(tocResult)
+        .map(path => path.split('/'))
+        .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
+      console.log(tocTree);
       yield put({
         type: 'getTocResult',
-        payload: summaryTocResult,
+        payload: tocTree,
       });
     },
     *fetchIterationSamples({ payload }, { call, put }) {
