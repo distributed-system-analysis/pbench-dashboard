@@ -18,26 +18,40 @@ import {
   DataListCell,
 } from '@patternfly/react-core';
 import Table from '@/components/Table';
+import TableTree from '@/components/TableTree';
 import TableFilterSelection from '@/components/TableFilterSelection';
 import { filterIterations } from '../../utils/parse';
 
 const tocColumns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    width: '60%',
+    id: 'expander',
+    Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded }) => (
+      <span {...getToggleAllRowsExpandedProps()}>{isAllRowsExpanded ? '-' : '+'}</span>
+    ),
+    Cell: ({ row }) =>
+      row.canExpand ? (
+        <span
+          {...row.getToggleRowExpandedProps({
+            style: {
+              paddingLeft: `${row.depth * 2}rem`,
+            },
+          })}
+        >
+          {row.isExpanded ? '-' : '+'}
+        </span>
+      ) : null,
   },
   {
-    title: 'Size',
-    dataIndex: 'size',
-    key: 'size',
-    width: '20%',
+    Header: 'Name',
+    accessor: 'name',
   },
   {
-    title: 'Mode',
-    dataIndex: 'mode',
-    key: 'mode',
+    Header: 'Size',
+    accessor: 'size',
+  },
+  {
+    Header: 'Mode',
+    accessor: 'mode',
   },
 ];
 
@@ -67,7 +81,6 @@ class Summary extends React.Component {
 
   componentDidMount() {
     const { dispatch, selectedDateRange, selectedResults } = this.props;
-
     dispatch({
       type: 'dashboard/fetchIterationSamples',
       payload: { selectedResults, selectedDateRange },
@@ -77,6 +90,7 @@ class Summary extends React.Component {
       payload: {
         selectedDateRange,
         result: selectedResults[0]['run.name'],
+        parent: '',
       },
     });
     dispatch({
@@ -84,6 +98,7 @@ class Summary extends React.Component {
       payload: {
         selectedDateRange,
         id: selectedResults[0].id,
+        parent: '/',
       },
     });
   }
@@ -105,6 +120,18 @@ class Summary extends React.Component {
 
   onTabChange = (event, tabIndex) => {
     this.setState({ activeTabKey: tabIndex });
+  };
+
+  getMoreToCResult = name => {
+    const { dispatch, selectedDateRange, selectedResults } = this.props;
+    dispatch({
+      type: 'dashboard/fetchTocResult',
+      payload: {
+        selectedDateRange,
+        id: selectedResults[0].id,
+        parent: name,
+      },
+    });
   };
 
   render() {
@@ -151,7 +178,13 @@ class Summary extends React.Component {
             <Tab eventKey={1} title={<TabTitleText>Table of Contents</TabTitleText>}>
               <Card>
                 <CardBody>
-                  <Table columns={tocColumns} dataSource={tocResult} defaultExpandAllRows />
+                  <TableTree
+                    columns={tocColumns}
+                    data={tocResult}
+                    // onRow={r => ({
+                    //   onClick: () => this.getMoreToCResult(`/${r.name}`),
+                    // })}
+                  />
                 </CardBody>
               </Card>
             </Tab>

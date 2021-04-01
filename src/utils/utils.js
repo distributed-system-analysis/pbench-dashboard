@@ -67,12 +67,15 @@ export function isUrl(path) {
   return reg.test(path);
 }
 
+const fileData = [];
 export const insertTocTreeData = (tocResult, items = [], [head, ...tail]) => {
   const tocResultCopy = Object.assign({}, tocResult);
-  const fileData = [];
-
-  if (tocResultCopy[`/${[head, ...tail].join('/')}`] !== undefined) {
-    fileData[tail[tail.length - 1]] = tocResultCopy[`/${[head, ...tail].join('/')}`];
+  if (tocResultCopy[`${[head, ...tail].join('/')}`] !== undefined) {
+    if (tail[tail.length - 1] !== undefined) {
+      fileData[tail[tail.length - 1]] = tocResult[`${[head, ...tail].join('/')}`];
+    } else {
+      fileData[head] = tocResult[`${[head, ...tail].join('/')}`];
+    }
   }
   let child = items.find(childNode => childNode.name === head);
   if (!child) {
@@ -83,17 +86,18 @@ export const insertTocTreeData = (tocResult, items = [], [head, ...tail]) => {
           key: Math.random(),
           size: fileData[head][0],
           mode: fileData[head][1],
-          children: [],
+          url: fileData[head][2],
+          subRows: [],
         })
       );
     } else {
-      items.push((child = { name: head, key: Math.random(), children: [] }));
+      items.push((child = { name: head, key: Math.random(), subRows: [], url: '' }));
     }
   }
   if (tail.length > 0) {
-    insertTocTreeData(tocResult, child.children, tail);
+    insertTocTreeData(tocResult, child.subRows, tail);
   } else {
-    delete child.children;
+    delete child.subRows;
   }
   return items;
 };

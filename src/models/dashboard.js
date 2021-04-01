@@ -132,9 +132,9 @@ export default {
       });
 
       const tocTree = Object.keys(tocResult)
-        .map(path => path.split('/').slice(1))
+        .map(path => path.split('/'))
         .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
-
+      console.log(tocTree);
       yield put({
         type: 'getTocResult',
         payload: tocTree,
