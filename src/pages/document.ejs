@@ -10,7 +10,7 @@
   
   <!-- runtime endpoints config -->
   <script type="text/javascript">
-    fetch( '<%= context.config.define.ENDPOINTS_ENV %>' )
+    fetch( '/api/v1/endpoints' )
       .then(response => {
         console.log(`RESPONSE: ${response.status},${response.statusText}`);
         if (response.ok) {
