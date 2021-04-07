@@ -4,7 +4,7 @@ export default {
   // Note: typeof(process.env.MOCK) === string
   define: {
     MOCK_UI: process.env.MOCK === 'true',
-    ENDPOINTS_ENV: process.env.MOCK === 'true' ? 'endpoints.mock.js' : 'endpoints.js',
+    ENDPOINTS_ENV: process.env.MOCK === 'true' ? '/mock/endpoints.mock.json' : '/api/v1/endpoints',
   },
   dynamicImport: undefined,
   base: '/dashboard/',
