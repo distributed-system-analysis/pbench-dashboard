@@ -1,15 +1,15 @@
+/* eslint-disable no-underscore-dangle */
 import React from 'react';
-import PropTypes from 'prop-types';
 import DocumentTitle from 'react-document-title';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
-import { getDvaApp } from 'umi';
-import pathToRegexp from 'path-to-regexp';
 import memoizeOne from 'memoize-one';
 import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
+import { getDvaApp } from 'umi';
+import pathToRegexp from 'path-to-regexp';
 import {
   Page,
   Bullseye,
@@ -25,10 +25,13 @@ import {
   ModalVariant,
   AlertGroup,
   AlertActionCloseButton,
+  PageSection,
+  PageSectionVariants
 } from '@patternfly/react-core';
 import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
+import RenderBreadcrumb from '@/components/Breadcrumb';
 
 const redirectData = [];
 const getRedirect = item => {
@@ -60,7 +63,6 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   mergeMeunAndRouter(menu);
   return routerMap;
 }, deepEqual);
-
 @connect(({ sessions, loading, auth }) => ({
   sessionBannerVisible: sessions.sessionBannerVisible,
   sessionDescription: sessions.sessionDescription,
@@ -70,13 +72,6 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   errorMessage: auth.errorMessage,
 }))
 class BasicLayout extends React.PureComponent {
-  static childContextTypes = {
-    location: PropTypes.object,
-    breadcrumbNameMap: PropTypes.object,
-    routes: PropTypes.array,
-    params: PropTypes.object,
-  };
-
   constructor(props) {
     super(props);
     this.getPageTitle = memoizeOne(this.getPageTitle);
@@ -87,27 +82,43 @@ class BasicLayout extends React.PureComponent {
 
     this.state = {
       sessionExitModalVisible: false,
+      breadcrumb: {},
     };
   }
 
-  getChildContext() {
-    const { location } = this.props;
-    const { route } = this.props;
-    return {
-      location,
-      breadcrumbNameMap: this.breadcrumbNameMap,
-      routes: route.routes,
-    };
-  }
-
-  getPageTitle = pathname => {
-    let currRouterData = null;
-    // match params path
-    Object.keys(this.breadcrumbNameMap).forEach(key => {
-      if (pathToRegexp(key).test(pathname)) {
-        currRouterData = this.breadcrumbNameMap[key];
+  componentDidMount() {
+    const {
+      location: { pathname },
+    } = this.props;
+    let exactPath = {};
+    Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
+      if (routeMap.endsWith(pathname)) {
+        exactPath = this.breadcrumbNameMap[routeMap];
       }
     });
+    this.setState({
+      breadcrumb: exactPath,
+    });
+  }
+
+  // When router data updates
+  componentDidUpdate() {
+    const {
+      location: { pathname },
+    } = this.props;
+    let exactPath = {};
+    Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
+      if (routeMap.endsWith(pathname)) {
+        exactPath = this.breadcrumbNameMap[routeMap];
+      }
+    });
+    this.setState({
+      breadcrumb: exactPath,
+    });
+  }
+
+  getPageTitle = () => {
+    const currRouterData = null;
     if (!currRouterData) {
       return 'Pbench Dashboard';
     }
@@ -152,13 +163,13 @@ class BasicLayout extends React.PureComponent {
       sessionBannerVisible,
       sessionDescription,
       sessionId,
-      children,
       location: { pathname },
       username,
+      children,
       errorMessage,
     } = this.props;
 
-    const { sessionExitModalVisible } = this.state;
+    const { sessionExitModalVisible, breadcrumb } = this.state;
 
     return (
       <React.Fragment>
@@ -229,6 +240,9 @@ class BasicLayout extends React.PureComponent {
                 </Bullseye>
               }
             >
+              <PageSection style={{ paddingBottom: 0 }} variant={PageSectionVariants.light}>
+                <RenderBreadcrumb context={breadcrumb} currLocation={pathname} />
+              </PageSection>
               {children}
             </PersistGate>
           </Page>
