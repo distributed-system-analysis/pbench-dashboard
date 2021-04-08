@@ -1,15 +1,13 @@
+/* eslint-disable no-underscore-dangle */
 import React from 'react';
-import PropTypes from 'prop-types';
 import DocumentTitle from 'react-document-title';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
-import { getDvaApp } from 'umi';
-import pathToRegexp from 'path-to-regexp';
 import memoizeOne from 'memoize-one';
-import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
+import { getDvaApp } from 'umi';
 import {
   Page,
   Bullseye,
@@ -25,41 +23,13 @@ import {
   ModalVariant,
   AlertGroup,
   AlertActionCloseButton,
+  PageSection,
+  PageSectionVariants,
 } from '@patternfly/react-core';
 import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
-
-const redirectData = [];
-const getRedirect = item => {
-  if (item && item.children) {
-    if (item.children[0] && item.children[0].path) {
-      redirectData.push({
-        from: `${item.path}`,
-        to: `${item.children[0].path}`,
-      });
-      item.children.forEach(children => {
-        getRedirect(children);
-      });
-    }
-  }
-};
-getMenuData().forEach(getRedirect);
-
-const getBreadcrumbNameMap = memoizeOne(menu => {
-  const routerMap = {};
-  const mergeMeunAndRouter = menuData => {
-    menuData.forEach(menuItem => {
-      if (menuItem.routes) {
-        mergeMeunAndRouter(menuItem.routes);
-      }
-      // Reduce memory usage
-      routerMap[menuItem.path] = menuItem;
-    });
-  };
-  mergeMeunAndRouter(menu);
-  return routerMap;
-}, deepEqual);
+import RenderBreadcrumb from '@/components/Breadcrumb';
 
 @connect(({ sessions, loading, auth }) => ({
   sessionBannerVisible: sessions.sessionBannerVisible,
@@ -70,44 +40,57 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   errorMessage: auth.errorMessage,
 }))
 class BasicLayout extends React.PureComponent {
-  static childContextTypes = {
-    location: PropTypes.object,
-    breadcrumbNameMap: PropTypes.object,
-    routes: PropTypes.array,
-    params: PropTypes.object,
-  };
-
   constructor(props) {
     super(props);
     this.getPageTitle = memoizeOne(this.getPageTitle);
-    this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
+    this.breadcrumbNameMap = getMenuData();
+
     // eslint-disable-next-line no-underscore-dangle
     const app = getDvaApp();
     this.persistor = persistStore(app._store);
 
     this.state = {
       sessionExitModalVisible: false,
+      breadcrumb: {},
+      showLoginBanner: true,
     };
   }
 
-  getChildContext() {
-    const { location } = this.props;
-    const { route } = this.props;
-    return {
-      location,
-      breadcrumbNameMap: this.breadcrumbNameMap,
-      routes: route.routes,
-    };
-  }
+  componentDidMount() {
+    const {
+      location: { pathname },
+    } = this.props;
+    // find the current route from menuData.
+    const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
 
-  getPageTitle = pathname => {
-    let currRouterData = null;
-    // match params path
-    Object.keys(this.breadcrumbNameMap).forEach(key => {
-      if (pathToRegexp(key).test(pathname)) {
-        currRouterData = this.breadcrumbNameMap[key];
-      }
+    this.setState({
+      breadcrumb: currRouteMap,
     });
+  }
+
+  // When router data updates
+  componentDidUpdate(prevProps) {
+    const {
+      location: { pathname },
+    } = this.props;
+    if (prevProps.location.pathname !== pathname) {
+      // find the current route from menuData.
+      const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
+
+      this.setState({
+        breadcrumb: currRouteMap,
+      });
+    }
+  }
+
+  closeLoginHint = () => {
+    this.setState({
+      showLoginBanner: false,
+    });
+  };
+
+  getPageTitle = () => {
+    const currRouterData = null;
     if (!currRouterData) {
       return 'Pbench Dashboard';
     }
@@ -152,13 +135,13 @@ class BasicLayout extends React.PureComponent {
       sessionBannerVisible,
       sessionDescription,
       sessionId,
-      children,
       location: { pathname },
       username,
+      children,
       errorMessage,
     } = this.props;
 
-    const { sessionExitModalVisible } = this.state;
+    const { sessionExitModalVisible, breadcrumb, showLoginBanner } = this.state;
 
     return (
       <React.Fragment>
@@ -206,7 +189,9 @@ class BasicLayout extends React.PureComponent {
                 </DescriptionList>
               </Alert>
             )}
-            {username ? '' : <LoginHint />}
+            {username
+              ? ''
+              : showLoginBanner && <LoginHint closeLoginHint={() => this.closeLoginHint()} />}
             <Modal
               variant={ModalVariant.small}
               title="Confirm session exit"
@@ -229,6 +214,12 @@ class BasicLayout extends React.PureComponent {
                 </Bullseye>
               }
             >
+              <PageSection
+                style={showLoginBanner ? { paddingBottom: 0 } : { marginTop: 0, paddingBottom: 0 }}
+                variant={PageSectionVariants.light}
+              >
+                {breadcrumb.parent && <RenderBreadcrumb context={breadcrumb} />}
+              </PageSection>
               {children}
             </PersistGate>
           </Page>
