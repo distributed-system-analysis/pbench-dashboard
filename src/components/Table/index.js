@@ -195,7 +195,7 @@ function Table({ columns, data, isCheckable, onCompare, loadingData }) {
               {page.map(row => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()}>
+                  <tr className="pf-m-hoverable" {...row.getRowProps()}>
                     {row.cells.map(cell => {
                       return (
                         <td {...cell.getCellProps()}>
