@@ -51,12 +51,12 @@ class AntdDatePicker extends Component {
   };
 
   render() {
-    const { selectedDateRange, styles } = this.props;
+    const { selectedDateRange, style } = this.props;
 
     return (
       <RangePicker
         separator="to"
-        style={styles}
+        style={style}
         onChange={this.handleChange}
         value={[
           selectedDateRange.start ? moment(selectedDateRange.start) : moment().subtract(7, 'day'),
