@@ -1,6 +1,8 @@
 import puppeteer from 'puppeteer';
 import { mockControllers, mockIndices } from '../../mock/api';
 
+jest.setTimeout(30000);
+
 let browser;
 let page;
 
