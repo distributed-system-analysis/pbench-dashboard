@@ -16,10 +16,10 @@ fi
 printf -- "... done running \"yarn install\" command.\n" 
 printf -- "NODE_ENV=%s\n" "${NODE_ENV}"
 printf -- "Running \"yarn start\" command in the background...\n" 
-yarn start &
+yarn start:mock &
 yarn_start_pid=${!}
 if [[ -z "${yarn_start_pid}" ]]; then
-    printf -- "yarn e2e tests failed! (could not execute \"yarn start\" in background)\n" >&2
+    printf -- "yarn e2e tests failed! (could not execute \"yarn start:mock\" in background)\n" >&2
     exit 1
 fi
 # Wait checking once a second for the web server to show up on port
@@ -37,7 +37,7 @@ done
 curl -X GET http://localhost:8000/dashboard/
 res=${?}
 if [[ ${res} -eq 0 ]]; then
-    printf -- "... \"yarn start\" web server up and running.\n" 
+    printf -- "... \"yarn start:mock\" web server up and running.\n" 
 
     # Now that the web server is running in the background, we can run
     # the E2E tests which drive a headless browser against our server.
@@ -46,7 +46,7 @@ if [[ ${res} -eq 0 ]]; then
     res=${?}
     printf -- "... E2E tests finished (%s).\n" ${res}
 else
-    printf -- "... \"yarn start\" failed to start web server (%s).\n" ${res} 
+    printf -- "... \"yarn start:mock\" failed to start web server (%s).\n" ${res} 
 fi
 # The yarn start process leaves many processes lying around unless we
 # explicitly kill them.
