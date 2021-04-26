@@ -35,9 +35,6 @@ export async function queryControllers(params) {
         start: selectedDateRange.start,
         end: selectedDateRange.end,
       },
-      headers: {
-        Authorization: 'Bearer xyzzy', // TODO: real auth token
-      },
     });
   } catch (err) {
     throw err;
@@ -53,9 +50,7 @@ export async function queryResults(params) {
       endpoints.indices.run_index,
       selectedDateRange
     )}/_search`;
-    const endpoint = MOCK_UI
-      ? endpoints.api.datasets_list
-      : endpoints.api.elasticsearch;
+    const endpoint = MOCK_UI ? endpoints.api.datasets_list : endpoints.api.elasticsearch;
 
     return request.post(endpoint, {
       data: {
@@ -102,9 +97,7 @@ export async function queryResult(params) {
     selectedDateRange
   )}/_search`;
 
-  const endpoint = MOCK_UI
-    ? endpoints.api.datasets_detail
-    : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? endpoints.api.datasets_detail : endpoints.api.elasticsearch;
 
   return request.post(endpoint, {
     data: {
@@ -130,9 +123,7 @@ export async function queryTocResult(params) {
     selectedDateRange
   )}/_search?q=run_data_parent:"${id}"`;
 
-  const endpoint = MOCK_UI
-    ? endpoints.api.datasets_toc
-    : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? endpoints.api.datasets_toc : endpoints.api.elasticsearch;
 
   return request.post(endpoint, {
     data: {
@@ -150,9 +141,7 @@ export async function queryIterationSamples(params) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = MOCK_UI
-    ? endpoints.api.datasets_samples
-    : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? endpoints.api.datasets_samples : endpoints.api.elasticsearch;
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
@@ -238,9 +227,7 @@ export async function queryTimeseriesData(payload) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = MOCK_UI
-    ? endpoints.api.datasets_timeseries
-    : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? endpoints.api.datasets_timeseries : endpoints.api.elasticsearch;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {
