@@ -9,7 +9,21 @@
   <link rel="icon" href="<%= context.config.publicPath +'favicon.ico'%>" type="image/x-icon">
   
   <!-- runtime endpoints config -->
-  <script src="<%= context.config.publicPath + context.config.define.ENDPOINTS_ENV%>"></script>
+  <script type="text/javascript">
+    fetch( '/api/v1/endpoints' )
+      .then(response => {
+        console.log(`RESPONSE: ${response.status},${response.statusText}`);
+        if (response.ok) {
+          response.text().then(data => {
+            console.log(`ENDPOINTS: ${data}`);
+            window.endpoints = JSON.parse(data);
+          }).catch(error => console.log(`ERROR data: ${error}`))
+        } else {
+          console.log(`NOTOK: ${response}`);
+        }
+      })
+      .catch(error => console.log(`ERROR: ${error}`));
+  </script>
 </head>
 
 <body>

@@ -28,10 +28,10 @@ export function getAllMonthsWithinRange(endpoints, index, selectedDateRange) {
     monthResults.push(referenceDate.format('YYYY-MM'));
   }
   monthResults.forEach(monthValue => {
-    if (index === endpoints.result_index) {
-      queryString += `${endpoints.prefix + index + monthValue}-*,`;
+    if (index === endpoints.indices.result_index) {
+      queryString += `${index + monthValue}-*,`;
     } else {
-      queryString += `${endpoints.prefix + index + monthValue},`;
+      queryString += `${index + monthValue},`;
     }
   });
   return queryString;
