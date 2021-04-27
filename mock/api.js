@@ -255,6 +255,12 @@ export const mockMappings = {
   },
 };
 
+export const mockTimeseries = {
+  // TODO: need to figure out how to mock the series of queries we make
+  // in queryTimeseriesData. This doesn't appear to have been mocked before
+  // and maybe isn't tested (seems to be used only in the Compare function)
+};
+
 export const mockSearch = {
   hits: {
     total: DEFAULT_SIZE,
@@ -298,6 +304,17 @@ export const mockEndpoints = {
   api: {
     controllers_list: '/controllers/list',
     controllers_months: '/controllers/months',
+
+    // NOTE: these are not implemented in the server yet, but are defined
+    // below as mocks for testing
+    datasets_list: '/datasets/list',
+    datasets_detail: '/datasets/detail',
+    datasets_toc: '/datasets/toc',
+    datasets_samples: '/datasets/samples',
+    datasets_timeseries: '/datasets/timeseries',
+    mappings: '/mappings',
+    search: '/search',
+    // END test-only mock endpoints
     elasticsearch: '/elasticsearch',
     endpoints: '/endpoints',
     graphql: '/graphql',
@@ -326,6 +343,7 @@ export default {
   'POST /datasets/detail': mockDetail,
   'POST /datasets/toc': mockTableContents,
   'POST /datasets/samples': mockSamples,
+  'POST /datasets/timeseries': mockTimeseries,
   'POST /mappings': mockMappings,
   'POST /search': mockSearch,
   'POST /sessions/list': mockSessions,

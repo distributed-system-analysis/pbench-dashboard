@@ -145,7 +145,7 @@ export async function queryIterationSamples(params) {
   const iterationSampleRequests = [];
   selectedResults.forEach(run => {
     iterationSampleRequests.push(
-      request.post(endpoints.api.elasticsearch, {
+      request.post(endpoint, {
         data: {
           indices,
           payload: {
@@ -235,7 +235,7 @@ export async function queryTimeseriesData(payload) {
       Object.entries(iteration.samples).forEach(([, sample]) => {
         if (sample.benchmark.primary_metric === sample.sample.measurement_title) {
           timeseriesRequests.push(
-            request.post(endpoints.api.elasticsearch, {
+            request.post(endpoint, {
               data: {
                 indices,
                 payload: {
