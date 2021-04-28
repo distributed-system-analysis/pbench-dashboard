@@ -69,10 +69,10 @@ class Controllers extends Component {
   };
 
   fetchControllers = () => {
-    const { dispatch, selectedDateRange } = this.props;
+    const { dispatch, selectedDateRange, username } = this.props;
     dispatch({
       type: 'dashboard/fetchControllers',
-      payload: { selectedDateRange },
+      payload: { selectedDateRange, username },
     });
   };
 
