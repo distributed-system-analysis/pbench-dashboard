@@ -1,8 +1,16 @@
 tr > td > span > a {
-  text-decoration: none !important;
   color: inherit !important;
+  text-decoration: none !important;
 }
 
 .table-wrapper {
   overflow-x: auto;
+}
+
+a:hover {
+  font-weight: normal !important;
+}
+
+tr:is(.pf-m-hoverable):hover {
+  background: aliceblue;
 }
