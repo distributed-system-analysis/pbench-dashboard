@@ -1,10 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Flex, FlexItem } from '@patternfly/react-core';
-
+import {
+  Button,
+  Form,
+  Flex,
+  FlexItem,
+  Dropdown,
+  DropdownToggle,
+  DropdownItem,
+} from '@patternfly/react-core';
 import Select from '@/components/Select';
-
-import Button from '../Button';
+import styles from './index.less';
 
 export default class TableFilterSelection extends Component {
   static propTypes = {
@@ -18,15 +24,15 @@ export default class TableFilterSelection extends Component {
     this.state = {
       selectedFilters: {},
       updateFiltersDisabled: true,
+      isOpen: false,
     };
   }
 
   onFilterTable = () => {
     const { selectedFilters } = this.state;
     const { onFilterTable } = this.props;
-
     onFilterTable(selectedFilters);
-    this.setState({ updateFiltersDisabled: true });
+    this.setState({ updateFiltersDisabled: true, isOpen: false });
   };
 
   onFilterChange = (event, value, category) => {
@@ -51,49 +57,65 @@ export default class TableFilterSelection extends Component {
     this.setState({ updateFiltersDisabled: false });
   };
 
+  onToggle = isOpen => {
+    this.setState({
+      isOpen,
+    });
+  };
+
   render() {
     const { filters } = this.props;
-    const { selectedFilters, updateFiltersDisabled } = this.state;
+    const { selectedFilters, updateFiltersDisabled, isOpen } = this.state;
+
+    const dropdownItems = [
+      <DropdownItem style={{ width: '50vw' }}>
+        <div>
+          <Form className={styles.form}>
+            <Flex>
+              {Object.keys(filters).map(category => (
+                <FlexItem key={category} style={{ marginRight: 16, marginBottom: 16, width: 160 }}>
+                  <p style={{ marginBottom: 4, fontSize: 12, fontWeight: 600 }}>{category}</p>
+                  <Select
+                    key={category}
+                    selected={selectedFilters[category]}
+                    options={filters[category]}
+                    onSelect={(event, value) => this.onFilterChange(event, value, category)}
+                  />
+                </FlexItem>
+              ))}
+            </Flex>
+            <Button
+              variant="primary"
+              type="submit"
+              isDisabled={updateFiltersDisabled}
+              onClick={this.onFilterTable}
+            >
+              Save
+            </Button>
+          </Form>
+        </div>
+      </DropdownItem>,
+    ];
 
     return (
       <div>
-        <Form
-          style={{
-            padding: '24px',
-            backgroundColor: '#FAFAFA',
-            border: '1px solid #D9D9D9',
-            borderRadius: '6px',
-          }}
+        <Dropdown
+          toggle={
+            <DropdownToggle onToggle={this.onToggle} className={styles.primaryBtn} id="button">
+              Apply Filters
+            </DropdownToggle>
+          }
+          isOpen={isOpen}
+          dropdownItems={dropdownItems}
+        />
+        <Button
+          variant="plain"
+          aria-label="Action"
+          className={styles.btn}
+          onClick={this.onClearFilters}
         >
-          <Flex>
-            {Object.keys(filters).map(category => (
-              <FlexItem key={category} style={{ marginRight: 16, marginBottom: 16, width: 160 }}>
-                <p style={{ marginBottom: 4, fontSize: 12, fontWeight: 600 }}>{category}</p>
-                <Select
-                  key={category}
-                  selected={selectedFilters[category]}
-                  options={filters[category]}
-                  category={category}
-                  onSelect={(event, value) => this.onFilterChange(event, value, category)}
-                />
-              </FlexItem>
-            ))}
-          </Flex>
-          <div style={{ textAlign: 'right' }}>
-            <Button
-              type="primary"
-              name="Filter"
-              disabled={updateFiltersDisabled}
-              onClick={this.onFilterTable}
-            />
-            <Button
-              type="secondary"
-              style={{ marginLeft: 8 }}
-              onClick={this.onClearFilters}
-              name="Clear"
-            />
-          </div>
-        </Form>
+          Clear all Filters
+        </Button>
       </div>
     );
   }

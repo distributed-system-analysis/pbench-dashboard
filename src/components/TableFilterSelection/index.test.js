@@ -1,8 +1,8 @@
 import React from 'react';
 import { shallow, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { Button } from '@patternfly/react-core';
 import TableFilterSelection from './index';
-import Button from '../Button';
 
 const mockProps = {
   onFilterTable: jest.fn(),
@@ -28,23 +28,14 @@ describe('test rendering of TableFilterSelection page component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('check rendering', () => {
-    expect(wrapper.find('Select').length).toEqual(7);
-    expect(wrapper.find('Form')).toHaveLength(1);
-    expect(wrapper.find('Button')).toHaveLength(2);
+    expect(wrapper.find('Dropdown').length).toEqual(1);
+    expect(wrapper.find('Dropdown').props().isOpen).toEqual(false);
+    expect(wrapper.find('Dropdown').props().dropdownItems).toHaveLength(1);
+    expect(wrapper.find('Button')).toHaveLength(1);
   });
 });
 
 describe('test interaction of TableFilterSelection page component', () => {
-  it('Check click event to call onFilterTable', () => {
-    const spy = jest.spyOn(wrapper.instance(), 'onFilterTable');
-    wrapper.instance().forceUpdate();
-    wrapper
-      .find(Button)
-      .first()
-      .props()
-      .onClick();
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
   it('Check click event to call onClearFilters', () => {
     const spy = jest.spyOn(wrapper.instance(), 'onClearFilters');
     wrapper.instance().forceUpdate();

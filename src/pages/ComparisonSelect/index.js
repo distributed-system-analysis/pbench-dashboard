@@ -15,6 +15,9 @@ import {
   EmptyStateBody,
   Chip,
   Spinner,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 
@@ -121,17 +124,24 @@ class ComparisonSelect extends React.Component {
               />
             ) : (
               <CardBody>
-                <Button
-                  type="primary"
-                  style={{ marginBottom: 16 }}
-                  name="Compare Iterations"
-                  onClick={this.onCompareIterations}
-                  disabled={Object.values(resultIterations).length === 0}
-                />
-                <TableFilterSelection
-                  onFilterTable={this.onFilterTable}
-                  filters={iterationParams}
-                />
+                <Toolbar id="toolbar">
+                  <ToolbarContent>
+                    <ToolbarItem>
+                      <Button
+                        type="primary"
+                        name="Compare Iterations"
+                        onClick={this.onCompareIterations}
+                        disabled={Object.values(resultIterations).length === 0}
+                      />
+                    </ToolbarItem>
+                    <ToolbarItem>
+                      <TableFilterSelection
+                        onFilterTable={this.onFilterTable}
+                        filters={iterationParams}
+                      />
+                    </ToolbarItem>
+                  </ToolbarContent>
+                </Toolbar>
                 {Object.values(resultIterations).length > 0 ? (
                   Object.values(resultIterations).map(run => {
                     const rowSelection = {
