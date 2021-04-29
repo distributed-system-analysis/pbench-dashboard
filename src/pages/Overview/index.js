@@ -232,6 +232,17 @@ class Overview extends React.Component {
     const { favoriteControllers, seenResults } = this.props;
     const newDataColumns = [
       {
+        // Make an expander cell
+        Header: () => null, // No header
+        id: 'expander', // It needs an ID
+        Cell: ({ row }) => (
+          // Use Cell to render an expander for each row.
+          // We can use the getToggleRowExpandedProps prop-getter
+          // to build the expander.
+          <span {...row.getToggleRowExpandedProps()}>{row.isExpanded ? '-' : '+'}</span>
+        ),
+      },
+      {
         Header: 'Result',
         accessor: 'result',
         Cell: cell => {
@@ -382,6 +393,17 @@ class Overview extends React.Component {
     ];
 
     const seenDataColumns = [
+      {
+        // Make an expander cell
+        Header: () => null, // No header
+        id: 'expander', // It needs an ID
+        Cell: ({ row }) => (
+          // Use Cell to render an expander for each row.
+          // We can use the getToggleRowExpandedProps prop-getter
+          // to build the expander.
+          <span {...row.getToggleRowExpandedProps()}>{row.isExpanded ? '-' : '+'}</span>
+        ),
+      },
       {
         Header: 'Result',
         accessor: 'result',
@@ -587,6 +609,10 @@ class Overview extends React.Component {
       },
     ];
 
+    // const renderRowSubComponent = (config) => {
+    //   return <div>kjvnwkvcn</div>
+    // }
+
     const manageRunDropdown = [
       <DropdownItem
         key="save"
@@ -705,6 +731,7 @@ class Overview extends React.Component {
                     onRowClick={record => {
                       this.retrieveResults(record);
                     }}
+                    renderRowSubComponent={record => <p>{record.row.original.config}</p>}
                     data={newData}
                     isCheckable
                   />
@@ -731,6 +758,7 @@ class Overview extends React.Component {
                     onRowClick={record => {
                       this.retrieveResults(record);
                     }}
+                    renderRowSubComponent={record => <p>{record.row.original.config}</p>}
                     data={unlabledData}
                     isCheckable
                   />
