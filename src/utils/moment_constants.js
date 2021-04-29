@@ -40,3 +40,9 @@ export function getAllMonthsWithinRange(endpoints, index, selectedDateRange) {
 export const getDiffDate = givenDate => {
   return moment(givenDate).fromNow();
 };
+
+export const getDiffDays = givenDate => {
+  const futureDate = moment(givenDate);
+  const currDate = moment(new Date());
+  return futureDate.diff(currDate, 'days');
+};

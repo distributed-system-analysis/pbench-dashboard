@@ -192,18 +192,6 @@ export default {
         iterations: payload,
       };
     },
-    modifySelectedControllers(state, { payload }) {
-      return {
-        ...state,
-        selectedControllers: payload,
-      };
-    },
-    modifySelectedResults(state, { payload }) {
-      return {
-        ...state,
-        selectedResults: payload,
-      };
-    },
     modifyConfigCategories(state, { payload }) {
       return {
         ...state,

@@ -28,6 +28,11 @@ const menuData = [
     ],
   },
   {
+    name: 'Controllers',
+    icon: 'controllers',
+    path: '/',
+  },
+  {
     name: 'Search',
     path: '/search',
   },
