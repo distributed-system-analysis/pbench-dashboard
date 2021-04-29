@@ -1,0 +1,180 @@
+*::-webkit-scrollbar {
+  width: 1em;
+}
+*::-webkit-scrollbar-thumb {
+  height: 1em;
+  background-color: rgba(0, 0, 0, 0.15);
+  background-clip: padding-box;
+  border: 0.5em solid rgba(0, 0, 0, 0);
+  -webkit-border-radius: 1em;
+  -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.025);
+}
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+div.pf-c-backdrop {
+  background-color: None !important;
+}
+
+li {
+  list-style-type: none;
+}
+
+ul {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  list-style: none !important;
+}
+
+a {
+  color: none !important;
+  text-decoration: none !important;
+}
+
+.displayFlex {
+  display: flex;
+  width: 100%;
+}
+
+.flexEnd {
+  float: right;
+  width: 50%;
+}
+
+.flexItem {
+  align-self: flex-end;
+  width: 50%;
+}
+
+.centertext {
+  text-align: center;
+}
+
+.paddingSmall {
+  margin: 8px;
+  margin-left: 16px;
+}
+
+.paddingLeft {
+  padding-left: 4px;
+}
+
+.paddingRight {
+  padding-right: 4px;
+}
+
+.marginLeft {
+  margin-left: 4px;
+}
+
+.marginRight {
+  margin-right: 4px;
+}
+
+.savedRunCard {
+  min-height: 188vh;
+  max-height: 188vh;
+  overflow: scroll;
+}
+
+.savedRunCardExpanded {
+  max-height: 147.5vh;
+  min-height: 147.5vh;
+}
+
+.newRunCard {
+  height: 200vh;
+  overflow: scroll;
+}
+
+.expiringCard {
+  max-height: 50vh;
+  overflow: scroll;
+}
+
+.newRunTable {
+  overflow: scroll;
+}
+
+.expiringValues {
+  overflow: scroll;
+}
+
+.paddingBig {
+  margin: 16px;
+}
+
+.marginBottom {
+  margin-bottom: 3vh;
+}
+
+.subCard {
+  border-top: solid 1px #cfcfcf;
+}
+
+.subText {
+  color: #4c4c4c;
+  font-size: smaller;
+}
+
+.icons {
+  margin-right: 8px;
+}
+
+.label {
+  margin: 3px;
+  padding: 2px 8px;
+  background-color: rgb(220 239 255);
+  border-radius: 25px;
+}
+
+.dropdownContent {
+  position: absolute;
+  z-index: 1;
+  min-width: fit-content;
+  margin-left: -60%;
+  overflow: auto;
+  background-color: #f1f1f1;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dropdownLink {
+  display: block;
+  padding: 12px 16px;
+  color: black;
+  text-decoration: none;
+}
+
+.dropdownLink:hover {
+  background-color: #ddd;
+}
+
+.stopwatchIcon {
+  font-size: 5rem;
+}
+
+button.pf-c-accordion__toggle.pf-m-expanded {
+  --pf-c-accordion__toggle--before--BackgroundColor: white !important;
+}
+
+.expiringCard,
+.newRunCard,
+.savedRunCard {
+  border: 1px solid #bec1c3;
+}
+
+.noExpiringRunCard {
+  border-top: solid 3px red;
+  max-height: 50vh;
+  overflow: scroll;
+}
+
+.expiringTable {
+  background-color: red !important;
+}

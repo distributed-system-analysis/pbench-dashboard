@@ -240,7 +240,7 @@ class AuthLayout extends Component {
               <Button
                 variant="link"
                 className={styles.continueBtn}
-                onClick={() => this.navigate('controllers')}
+                onClick={() => this.navigate('')}
               >
                 here
               </Button>

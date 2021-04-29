@@ -9,7 +9,7 @@ import styles from './index.less';
   store,
   auth: auth.auth,
 }))
-class Overview extends Component {
+class LoginHint extends Component {
   navigateToAuth = () => {
     const { dispatch } = this.props;
     dispatch(routerRedux.push(`/auth`));
@@ -49,4 +49,4 @@ class Overview extends Component {
   }
 }
 
-export default Overview;
+export default LoginHint;

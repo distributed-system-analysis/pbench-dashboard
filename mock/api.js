@@ -15,15 +15,23 @@ export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index)
 }));
 
 export const mockResults = hostname =>
-  new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+  new Array(DEFAULT_SIZE).fill().map(() => ({
     '@metadata.controller_dir': hostname,
     config: casual.word,
     controller: hostname,
     end: moment.utc(),
-    // Since dataset id is a long hex string, removed "-" characters here to make it look like real data
-    id: casual.uuid.replace(/-/g, ''),
-    result: `${index}${hostname.slice(0, -6)}${index}`,
-    start: moment.utc(),
+    id: createUniqueKey(),
+    result: `${casual.word}.${casual.word}.${casual.word}`,
+    start: moment.utc().subtract(Math.random() * 10 + 10, 'days'),
+    serverMetadata: {
+      dashboard: {
+        saved: false,
+        seen: false,
+      },
+      'dataset.access': 'public',
+      'dataset.owner': 'roger@example.com',
+      'server.deletion': moment.utc().add('days', Math.random() * 10 + 10),
+    },
   }));
 
 export const mockSamples = {
@@ -330,7 +338,8 @@ export default {
   'POST /api/v1/controllers/list': mockControllers,
   'POST /api/v1/datasets/list': (req, res) => {
     const data = {};
-    data[req.body.controller] = mockResults(req.body.controller);
+    const controller = req.body.controller || 'mock-controller';
+    data[controller] = mockResults(controller);
     res.send(data);
   },
   'POST /api/v1/datasets/detail': (req, res) => {

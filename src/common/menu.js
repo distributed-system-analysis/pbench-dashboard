@@ -28,6 +28,21 @@ export const menuData = [
     ],
   },
   {
+    name: 'Overview',
+    icon: 'overview',
+    path: '/overview',
+    routes: [
+      {
+        name: 'Expiring Results',
+        path: '/expiring-results',
+      },
+      {
+        name: 'result',
+        path: '/result',
+      },
+    ],
+  },
+  {
     name: 'Search',
     path: '/search',
   },

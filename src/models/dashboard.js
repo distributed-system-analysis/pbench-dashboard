@@ -84,7 +84,6 @@ export default {
         const tocTree = Object.keys(tocResult)
           .map(path => path.split('/').slice(1))
           .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
-
         yield put({
           type: 'getTocResult',
           payload: tocTree,
@@ -168,6 +167,12 @@ export default {
         payload,
       });
     },
+    *updateResults({ payload }, { put }) {
+      yield put({
+        type: 'modifyResults',
+        payload,
+      });
+    },
   },
 
   reducers: {
@@ -207,22 +212,16 @@ export default {
         iterations: payload,
       };
     },
-    modifySelectedControllers(state, { payload }) {
-      return {
-        ...state,
-        selectedControllers: payload,
-      };
-    },
-    modifySelectedResults(state, { payload }) {
-      return {
-        ...state,
-        selectedResults: payload,
-      };
-    },
     modifyConfigCategories(state, { payload }) {
       return {
         ...state,
         iterationParams: payload,
+      };
+    },
+    modifyResults(state, { payload }) {
+      return {
+        ...state,
+        results: payload,
       };
     },
   },
