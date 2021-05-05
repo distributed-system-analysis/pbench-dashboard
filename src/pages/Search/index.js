@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Spin } from 'antd';
 import {
   Form,
   Flex,
@@ -9,6 +8,8 @@ import {
   Divider,
   Card,
   CardBody,
+  Bullseye,
+  Spinner,
 } from '@patternfly/react-core';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
@@ -243,7 +244,11 @@ class SearchList extends Component {
               placeholder="Search runs"
               onSearch={this.fetchSearchQuery}
             />
-            <Spin spinning={loadingMapping}>
+            {loadingMapping ? (
+              <Bullseye>
+                <Spinner />
+              </Bullseye>
+            ) : (
               <Form
                 style={{
                   padding: '24px',
@@ -293,7 +298,7 @@ class SearchList extends Component {
                   />
                 </div>
               </Form>
-            </Spin>
+            )}
           </div>
         </PageSection>
         <Divider component="div" />

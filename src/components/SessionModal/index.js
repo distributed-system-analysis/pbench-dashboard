@@ -13,6 +13,7 @@ import {
   Button,
 } from '@patternfly/react-core';
 import { ShareAltIcon } from '@patternfly/react-icons';
+import { getDvaApp } from 'umi';
 
 class SessionModal extends Component {
   constructor(props) {
@@ -48,7 +49,8 @@ class SessionModal extends Component {
     const { description } = this.state;
 
     // eslint-disable-next-line no-underscore-dangle
-    const { routing, global, dashboard, search } = window.g_app._store.getState();
+    const app = getDvaApp();
+    const { routing, global, dashboard, search } = app._store.getState();
     const sessionConfig = JSON.stringify({ routing, global, dashboard, search });
 
     dispatch({
