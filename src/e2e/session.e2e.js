@@ -50,9 +50,9 @@ afterAll(() => {
 
 describe('session flow', () => {
   test('should load controllers', async () => {
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(mockControllers[0].controller);
