@@ -50,21 +50,21 @@ afterAll(() => {
 
 describe('results page component', () => {
   test('should load controllers', async () => {
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(mockControllers[0].controller);
   });
 
   test('should navigate to result', async () => {
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
-    await page.click('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.click('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     await page.waitForSelector('section.pf-c-page__main-section.pf-m-light > div > h1');
     const pageHeader = await page.$eval(
       'section.pf-c-page__main-section.pf-m-light > div > h1',
