@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Spin } from 'antd';
 import {
   PageSection,
   PageSectionVariants,
@@ -16,6 +15,8 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell,
+  Bullseye,
+  Spinner,
 } from '@patternfly/react-core';
 import { AngleDownIcon, AngleRightIcon } from '@patternfly/react-icons';
 import Table from '@/components/Table';
@@ -157,28 +158,34 @@ class Summary extends React.Component {
             <Tab eventKey={0} title={<TabTitleText>Iterations</TabTitleText>}>
               <Card>
                 <CardBody>
-                  <Spin spinning={loadingSummary} tip="Loading Iterations...">
-                    <TableFilterSelection
-                      onFilterTable={this.onFilterTable}
-                      filters={iterationParams}
-                    />
-                    <Table
-                      style={{ marginTop: 16 }}
-                      columns={
-                        resultIterations[Object.keys(resultIterations)[0]]
-                          ? resultIterations[Object.keys(resultIterations)[0]].columns
-                          : []
-                      }
-                      data={
-                        resultIterations[Object.keys(resultIterations)[0]]
-                          ? Object.values(
-                              resultIterations[Object.keys(resultIterations)[0]].iterations
-                            )
-                          : []
-                      }
-                      bordered
-                    />
-                  </Spin>
+                  {loadingSummary ? (
+                    <Bullseye>
+                      <Spinner />
+                    </Bullseye>
+                  ) : (
+                    <>
+                      <TableFilterSelection
+                        onFilterTable={this.onFilterTable}
+                        filters={iterationParams}
+                      />
+                      <Table
+                        style={{ marginTop: 16 }}
+                        columns={
+                          resultIterations[Object.keys(resultIterations)[0]]
+                            ? resultIterations[Object.keys(resultIterations)[0]].columns
+                            : []
+                        }
+                        data={
+                          resultIterations[Object.keys(resultIterations)[0]]
+                            ? Object.values(
+                                resultIterations[Object.keys(resultIterations)[0]].iterations
+                              )
+                            : []
+                        }
+                        bordered
+                      />
+                    </>
+                  )}
                 </CardBody>
               </Card>
             </Tab>

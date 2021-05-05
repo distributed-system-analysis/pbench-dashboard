@@ -12,7 +12,7 @@ import {
 } from 'react-table';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { AngleDownIcon, AngleUpIcon } from '@patternfly/react-icons';
-import matchSorter from 'match-sorter';
+import { matchSorter } from 'match-sorter';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@patternfly/patternfly/patternfly.css';
 import './index.less';

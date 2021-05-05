@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row } from 'antd';
 import {
   Page,
   PageSection,
@@ -90,45 +89,41 @@ class RunComparison extends React.Component {
               ) : (
                 <CardBody>
                   {Object.keys(clusters).map(cluster => (
-                    <Row style={{ marginTop: 16 }}>
-                      <div style={{ height: '400px', width: '1000px' }}>
-                        <Chart
-                          containerComponent={
-                            <ChartVoronoiContainer
-                              labels={({ datum }) => `${datum.iteration_name}: ${datum.y}`}
-                              constrainToVisibleArea
-                            />
-                          }
-                          fixLabelOverlap
-                          legendData={paramKeys}
-                          legendOrientation="vertical"
-                          legendPosition="bottom"
-                          height={400}
-                          themeColor={ChartThemeColor.multiOrdered}
-                          width={1000}
-                          padding={{
-                            bottom: 150,
-                            left: 100,
-                            right: 300,
-                            top: 50,
-                          }}
-                        >
-                          <ChartAxis label="Clusters" />
-                          <ChartAxis label="Sample Mean" dependentAxis showGrid />
-                          {clusters[cluster]
-                            .map(iteration => iteration.cluster)
-                            .map(clusterData => (
-                              <ChartGroup offset={20}>
-                                {Object.entries(clusterData)
-                                  .map(entry => entry[1])
-                                  .map(clusterItem => (
-                                    <ChartBar data={[clusterItem]} />
-                                  ))}
-                              </ChartGroup>
-                            ))}
-                        </Chart>
-                      </div>
-                    </Row>
+                    <div style={{ height: '400px', width: '1000px' }}>
+                      <Chart
+                        containerComponent={
+                          <ChartVoronoiContainer
+                            labels={({ datum }) => `${datum.iteration_name}: ${datum.y}`}
+                            constrainToVisibleArea
+                          />
+                        }
+                        fixLabelOverlap
+                        legendData={paramKeys}
+                        legendOrientation="vertical"
+                        legendPosition="bottom"
+                        height={400}
+                        themeColor={ChartThemeColor.multiOrdered}
+                        width={1000}
+                        padding={{
+                          bottom: 150,
+                          left: 100,
+                          right: 300,
+                          top: 50,
+                        }}
+                      >
+                        <ChartAxis label="Clusters" />
+                        <ChartAxis label="Sample Mean" dependentAxis showGrid />
+                        {clusters[cluster].map(iteration => iteration.cluster).map(clusterData => (
+                          <ChartGroup offset={20}>
+                            {Object.entries(clusterData)
+                              .map(entry => entry[1])
+                              .map(clusterItem => (
+                                <ChartBar data={[clusterItem]} />
+                              ))}
+                          </ChartGroup>
+                        ))}
+                      </Chart>
+                    </div>
                   ))}
                 </CardBody>
               )}

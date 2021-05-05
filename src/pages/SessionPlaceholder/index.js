@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import { Spinner } from '@patternfly/react-core';
+import { getDvaApp } from 'umi';
 
 @connect(({ sessions }) => ({
   sessions,
@@ -11,7 +12,8 @@ class SessionPlaceholder extends React.Component {
     super(props);
 
     // eslint-disable-next-line no-underscore-dangle
-    this.store = window.g_app._store;
+    const app = getDvaApp();
+    this.store = app._store;
   }
 
   componentDidMount = () => {

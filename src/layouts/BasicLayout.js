@@ -5,12 +5,14 @@ import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
+import { getDvaApp } from 'umi';
 import pathToRegexp from 'path-to-regexp';
 import memoizeOne from 'memoize-one';
 import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
 import {
   Page,
+  Bullseye,
   Spinner,
   Alert,
   AlertActionLink,
@@ -24,7 +26,7 @@ import {
   AlertGroup,
   AlertActionCloseButton,
 } from '@patternfly/react-core';
-import SiderMenu from '../components/SiderMenu';
+import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
 
@@ -80,7 +82,8 @@ class BasicLayout extends React.PureComponent {
     this.getPageTitle = memoizeOne(this.getPageTitle);
     this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
     // eslint-disable-next-line no-underscore-dangle
-    this.persistor = persistStore(window.g_app._store);
+    const app = getDvaApp();
+    this.persistor = persistStore(app._store);
 
     this.state = {
       sessionExitModalVisible: false,
@@ -162,7 +165,7 @@ class BasicLayout extends React.PureComponent {
         <DocumentTitle title={this.getPageTitle(pathname)}>
           <Page
             header={<GlobalHeader savingSession={savingSession} />}
-            sidebar={<SiderMenu location={pathname} />}
+            sidebar={<NavigationDrawer location={pathname} />}
             isManagedSidebar
           >
             {errorMessage && (
@@ -221,9 +224,9 @@ class BasicLayout extends React.PureComponent {
             <PersistGate
               persistor={this.persistor}
               loading={
-                <Spinner
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                />
+                <Bullseye>
+                  <Spinner />
+                </Bullseye>
               }
             >
               {children}
