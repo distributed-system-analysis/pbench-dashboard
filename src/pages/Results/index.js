@@ -157,11 +157,7 @@ class Results extends Component {
       {
         Header: 'Result',
         accessor: 'result',
-        Cell: row => (
-          <span>
-            <a onClick={() => this.retrieveResults(row.cell.row)}>{row.value}</a>
-          </span>
-        ),
+        Cell: row => <span>{row.value}</span>,
       },
       {
         Header: 'Config',
@@ -186,13 +182,19 @@ class Results extends Component {
             <FontAwesomeIcon
               color="gold"
               icon={faStar}
-              onClick={() => this.unfavoriteResult(cell.row.original.result)}
+              onClick={e => {
+                e.stopPropagation();
+                this.unfavoriteResult(cell.row.original.result);
+              }}
             />
           ) : (
             <FontAwesomeIcon
               color="lightgrey"
               icon={faStar}
-              onClick={() => this.favoriteResult(cell.row.original.result)}
+              onClick={e => {
+                e.stopPropagation();
+                this.favoriteResult(cell.row.original.result);
+              }}
             />
           ),
       },
@@ -213,8 +215,9 @@ class Results extends Component {
                 onCompare={selectedRowIds => this.compareResults(selectedRowIds)}
                 columns={columns}
                 data={results}
-                onRowClick={record => {
-                  this.retrieveResults(record);
+                onRowClick={row => {
+                  const { result } = row;
+                  this.retrieveResults(result);
                 }}
                 loadingData={loading}
                 isCheckable

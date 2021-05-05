@@ -151,11 +151,7 @@ class Controllers extends Component {
       {
         Header: 'Controller',
         accessor: 'controller',
-        Cell: row => (
-          <span>
-            <a onClick={() => this.retrieveResults(row.value)}>{row.value}</a>
-          </span>
-        ),
+        Cell: row => <span>{row.value}</span>,
       },
       {
         Header: 'Last Modified',
@@ -175,13 +171,19 @@ class Controllers extends Component {
             <FontAwesomeIcon
               color="gold"
               icon={faStar}
-              onClick={() => this.unfavoriteController(cell.row.original.controller)}
+              onClick={e => {
+                e.stopPropagation();
+                this.unfavoriteController(cell.row.original.controller);
+              }}
             />
           ) : (
             <FontAwesomeIcon
               color="lightgrey"
               icon={faStar}
-              onClick={() => this.favoriteController(cell.row.original.controller)}
+              onClick={e => {
+                e.stopPropagation();
+                this.favoriteController(cell.row.original.controller);
+              }}
             />
           ),
       },
@@ -211,8 +213,9 @@ class Controllers extends Component {
                   style={{ marginTop: 20 }}
                   columns={columns}
                   data={controllers}
-                  onRowClick={record => {
-                    this.retrieveResults(record);
+                  onRowClick={row => {
+                    const { controller } = row;
+                    this.retrieveResults(controller);
                   }}
                   loadingData={loadingControllers}
                 />
