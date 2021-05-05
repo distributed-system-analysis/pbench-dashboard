@@ -62,7 +62,7 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 
 fuzzyTextFilterFn.autoRemove = val => !val;
 
-function Table({ columns, data, isCheckable, onCompare, loadingData }) {
+function Table({ columns, data, isCheckable, onCompare, loadingData, onRowClick }) {
   const filterTypes = React.useMemo(
     () => ({
       fuzzyText: fuzzyTextFilterFn,
@@ -139,7 +139,7 @@ function Table({ columns, data, isCheckable, onCompare, loadingData }) {
                 </div>
               ),
               Cell: ({ row }) => (
-                <div>
+                <div onClick={e => e.stopPropagation()}>
                   <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
                 </div>
               ),
@@ -202,7 +202,11 @@ function Table({ columns, data, isCheckable, onCompare, loadingData }) {
               {page.map(row => {
                 prepareRow(row);
                 return (
-                  <tr className="pf-m-hoverable" {...row.getRowProps()}>
+                  <tr
+                    className="pf-m-hoverable"
+                    {...row.getRowProps()}
+                    onClick={onRowClick ? () => onRowClick(row.original) : null}
+                  >
                     {row.cells.map(cell => {
                       return (
                         <td {...cell.getCellProps()}>
