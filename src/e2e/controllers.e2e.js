@@ -43,18 +43,18 @@ afterAll(() => {
 
 describe('controller page component', () => {
   test('should load controllers', async () => {
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(mockControllers[0].controller);
   });
 
   test('should search for controller name', async () => {
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     await page.waitForSelector('div.pf-c-input-group > input');
@@ -62,9 +62,9 @@ describe('controller page component', () => {
     await page.type('div.pf-c-input-group > input', testController);
     await page.waitForSelector('div.pf-c-input-group > button');
     await page.click('div.pf-c-input-group > button');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const filteredController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(filteredController).toBe(testController);
@@ -73,9 +73,9 @@ describe('controller page component', () => {
   test('should reset search results', async () => {
     await page.waitForSelector('div.pf-c-input-group > input');
     await page.click('div.pf-c-input-group > input');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     let testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     for (let i = 0; i < testController.length; i += 1) {
@@ -83,9 +83,9 @@ describe('controller page component', () => {
     }
     await page.waitForSelector('div.pf-c-input-group > button');
     await page.click('div.pf-c-input-group > button');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(mockControllers[0].controller);
@@ -94,9 +94,9 @@ describe('controller page component', () => {
   test('should sort controllers column alphabetically ascending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(1) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(1) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
@@ -107,9 +107,9 @@ describe('controller page component', () => {
   test('should sort controllers column alphabetically descending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(1) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(1) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
@@ -122,9 +122,9 @@ describe('controller page component', () => {
   test('should sort last modified column chronologically ascending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
@@ -135,9 +135,9 @@ describe('controller page component', () => {
   test('should sort last modified column chronologically descending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
@@ -150,9 +150,9 @@ describe('controller page component', () => {
   test('should sort results column numerically ascending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
@@ -163,9 +163,9 @@ describe('controller page component', () => {
   test('should sort results column numerically descending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
-    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span > a',
+      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
