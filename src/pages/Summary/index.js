@@ -148,7 +148,7 @@ class Summary extends React.Component {
         <PageSection variant={PageSectionVariants.light}>
           <TextContent>
             <Text component="h1">{selectedControllers.join(', ')}</Text>
-            <Text component="h1">{selectedResults[0].result}</Text>
+            <Text component="h2">{selectedResults[0]}</Text>
           </TextContent>
         </PageSection>
         <PageSection padding="noPadding" isFilled>
