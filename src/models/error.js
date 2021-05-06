@@ -5,7 +5,8 @@ export default {
   namespace: 'error',
 
   state: {
-    error: '',
+    errorMessage: '',
+    successMessage: '',
     isloading: false,
   },
 
@@ -19,12 +20,50 @@ export default {
         payload: payload.code,
       });
     },
+    *updateAlertMessage({ payload }, { put }) {
+      yield put({
+        type: 'addAlertMessage',
+        payload,
+      });
+    },
+    *clearAlertMessage({ payload }, { put }) {
+      yield put({
+        type: 'removeAlertMesage',
+        payload,
+      });
+    },
   },
 
   reducers: {
     trigger(state, action) {
       return {
-        error: action.payload,
+        ...state,
+        errorMessage: action.payload,
+      };
+    },
+    addAlertMessage(state, { payload }) {
+      const { messageType, message } = payload;
+      if (messageType === 'error') {
+        return {
+          ...state,
+          errorMessage: message,
+        };
+      }
+      return {
+        ...state,
+        successMessage: message,
+      };
+    },
+    removeAlertMesage(state, { payload }) {
+      if (payload === 'error') {
+        return {
+          ...state,
+          errorMessage: '',
+        };
+      }
+      return {
+        ...state,
+        successMessage: '',
       };
     },
   },
