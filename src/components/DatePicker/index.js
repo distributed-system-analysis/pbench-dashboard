@@ -58,10 +58,7 @@ class AntdDatePicker extends Component {
         separator="to"
         style={style}
         onChange={this.handleChange}
-        value={[
-          selectedDateRange.start ? moment(selectedDateRange.start) : moment().subtract(7, 'day'),
-          selectedDateRange.end ? moment(selectedDateRange.end) : moment(),
-        ]}
+        value={[moment(selectedDateRange.start), moment(selectedDateRange.end)]}
         disabledDate={this.disabledDate}
         size="default"
         ranges={{
