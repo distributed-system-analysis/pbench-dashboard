@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
-import { Title, Button } from '@patternfly/react-core';
+import { Title, Button, Banner, Flex, FlexItem } from '@patternfly/react-core';
+import { CloseIcon } from '@patternfly/react-icons';
+import styles from './index.less';
 
 @connect(({ store, auth }) => ({
   store,
@@ -14,21 +16,35 @@ class Overview extends Component {
   };
 
   render() {
+    const { closeLoginHint } = this.props;
     return (
-      <div
-        style={{
-          padding: '1.5rem',
-          backgroundColor: '#e7f1fa',
-          border: '1px solid #bee1f4',
-          boxShadow: 'rgba(3, 3, 3, 0.12) 0px 1px 2px 0px, rgba(3, 3, 3, 0.06) 0px 0px 2px 0px',
-          display: 'flex',
-        }}
-      >
-        <Title headingLevel="h4"> Want to see only metrics relevant to you? &nbsp; &nbsp;</Title>
-        <Button variant="link" onClick={() => this.navigateToAuth()} isInline>
-          Login or Create an account?
-        </Button>
-      </div>
+      <Banner variant="info">
+        <Flex>
+          <FlexItem>
+            <Title headingLevel="h4">Want to see only metrics relevant to you? </Title>
+          </FlexItem>
+          <FlexItem>
+            <Button
+              className={styles.btnHint}
+              variant="link"
+              onClick={() => this.navigateToAuth()}
+              isInline
+            >
+              Login or Create an account
+            </Button>
+          </FlexItem>
+          <FlexItem align={{ sm: 'alignRight' }}>
+            <Button
+              className={styles.btnClose}
+              variant="link"
+              onClick={() => closeLoginHint()}
+              isInline
+            >
+              <CloseIcon />
+            </Button>
+          </FlexItem>
+        </Flex>
+      </Banner>
     );
   }
 }

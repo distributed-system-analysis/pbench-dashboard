@@ -26,7 +26,7 @@ import {
   AlertGroup,
   AlertActionCloseButton,
   PageSection,
-  PageSectionVariants
+  PageSectionVariants,
 } from '@patternfly/react-core';
 import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
@@ -83,6 +83,7 @@ class BasicLayout extends React.PureComponent {
     this.state = {
       sessionExitModalVisible: false,
       breadcrumb: {},
+      showLoginBanner: true,
     };
   }
 
@@ -102,20 +103,28 @@ class BasicLayout extends React.PureComponent {
   }
 
   // When router data updates
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     const {
       location: { pathname },
     } = this.props;
-    let exactPath = {};
-    Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
-      if (routeMap.endsWith(pathname)) {
-        exactPath = this.breadcrumbNameMap[routeMap];
-      }
-    });
-    this.setState({
-      breadcrumb: exactPath,
-    });
+    if (prevProps.location.pathname !== pathname) {
+      let exactPath = {};
+      Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
+        if (routeMap.endsWith(pathname)) {
+          exactPath = this.breadcrumbNameMap[routeMap];
+        }
+      });
+      this.setState({
+        breadcrumb: exactPath,
+      });
+    }
   }
+
+  closeLoginHint = () => {
+    this.setState({
+      showLoginBanner: false,
+    });
+  };
 
   getPageTitle = () => {
     const currRouterData = null;
@@ -169,7 +178,7 @@ class BasicLayout extends React.PureComponent {
       errorMessage,
     } = this.props;
 
-    const { sessionExitModalVisible, breadcrumb } = this.state;
+    const { sessionExitModalVisible, breadcrumb, showLoginBanner } = this.state;
 
     return (
       <React.Fragment>
@@ -217,7 +226,9 @@ class BasicLayout extends React.PureComponent {
                 </DescriptionList>
               </Alert>
             )}
-            {username ? '' : <LoginHint />}
+            {username
+              ? ''
+              : showLoginBanner && <LoginHint closeLoginHint={() => this.closeLoginHint()} />}
             <Modal
               variant={ModalVariant.small}
               title="Confirm session exit"
@@ -240,7 +251,10 @@ class BasicLayout extends React.PureComponent {
                 </Bullseye>
               }
             >
-              <PageSection style={{ paddingBottom: 0 }} variant={PageSectionVariants.light}>
+              <PageSection
+                style={showLoginBanner ? { paddingBottom: 0 } : { marginTop: 0, paddingBottom: 0 }}
+                variant={PageSectionVariants.light}
+              >
                 <RenderBreadcrumb context={breadcrumb} currLocation={pathname} />
               </PageSection>
               {children}
