@@ -105,6 +105,13 @@ export const isLoggedInUser = username => {
   return false;
 };
 
+export const isRootPath = pathname => {
+  if (pathname === '/' || pathname === '/search' || pathname === '/sessions') {
+    return true;
+  }
+  return false;
+};
+
 // Converts breadcrumb data into array
 // of name and path pairs to be rendered
 // as Patternfly breadcrumb items.

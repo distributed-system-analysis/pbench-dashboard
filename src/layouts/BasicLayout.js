@@ -9,7 +9,6 @@ import memoizeOne from 'memoize-one';
 import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
 import { getDvaApp } from 'umi';
-import pathToRegexp from 'path-to-regexp';
 import {
   Page,
   Bullseye,
@@ -32,6 +31,7 @@ import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
 import RenderBreadcrumb from '@/components/Breadcrumb';
+import { isRootPath } from '@/utils/utils';
 
 const redirectData = [];
 const getRedirect = item => {
@@ -255,7 +255,9 @@ class BasicLayout extends React.PureComponent {
                 style={showLoginBanner ? { paddingBottom: 0 } : { marginTop: 0, paddingBottom: 0 }}
                 variant={PageSectionVariants.light}
               >
-                <RenderBreadcrumb context={breadcrumb} currLocation={pathname} />
+                {!isRootPath(pathname) && (
+                  <RenderBreadcrumb context={breadcrumb} currLocation={pathname} />
+                )}
               </PageSection>
               {children}
             </PersistGate>
