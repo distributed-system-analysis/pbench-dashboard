@@ -1,7 +1,5 @@
 import React from 'react';
-import { shallow, configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import 'jest-canvas-mock';
+import { shallow } from 'enzyme';
 
 import RunComparison from './index';
 
@@ -30,7 +28,6 @@ const clusterLabels = [];
 clusterLabels.sample_metric = ['sample-1'];
 
 const mockDispatch = jest.fn();
-configure({ adapter: new Adapter() });
 const wrapper = shallow(
   <RunComparison.WrappedComponent dispatch={mockDispatch} location={mockLocation} {...mockProps} />,
   { disableLifecycleMethods: true }
