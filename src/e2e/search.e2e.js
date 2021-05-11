@@ -54,10 +54,10 @@ afterAll(() => {
 describe('search page component', () => {
   test('should load mappings', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > p'
     );
     const testField = await page.$eval(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > p',
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > p',
       elem => elem.innerHTML
     );
     expect(testField).toBe('run');
@@ -65,35 +65,35 @@ describe('search page component', () => {
 
   test('should select field tag', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > div'
     );
     await page.click(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > div'
     );
 
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
     );
     await page.click(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div.pf-l-flex > div:nth-child(2) > div > div > div > input'
     );
   });
 
   test('should apply filter changes', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(1)'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div:nth-child(2) > button:nth-child(1)'
     );
     await page.click(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(1)'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div:nth-child(2) > button:nth-child(1)'
     );
   });
 
   test('should reset filter changes', async () => {
     await page.waitForSelector(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(2)'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div:nth-child(2) > button:nth-child(2)'
     );
     await page.click(
-      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > div.ant-spin-nested-loading > div > form > div:nth-child(2) > button:nth-child(2)'
+      '#root > div > main > section.pf-c-page__main-section.pf-m-light > div > form > div:nth-child(2) > button:nth-child(2)'
     );
   });
 
