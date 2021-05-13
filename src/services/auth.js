@@ -10,8 +10,8 @@ export const queryRegisterUser = async params => {
       username,
       password,
       email,
-      firstName,
-      lastName,
+      first_name: firstName,
+      last_name: lastName,
     },
     headers: {
       'Content-Type': 'application/json',
