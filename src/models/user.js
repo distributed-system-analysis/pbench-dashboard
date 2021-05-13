@@ -61,7 +61,7 @@ export default {
     //   };
     // },
     modifyFavoritedControllers(state, { payload }) {
-      payload.map(result => state.favoriteControllers.push(result));
+      state.favoriteControllers.push(...payload);
       return {
         ...state,
         favoriteControllers: state.favoriteControllers,

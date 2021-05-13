@@ -220,6 +220,10 @@ class Overview extends React.Component {
     );
   };
 
+  onMultiNewRowSelection = newRunsSelectedRowKeys => {
+    console.log(newRunsSelectedRowKeys);
+  };
+
   render() {
     const {
       newData,
@@ -250,7 +254,7 @@ class Overview extends React.Component {
           let isSeen = false;
           if (seenResults !== []) {
             seenResults.forEach(item => {
-              if (item.key === row.key) {
+              if (item.original.key === row.key) {
                 isSeen = true;
               }
             });
@@ -281,7 +285,7 @@ class Overview extends React.Component {
                 style={{ marginBottom: '8px' }}
                 onClick={() => this.retrieveResults(cell.row)}
               >
-                <b>{cell.value}</b>
+                <i>{cell.value}</i>
               </Button>
               <br />
               <Text component={TextVariants.p} className={styles.subText}>
@@ -609,10 +613,6 @@ class Overview extends React.Component {
       },
     ];
 
-    // const renderRowSubComponent = (config) => {
-    //   return <div>kjvnwkvcn</div>
-    // }
-
     const manageRunDropdown = [
       <DropdownItem
         key="save"
@@ -727,12 +727,14 @@ class Overview extends React.Component {
                   <Table
                     onCompare={selectedRowIds => this.compareResults(selectedRowIds)}
                     columns={newDataColumns}
-                    // expandedRowRender={record => <p style={{ margin: 0 }}>{record.config}</p>}
                     onRowClick={record => {
                       this.retrieveResults(record);
                     }}
                     renderRowSubComponent={record => <p>{record.row.original.config}</p>}
                     data={newData}
+                    onMultiNewRowSelection={selectedRowIds =>
+                      this.onMultiNewRowSelection(selectedRowIds)
+                    }
                     isCheckable
                   />
                 </div>
