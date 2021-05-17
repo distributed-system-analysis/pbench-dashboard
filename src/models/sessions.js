@@ -17,33 +17,117 @@ export default {
   },
 
   effects: {
-    *fetchSession({ payload }, { call }) {
-      const response = yield call(getSession, payload);
-      const { config } = response.data.session;
-      const parsedSessionConfig = JSON.parse(config);
-      return {
-        sessionConfig: parsedSessionConfig,
-        sessionMetadata: response.data.session,
-      };
+    *fetchSession({ payload }, { call, put }) {
+      try {
+        const response = yield call(getSession, payload);
+        const { config } = response.data.session;
+        const parsedSessionConfig = JSON.parse(config);
+        return {
+          sessionConfig: parsedSessionConfig,
+          sessionMetadata: response.data.session,
+        };
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+        return false;
+      }
     },
     *fetchAllSessions({ payload }, { call, put }) {
-      const response = yield call(getAllSessions, payload);
-      yield put({
-        type: 'getAllSessions',
-        payload: response.data.sessions,
-      });
+      try {
+        const response = yield call(getAllSessions, payload);
+        yield put({
+          type: 'getAllSessions',
+          payload: response.data.sessions,
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
     },
-    *saveSession({ payload }, { call }) {
-      const response = yield call(saveSession, payload);
-      return response;
+    *saveSession({ payload }, { call, put }) {
+      try {
+        const response = yield call(saveSession, payload);
+        return response;
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+        return false;
+      }
     },
-    *deleteSession({ payload }, { call }) {
-      const response = yield call(deleteSession, payload);
-      return response;
+    *deleteSession({ payload }, { call, put }) {
+      try {
+        const response = yield call(deleteSession, payload);
+        return response;
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+        return false;
+      }
     },
-    *updateSessionDescription({ payload }, { call }) {
-      const response = yield call(updateSessionDescription, payload);
-      return response;
+    *updateSessionDescription({ payload }, { call, put }) {
+      try {
+        const response = yield call(updateSessionDescription, payload);
+        return response;
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+        return false;
+      }
     },
     *startSession({ payload }, { put }) {
       yield put({
