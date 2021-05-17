@@ -34,172 +34,269 @@ export default {
       });
     },
     *fetchControllers({ payload }, { call, put }) {
-      const controllers = yield call(queryControllers, payload);
+      try {
+        const controllers = yield call(queryControllers, payload);
 
-      yield put({
-        type: 'getControllers',
-        payload: controllers,
-      });
+        yield put({
+          type: 'fetchControllersSuccess',
+          payload: controllers,
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'An unexpected error occurred while fetching controllers.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
     },
     *fetchResults({ payload }, { call, put }) {
-      const response = yield call(queryResults, payload);
-      const runs = [];
+      try {
+        const response = yield call(queryResults, payload);
+        const runs = [];
 
-      response.hits.hits.forEach(result => {
-        const { _source } = result;
-        const { run } = _source;
-        const { name, controller, id, start, end } = run;
-        const metadata = _source['@metadata'];
+        response.hits.hits.forEach(result => {
+          const { _source } = result;
+          const { run } = _source;
+          const { name, controller, id, start, end } = run;
+          const metadata = _source['@metadata'];
 
-        const record = {
-          result: name,
-          controller,
-          start,
-          end,
-          id,
-        };
+          const record = {
+            result: name,
+            controller,
+            start,
+            end,
+            id,
+          };
 
-        if (typeof run.config !== 'undefined') {
-          record.config = run.config;
-        }
-        if (typeof run.prefix !== 'undefined') {
-          record['run.prefix'] = run.prefix;
-        }
-        if (typeof metadata !== 'undefined') {
-          if (typeof metadata.controller_dir !== 'undefined') {
-            record['@metadata.controller_dir'] = metadata.controller_dir;
+          if (typeof run.config !== 'undefined') {
+            record.config = run.config;
           }
-          if (typeof metadata.satellite !== 'undefined') {
-            record['@metadata.satellite'] = metadata.satellite;
+          if (typeof run.prefix !== 'undefined') {
+            record['run.prefix'] = run.prefix;
           }
+          if (typeof metadata !== 'undefined') {
+            if (typeof metadata.controller_dir !== 'undefined') {
+              record['@metadata.controller_dir'] = metadata.controller_dir;
+            }
+            if (typeof metadata.satellite !== 'undefined') {
+              record['@metadata.satellite'] = metadata.satellite;
+            }
+          }
+          runs.push(record);
+        });
+
+        const results = {};
+        results[payload.controller[0]] = runs;
+
+        yield put({
+          type: 'getResultsSuccess',
+          payload: results,
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
         }
-        runs.push(record);
-      });
-
-      const results = {};
-      results[payload.controller[0]] = runs;
-
-      yield put({
-        type: 'getResults',
-        payload: results,
-      });
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
     },
     *fetchResult({ payload }, { call, put }) {
-      const response = yield call(queryResult, payload);
-      const result =
-        // eslint-disable-next-line no-underscore-dangle
-        typeof response.hits.hits[0] !== 'undefined' ? response.hits.hits[0]._source : [];
-      let metadataTag = '';
-      const parsedResult = {};
+      try {
+        const response = yield call(queryResult, payload);
+        const result =
+          // eslint-disable-next-line no-underscore-dangle
+          typeof response.hits.hits[0] !== 'undefined' ? response.hits.hits[0]._source : [];
+        let metadataTag = '';
+        const parsedResult = {};
 
-      if (typeof result['@metadata'] !== 'undefined') {
-        metadataTag = '@metadata';
-      } else {
-        metadataTag = '_metadata';
+        if (typeof result['@metadata'] !== 'undefined') {
+          metadataTag = '@metadata';
+        } else {
+          metadataTag = '_metadata';
+        }
+
+        parsedResult.runMetadata = {
+          ...result.run,
+          ...result[metadataTag],
+        };
+
+        parsedResult.hostTools = [];
+        result.host_tools_info.forEach(toolData => {
+          parsedResult.hostTools.push(toolData);
+        });
+
+        yield put({
+          type: 'getResultSuccess',
+          payload: parsedResult,
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
       }
-
-      parsedResult.runMetadata = {
-        ...result.run,
-        ...result[metadataTag],
-      };
-
-      parsedResult.hostTools = [];
-      result.host_tools_info.forEach(toolData => {
-        parsedResult.hostTools.push(toolData);
-      });
-
-      yield put({
-        type: 'getResult',
-        payload: parsedResult,
-      });
     },
     *fetchTocResult({ payload }, { call, put }) {
-      const response = yield call(queryTocResult, payload);
-      const tocResult = {};
+      try {
+        const response = yield call(queryTocResult, payload);
+        const tocResult = {};
 
-      response.hits.hits.forEach(result => {
-        // eslint-disable-next-line no-underscore-dangle
-        const source = result._source;
+        response.hits.hits.forEach(result => {
+          // eslint-disable-next-line no-underscore-dangle
+          const source = result._source;
 
-        if (source.files !== undefined) {
-          source.files.forEach(path => {
-            const url = source.directory + path.name;
-            tocResult[url] = [path.size, path.mode];
-          });
-        }
-      });
-
-      const tocTree = Object.keys(tocResult)
-        .map(path => path.split('/').slice(1))
-        .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
-
-      yield put({
-        type: 'getTocResult',
-        payload: tocTree,
-      });
-    },
-    *fetchIterationSamples({ payload }, { call, put }) {
-      const response = yield call(queryIterationSamples, payload);
-      const parsedSampleData = generateSampleTable(response);
-
-      yield put({
-        type: 'modifyConfigCategories',
-        payload: parsedSampleData.iterationParams,
-      });
-      yield put({
-        type: 'getIterations',
-        payload: parsedSampleData.runs,
-      });
-    },
-    *fetchTimeseriesData({ payload }, { call }) {
-      const response = yield call(queryTimeseriesData, payload);
-      const clusteredIterations = payload.clusters.data;
-
-      response.forEach(timeseriesResponse => {
-        const timeseriesCollection = [];
-        const firstResponse = timeseriesResponse.hits.hits[0]._source;
-        const runId = firstResponse.run.id;
-        const primaryMetric = firstResponse.sample.measurement_title;
-        const iterationName = firstResponse.iteration.name;
-        const sampleName = firstResponse.sample.name;
-        timeseriesResponse.hits.hits.forEach(timeseries => {
-          timeseriesCollection.push({
-            x: timeseries._source['@timestamp_original'],
-            [`y-${runId}_${iterationName}_${sampleName}`]: timeseries._source.result.value,
-          });
-        });
-
-        Object.entries(clusteredIterations[primaryMetric]).forEach(([clusterId, cluster]) => {
-          const clusterKey = `${runId}_${iterationName}_${sampleName}`;
-          if (clusterKey in cluster) {
-            clusteredIterations[primaryMetric][clusterId][
-              clusterKey
-            ].timeseries = timeseriesCollection;
+          if (source.files !== undefined) {
+            source.files.forEach(path => {
+              const url = source.directory + path.name;
+              tocResult[url] = [path.size, path.mode];
+            });
           }
         });
-      });
 
-      Object.entries(clusteredIterations).forEach(([primaryMetric, clusters]) => {
-        Object.entries(clusters).forEach(([clusterKey, cluster]) => {
-          let timeseriesAggregation = {};
-          const timeseriesLabels = ['time'];
-          Object.entries(cluster.clusterKeys).forEach(([keyIndex]) => {
-            timeseriesAggregation =
-              Object.keys(timeseriesAggregation).length > 0
-                ? (timeseriesAggregation = _.merge(
-                    timeseriesAggregation,
-                    clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries
-                  ))
-                : clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries;
-            timeseriesLabels.push(keyIndex);
-          });
-          timeseriesAggregation = timeseriesAggregation.map(item => Object.values(item));
-          clusteredIterations[primaryMetric][
-            clusterKey
-          ].timeseriesAggregation = timeseriesAggregation;
-          clusteredIterations[primaryMetric][clusterKey].timeseriesLabels = timeseriesLabels;
+        const tocTree = Object.keys(tocResult)
+          .map(path => path.split('/').slice(1))
+          .reduce((items, path) => insertTocTreeData(tocResult, items, path), []);
+
+        yield put({
+          type: 'getTocResultSuccess',
+          payload: tocTree,
         });
-      });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
+    },
+    *fetchIterationSamples({ payload }, { call, put }) {
+      try {
+        const response = yield call(queryIterationSamples, payload);
+        const parsedSampleData = generateSampleTable(response);
+
+        yield put({
+          type: 'modifyConfigCategories',
+          payload: parsedSampleData.iterationParams,
+        });
+        yield put({
+          type: 'getIterationsSuccess',
+          payload: parsedSampleData.runs,
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
+    },
+    *fetchTimeseriesData({ payload }, { call, put }) {
+      let clusteredIterations;
+      try {
+        const response = yield call(queryTimeseriesData, payload);
+        clusteredIterations = payload.clusters.data;
+
+        response.forEach(timeseriesResponse => {
+          const timeseriesCollection = [];
+          const firstResponse = timeseriesResponse.hits.hits[0]._source;
+          const runId = firstResponse.run.id;
+          const primaryMetric = firstResponse.sample.measurement_title;
+          const iterationName = firstResponse.iteration.name;
+          const sampleName = firstResponse.sample.name;
+          timeseriesResponse.hits.hits.forEach(timeseries => {
+            timeseriesCollection.push({
+              x: timeseries._source['@timestamp_original'],
+              [`y-${runId}_${iterationName}_${sampleName}`]: timeseries._source.result.value,
+            });
+          });
+
+          Object.entries(clusteredIterations[primaryMetric]).forEach(([clusterId, cluster]) => {
+            const clusterKey = `${runId}_${iterationName}_${sampleName}`;
+            if (clusterKey in cluster) {
+              clusteredIterations[primaryMetric][clusterId][
+                clusterKey
+              ].timeseries = timeseriesCollection;
+            }
+          });
+        });
+
+        Object.entries(clusteredIterations).forEach(([primaryMetric, clusters]) => {
+          Object.entries(clusters).forEach(([clusterKey, cluster]) => {
+            let timeseriesAggregation = {};
+            const timeseriesLabels = ['time'];
+            Object.entries(cluster.clusterKeys).forEach(([keyIndex]) => {
+              timeseriesAggregation =
+                Object.keys(timeseriesAggregation).length > 0
+                  ? (timeseriesAggregation = _.merge(
+                      timeseriesAggregation,
+                      clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries
+                    ))
+                  : clusteredIterations[primaryMetric][clusterKey][keyIndex].timeseries;
+              timeseriesLabels.push(keyIndex);
+            });
+            timeseriesAggregation = timeseriesAggregation.map(item => Object.values(item));
+            clusteredIterations[primaryMetric][
+              clusterKey
+            ].timeseriesAggregation = timeseriesAggregation;
+            clusteredIterations[primaryMetric][clusterKey].timeseriesLabels = timeseriesLabels;
+          });
+        });
+      } catch (error) {
+        const { data } = error;
+        let errortext = 'Something went wrong. Please try again.';
+        if (data) {
+          const { message } = data;
+          errortext = message;
+        }
+        yield put({
+          type: 'error/updateAlertMessage',
+          payload: {
+            messageType: 'error',
+            message: errortext,
+          },
+        });
+      }
 
       return clusteredIterations;
     },
@@ -218,31 +315,31 @@ export default {
         ...payload,
       };
     },
-    getControllers(state, { payload }) {
+    fetchControllersSuccess(state, { payload }) {
       return {
         ...state,
         controllers: payload,
       };
     },
-    getResults(state, { payload }) {
+    getResultsSuccess(state, { payload }) {
       return {
         ...state,
         results: { ...state.results, ...payload },
       };
     },
-    getResult(state, { payload }) {
+    getResultSuccess(state, { payload }) {
       return {
         ...state,
         result: payload,
       };
     },
-    getTocResult(state, { payload }) {
+    getTocResultSuccess(state, { payload }) {
       return {
         ...state,
         tocResult: payload,
       };
     },
-    getIterations(state, { payload }) {
+    getIterationsSuccess(state, { payload }) {
       return {
         ...state,
         iterations: payload,

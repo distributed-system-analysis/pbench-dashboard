@@ -61,13 +61,14 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
   return routerMap;
 }, deepEqual);
 
-@connect(({ sessions, loading, auth }) => ({
+@connect(({ sessions, loading, auth, error }) => ({
   sessionBannerVisible: sessions.sessionBannerVisible,
   sessionDescription: sessions.sessionDescription,
   sessionId: sessions.sessionId,
   savingSession: loading.effects['sessions/saveSession'],
   username: auth.username,
-  errorMessage: auth.errorMessage,
+  errorMessage: error.errorMessage,
+  successMessage: error.successMessage,
 }))
 class BasicLayout extends React.PureComponent {
   static childContextTypes = {
@@ -138,11 +139,11 @@ class BasicLayout extends React.PureComponent {
     });
   };
 
-  closeAlert = () => {
+  closeAlert = messageType => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'auth/removeErrorMessage',
-      payload: '',
+      type: 'error/clearAlertMessage',
+      payload: messageType,
     });
   };
 
@@ -156,6 +157,7 @@ class BasicLayout extends React.PureComponent {
       location: { pathname },
       username,
       errorMessage,
+      successMessage,
     } = this.props;
 
     const { sessionExitModalVisible } = this.state;
@@ -173,7 +175,18 @@ class BasicLayout extends React.PureComponent {
                 <Alert
                   title={errorMessage}
                   variant="danger"
-                  actionClose={<AlertActionCloseButton onClose={() => this.closeAlert()} />}
+                  actionClose={<AlertActionCloseButton onClose={() => this.closeAlert('error')} />}
+                />
+              </AlertGroup>
+            )}
+            {successMessage && (
+              <AlertGroup isToast>
+                <Alert
+                  title={successMessage}
+                  variant="success"
+                  actionClose={
+                    <AlertActionCloseButton onClose={() => this.closeAlert('success')} />
+                  }
                 />
               </AlertGroup>
             )}
