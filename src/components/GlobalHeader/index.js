@@ -46,7 +46,7 @@ class GlobalHeader extends Component {
 
   navigateToProfile = () => {
     const { dispatch } = this.props;
-    dispatch(routerRedux.push(`/private/profile`));
+    dispatch(routerRedux.push(`/profile`));
   };
 
   navigateToAuth = () => {

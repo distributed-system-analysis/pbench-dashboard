@@ -30,7 +30,7 @@ export default {
               username,
             },
           }),
-          yield put(routerRedux.push('/private')),
+          yield put(routerRedux.push('/overview')),
         ]);
       } catch (error) {
         const { data } = error;
