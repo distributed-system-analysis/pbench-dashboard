@@ -64,10 +64,11 @@ const tocColumns = [
   },
 ];
 
-@connect(({ global, dashboard, loading }) => ({
+@connect(({ global, dashboard, loading, auth }) => ({
   iterations: dashboard.iterations,
   iterationParams: dashboard.iterationParams,
   result: dashboard.result,
+  username: auth.username,
   tocResult: dashboard.tocResult,
   selectedControllers: global.selectedControllers,
   selectedResults: global.selectedResults,
@@ -89,7 +90,7 @@ class Summary extends React.Component {
   }
 
   componentDidMount() {
-    const { dispatch, selectedDateRange, selectedResults } = this.props;
+    const { dispatch, username, selectedDateRange, selectedResults } = this.props;
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',
@@ -99,14 +100,15 @@ class Summary extends React.Component {
       type: 'dashboard/fetchResult',
       payload: {
         selectedDateRange,
-        result: selectedResults[0].result,
+        username,
+        result: selectedResults[0].values.result,
       },
     });
     dispatch({
       type: 'dashboard/fetchTocResult',
       payload: {
         selectedDateRange,
-        id: selectedResults[0].id,
+        id: selectedResults[0].original.id,
       },
     });
   }
