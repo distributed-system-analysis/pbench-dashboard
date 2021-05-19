@@ -65,22 +65,14 @@ module.exports = [
         component: './Sessions',
       },
       {
-        path: '/private',
-        Routes: ['./src/pages/PrivateRoute/index.js'],
-        routes: [
-          {
-            path: '/private',
-            name: 'dashboard',
-            icon: 'dashboard',
-            component: './Overview',
-          },
-          {
-            path: '/private/profile',
-            name: 'profile',
-            exact: true,
-            component: './Profile',
-          },
-        ],
+        path: '/overview',
+        name: 'overview',
+        component: './Overview',
+      },
+      {
+        path: '/profile',
+        name: 'profile',
+        component: './Profile',
       },
       {
         path: '/exception/403',
