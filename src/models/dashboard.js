@@ -42,42 +42,7 @@ export default {
       });
     },
     *fetchResults({ payload }, { call, put }) {
-      const response = yield call(queryResults, payload);
-      const runs = [];
-
-      response.hits.hits.forEach(result => {
-        const { _source } = result;
-        const { run } = _source;
-        const { name, controller, id, start, end } = run;
-        const metadata = _source['@metadata'];
-
-        const record = {
-          result: name,
-          controller,
-          start,
-          end,
-          id,
-        };
-
-        if (typeof run.config !== 'undefined') {
-          record.config = run.config;
-        }
-        if (typeof run.prefix !== 'undefined') {
-          record['run.prefix'] = run.prefix;
-        }
-        if (typeof metadata !== 'undefined') {
-          if (typeof metadata.controller_dir !== 'undefined') {
-            record['@metadata.controller_dir'] = metadata.controller_dir;
-          }
-          if (typeof metadata.satellite !== 'undefined') {
-            record['@metadata.satellite'] = metadata.satellite;
-          }
-        }
-        runs.push(record);
-      });
-
-      const results = {};
-      results[payload.controller[0]] = runs;
+      const results = yield call(queryResults, payload);
 
       yield put({
         type: 'getResults',
@@ -85,28 +50,7 @@ export default {
       });
     },
     *fetchResult({ payload }, { call, put }) {
-      const response = yield call(queryResult, payload);
-      const result =
-        // eslint-disable-next-line no-underscore-dangle
-        typeof response.hits.hits[0] !== 'undefined' ? response.hits.hits[0]._source : [];
-      let metadataTag = '';
-      const parsedResult = {};
-
-      if (typeof result['@metadata'] !== 'undefined') {
-        metadataTag = '@metadata';
-      } else {
-        metadataTag = '_metadata';
-      }
-
-      parsedResult.runMetadata = {
-        ...result.run,
-        ...result[metadataTag],
-      };
-
-      parsedResult.hostTools = [];
-      result.host_tools_info.forEach(toolData => {
-        parsedResult.hostTools.push(toolData);
-      });
+      const parsedResult = yield call(queryResult, payload);
 
       yield put({
         type: 'getResult',

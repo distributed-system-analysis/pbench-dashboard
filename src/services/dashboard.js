@@ -44,46 +44,14 @@ export async function queryControllers(params) {
 
 export async function queryResults(params) {
   try {
-    const { selectedDateRange, controller } = params;
+    const { selectedDateRange, username, controller } = params;
 
-    const indices = `${getAllMonthsWithinRange(
-      endpoints,
-      endpoints.run_index,
-      selectedDateRange
-    )}/_search`;
-    const endpoint = MOCK_UI
-      ? `${endpoints.pbench_server}/datasets/list`
-      : `${endpoints.pbench_server}/elasticsearch`;
-
-    return request.post(endpoint, {
+    return request.post(`${endpoints.pbench_server}/datasets/list`, {
       data: {
-        indices,
-        payload: {
-          _source: {
-            includes: [
-              '@metadata.controller_dir',
-              '@metadata.satellite',
-              'run.controller',
-              'run.start',
-              'run.end',
-              'run.name',
-              'run.config',
-              'run.prefix',
-              'run.id',
-            ],
-          },
-          sort: {
-            'run.end': {
-              order: 'desc',
-            },
-          },
-          query: {
-            match: {
-              'run.controller': controller[0],
-            },
-          },
-          size: 5000,
-        },
+        user: username,
+        controller: controller[0],
+        start: selectedDateRange.start,
+        end: selectedDateRange.end,
       },
     });
   } catch (error) {
@@ -92,29 +60,13 @@ export async function queryResults(params) {
 }
 
 export async function queryResult(params) {
-  const { selectedDateRange, result } = params;
-
-  const indices = `${getAllMonthsWithinRange(
-    endpoints,
-    endpoints.run_index,
-    selectedDateRange
-  )}/_search`;
-
-  const endpoint = MOCK_UI
-    ? `${endpoints.pbench_server}/datasets/detail`
-    : `${endpoints.pbench_server}/elasticsearch`;
-
-  return request.post(endpoint, {
+  const { selectedDateRange, username, result } = params;
+  return request.post(`${endpoints.pbench_server}/datasets/detail`, {
     data: {
-      indices,
-      data: {
-        query: {
-          match: {
-            'run.name': result,
-          },
-        },
-        sort: '_index',
-      },
+      user: username,
+      name: result,
+      start: selectedDateRange.start,
+      end: selectedDateRange.end,
     },
   });
 }
@@ -126,7 +78,7 @@ export async function queryTocResult(params) {
     endpoints,
     endpoints.run_toc_index,
     selectedDateRange
-  )}/_search?q=run_data_parent:"${id}"`;
+  )}/_search`;
 
   const endpoint = MOCK_UI
     ? `${endpoints.pbench_server}/datasets/toc`
@@ -135,6 +87,10 @@ export async function queryTocResult(params) {
   return request.post(endpoint, {
     data: {
       indices,
+      params: {
+        q: `run_data_parent:"${id}"`,
+        ignore_unavailable: 'true',
+      },
     },
   });
 }

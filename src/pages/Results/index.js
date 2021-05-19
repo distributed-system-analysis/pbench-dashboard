@@ -36,13 +36,14 @@ class Results extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, results, selectedDateRange, selectedControllers } = this.props;
+    const { dispatch, username, results, selectedDateRange, selectedControllers } = this.props;
 
     if (results.length === 0) {
       dispatch({
         type: 'dashboard/fetchResults',
         payload: {
           selectedDateRange,
+          username,
           controller: selectedControllers,
         },
       });
