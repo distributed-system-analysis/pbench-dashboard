@@ -16,7 +16,7 @@ import {
 } from '@patternfly/react-core';
 import { Icon } from 'antd';
 import { EllipsisVIcon } from '@patternfly/react-icons';
-import { getDiffDays, getDiffDate } from '../../utils/moment_constants';
+import { formatDate, getDiffDays, getDiffDate } from '../../utils/moment_constants';
 import Table from '@/components/Table';
 import styles from './index.less';
 
@@ -26,6 +26,7 @@ const expirationLimit = { val: 30 };
   selectedDateRange: global.selectedDateRange,
   selectedControllers: global.selectedControllers,
   user: user.user,
+  seenResults: user.seenResults,
   favoriteControllers: user.favoriteControllers,
   results: dashboard.results,
 }))
@@ -38,8 +39,7 @@ class ExpiringResults extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, selectedControllers, selectedDateRange, results } = this.props;
-    const controller = selectedControllers[0];
+    const { dispatch, selectedControllers, selectedDateRange } = this.props;
     dispatch({
       type: 'dashboard/fetchResults',
       payload: {
@@ -47,9 +47,10 @@ class ExpiringResults extends Component {
         controller: selectedControllers,
       },
     }).then(() => {
-      const totalResultData = results[controller];
+      const { results } = this.props;
+      console.log(results[selectedControllers[0]]);
       this.setState({
-        totalResultData,
+        totalResultData: results[selectedControllers[0]],
       });
     });
   }
@@ -76,22 +77,24 @@ class ExpiringResults extends Component {
     });
   };
 
-  deleteResult = keys => {
+  deleteResult = rows => {
+    const keys = rows.map(({ original }) => original.key);
     const { totalResultData } = this.state;
     const { dispatch } = this.props;
     const updatedResult = totalResultData.filter(item => !keys.includes(item.key));
-    this.setState(
-      {
-        totalResultData: updatedResult,
-      },
-      () => {
-        dispatch({
-          type: 'global/updateResults',
-          payload: totalResultData,
-        });
-        this.getSeperatedResults();
-      }
-    );
+    dispatch({
+      type: 'dashboard/updateResults',
+      payload: updatedResult,
+    });
+  };
+
+  removeResultFromSeen = controller => {
+    console.log(controller);
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'user/removeResultFromSeen',
+      payload: controller,
+    });
   };
 
   showDrowpdown = id => {
@@ -104,7 +107,7 @@ class ExpiringResults extends Component {
   };
 
   render() {
-    const { favoriteControllers } = this.props;
+    const { favoriteControllers, seenResults } = this.props;
     const { totalResultData } = this.state;
     const seenDataColumns = [
       {
@@ -112,15 +115,43 @@ class ExpiringResults extends Component {
         accessor: 'result',
         Cell: cell => {
           const row = cell.row.original;
+          let isSeen = false;
+          if (seenResults !== []) {
+            seenResults.forEach(item => {
+              if (item.original.key === row.key) {
+                isSeen = true;
+              }
+            });
+          }
+          if (isSeen) {
+            return (
+              <div>
+                <Button
+                  variant="link"
+                  isInline
+                  style={{ marginBottom: '8px' }}
+                  onClick={() => this.retrieveResults(cell.row)}
+                >
+                  {cell.value}
+                </Button>
+                <br />
+                <Text component={TextVariants.p} className={styles.subText}>
+                  <span className={styles.label}>{row.controller}</span>
+                </Text>
+              </div>
+            );
+          }
           return (
             <div>
               <Button
                 variant="link"
                 isInline
                 style={{ marginBottom: '8px' }}
-                onClick={() => this.navigateToRunResult(cell.row)}
+                onClick={() => this.retrieveResults(cell.row)}
               >
-                {cell.value}
+                <b>
+                  <i>{cell.value}</i>
+                </b>
               </Button>
               <br />
               <Text component={TextVariants.p} className={styles.subText}>
@@ -134,8 +165,8 @@ class ExpiringResults extends Component {
         Header: 'End Time',
         accessor: 'end',
         Cell: cell => (
-          <Tooltip content={cell.value}>
-            <span>{getDiffDate(cell.value)}</span>
+          <Tooltip content={formatDate('utc', cell.value)}>
+            <span>{formatDate('with time', cell.value)}</span>
           </Tooltip>
         ),
       },
@@ -147,7 +178,9 @@ class ExpiringResults extends Component {
           if (remainingDays > 15) {
             return (
               <div>
-                <Text>{cell.value}</Text>
+                <Tooltip content={formatDate('without time', cell.value)}>
+                  <span>{getDiffDate(cell.value)}</span>
+                </Tooltip>
                 <Progress
                   min={0}
                   max={expirationLimit.val}
@@ -196,14 +229,14 @@ class ExpiringResults extends Component {
             );
           }
           return (
-            <a onClick={e => this.favoriteRecord(e, null, row)}>
+            <a onClick={e => this.favoriteRecord(e, null, [row])}>
               <Icon type="star" />
             </a>
           );
         },
       },
       {
-        title: '',
+        Header: '',
         accessor: 'action',
         Cell: cell => {
           const row = cell.row.original;
@@ -215,8 +248,16 @@ class ExpiringResults extends Component {
               />
               <div className={styles.dropdown} id={`newrun${row.key}`} style={{ display: 'none' }}>
                 <div className={styles.dropdownContent}>
-                  <div className={styles.dropdownLink}>Mark unread</div>
-                  <div className={styles.dropdownLink} onClick={() => this.deleteResult(row)}>
+                  <div
+                    className={styles.dropdownLink}
+                    onClick={() => this.removeResultFromSeen([cell.row])}
+                  >
+                    Mark unread
+                  </div>
+                  <div
+                    className={styles.dropdownLink}
+                    onClick={() => this.deleteResult([cell.row])}
+                  >
                     Delete
                   </div>
                 </div>

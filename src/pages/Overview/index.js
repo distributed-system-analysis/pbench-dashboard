@@ -19,7 +19,7 @@ import { connect } from 'dva';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { OutlinedClockIcon, UndoAltIcon, EllipsisVIcon } from '@patternfly/react-icons';
 import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
-import { getDiffDays, getDiffDate } from '../../utils/moment_constants';
+import { formatDate, getDiffDays, getDiffDate } from '../../utils/moment_constants';
 import Table from '@/components/Table';
 import styles from './index.less';
 
@@ -246,8 +246,8 @@ class Overview extends React.Component {
         Header: 'End Time',
         accessor: 'end',
         Cell: cell => (
-          <Tooltip content={cell.value}>
-            <span>{getDiffDate(cell.value)}</span>
+          <Tooltip content={formatDate('utc', cell.value)}>
+            <span>{formatDate('with time', cell.value)}</span>
           </Tooltip>
         ),
       },
@@ -259,7 +259,9 @@ class Overview extends React.Component {
           if (remainingDays > 15) {
             return (
               <div>
-                <Text>{cell.value}</Text>
+                <Tooltip content={formatDate('without time', cell.value)}>
+                  <span>{getDiffDate(cell.value)}</span>
+                </Tooltip>
                 <Progress
                   min={0}
                   max={expirationLimit.val}
@@ -348,17 +350,6 @@ class Overview extends React.Component {
 
     const seenDataColumns = [
       {
-        // Make an expander cell
-        Header: () => null, // No header
-        id: 'expander', // It needs an ID
-        Cell: ({ row }) => (
-          // Use Cell to render an expander for each row.
-          // We can use the getToggleRowExpandedProps prop-getter
-          // to build the expander.
-          <span {...row.getToggleRowExpandedProps()}>{row.isExpanded ? '-' : '+'}</span>
-        ),
-      },
-      {
         Header: 'Result',
         accessor: 'result',
         Cell: cell => {
@@ -366,7 +357,7 @@ class Overview extends React.Component {
           let isSeen = false;
           if (seenResults !== []) {
             seenResults.forEach(item => {
-              if (item.key === row.key) {
+              if (item.original.key === row.key) {
                 isSeen = true;
               }
             });
@@ -413,8 +404,8 @@ class Overview extends React.Component {
         Header: 'End Time',
         accessor: 'end',
         Cell: cell => (
-          <Tooltip content={cell.value}>
-            <span>{getDiffDate(cell.value)}</span>
+          <Tooltip content={formatDate('utc', cell.value)}>
+            <span>{formatDate('with time', cell.value)}</span>
           </Tooltip>
         ),
       },
@@ -426,7 +417,9 @@ class Overview extends React.Component {
           if (remainingDays > 15) {
             return (
               <div>
-                <Text>{cell.value}</Text>
+                <Tooltip content={formatDate('without time', cell.value)}>
+                  <span>{getDiffDate(cell.value)}</span>
+                </Tooltip>
                 <Progress
                   min={0}
                   max={expirationLimit.val}
@@ -523,7 +516,7 @@ class Overview extends React.Component {
           let isSeen = false;
           if (seenResults !== []) {
             seenResults.forEach(item => {
-              if (item.key === row.key) {
+              if (item.original.key === row.key) {
                 isSeen = true;
               }
             });
@@ -540,10 +533,12 @@ class Overview extends React.Component {
                   {cell.value}
                 </Button>
                 <br />
-                <Text component={TextVariants.p} className={styles.subText}>
-                  <OutlinedClockIcon />
-                  <span className={styles.label}>{row.deletion}</span>
-                </Text>
+                <Tooltip content={formatDate('utc', cell.value)}>
+                  <Text component={TextVariants.p} className={styles.subText}>
+                    <OutlinedClockIcon />
+                    <span className={styles.label}>{formatDate('with time', row.deletion)}</span>
+                  </Text>
+                </Tooltip>
               </div>
             );
           }
@@ -555,13 +550,17 @@ class Overview extends React.Component {
                 style={{ marginBottom: '8px' }}
                 onClick={() => this.retrieveResults(cell.row)}
               >
-                <b>{cell.value}</b>
+                <b>
+                  <i>{cell.value}</i>
+                </b>
               </Button>
               <br />
-              <Text component={TextVariants.p} className={styles.subText}>
-                <OutlinedClockIcon />
-                <span className={styles.label}>{row.deletion}</span>
-              </Text>
+              <Tooltip content={formatDate('utc', cell.value)}>
+                <Text component={TextVariants.p} className={styles.subText}>
+                  <OutlinedClockIcon />
+                  <span className={styles.label}>{formatDate('with time', row.deletion)}</span>
+                </Text>
+              </Tooltip>
             </div>
           );
         },

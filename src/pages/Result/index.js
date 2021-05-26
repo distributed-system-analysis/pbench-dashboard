@@ -54,12 +54,6 @@ class Result extends Component {
             <span className={styles.label}>{selectedResults[0].original.controller}</span>
           </TextContent>
           {acceptanceStatus === true ? '' : unAcceptedHint}
-          <TextContent>
-            <Text component={TextVariants.h3}>
-              {' '}
-              Detail Page about specific run that you drilled into
-            </Text>
-          </TextContent>
         </div>
         <div>
           <Summary />
