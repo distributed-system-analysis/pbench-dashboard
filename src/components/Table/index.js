@@ -62,7 +62,17 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 
 fuzzyTextFilterFn.autoRemove = val => !val;
 
-function Table({ columns, data, isCheckable, onCompare, loadingData, renderRowSubComponent }) {
+function Table({
+  columns,
+  data,
+  isCheckable,
+  onCompare,
+  saveRuns,
+  removeResultFromSeen,
+  favoriteRecord,
+  deleteResult,
+  loadingData,
+}) {
   const filterTypes = React.useMemo(
     () => ({
       fuzzyText: fuzzyTextFilterFn,
@@ -101,7 +111,6 @@ function Table({ columns, data, isCheckable, onCompare, loadingData, renderRowSu
     preGlobalFilteredRows,
     setGlobalFilter,
     selectedFlatRows,
-    // visibleColumns,
     state: { globalFilter, selectedRowIds },
   } = useTable(
     {
@@ -165,6 +174,10 @@ function Table({ columns, data, isCheckable, onCompare, loadingData, renderRowSu
           selectedItems={Object.keys(selectedRowIds).length}
           compareActionName="Compare"
           onCompare={() => onCompare(selectedFlatRows)}
+          saveRuns={() => saveRuns(selectedFlatRows)}
+          removeResultFromSeen={() => removeResultFromSeen(selectedFlatRows)}
+          favoriteRecord={() => favoriteRecord(selectedFlatRows)}
+          deleteResult={() => deleteResult(selectedFlatRows)}
         />
       )}
       {loadingData ? (
@@ -203,42 +216,26 @@ function Table({ columns, data, isCheckable, onCompare, loadingData, renderRowSu
               {page.map(row => {
                 prepareRow(row);
                 return (
-                  <React.Fragment>
-                    <tr className="pf-m-hoverable" {...row.getRowProps()}>
-                      {row.cells.map(cell => {
-                        return (
-                          <td {...cell.getCellProps()}>
-                            {cell.isGrouped ? (
-                              <>
-                                <span {...row.getToggleRowExpandedProps()}>
-                                  {row.isExpanded ? '↓' : '→'}
-                                </span>{' '}
-                                {cell.render('Cell', { editable: false })} ({row.subRows.length})
-                              </>
-                            ) : cell.isAggregated ? (
-                              cell.render('Aggregated')
-                            ) : cell.isPlaceholder ? null : (
-                              cell.render('Cell', { editable: false })
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    {row.isExpanded ? (
-                      <tr>
-                        <td colSpan={visibleColumns.length}>
-                          {/*
-                              Inside it, call our renderRowSubComponent function. In reality,
-                              you could pass whatever you want as props to
-                              a component like this, including the entire
-                              table instance. But for this example, we'll just
-                              pass the row
-                            */}
-                          {renderRowSubComponent({ row })}
+                  <tr className="pf-m-hoverable" {...row.getRowProps()}>
+                    {row.cells.map(cell => {
+                      return (
+                        <td {...cell.getCellProps()}>
+                          {cell.isGrouped ? (
+                            <>
+                              <span {...row.getToggleRowExpandedProps()}>
+                                {row.isExpanded ? '↓' : '→'}
+                              </span>{' '}
+                              {cell.render('Cell', { editable: false })} ({row.subRows.length})
+                            </>
+                          ) : cell.isAggregated ? (
+                            cell.render('Aggregated')
+                          ) : cell.isPlaceholder ? null : (
+                            cell.render('Cell', { editable: false })
+                          )}
                         </td>
-                      </tr>
-                    ) : null}
-                  </React.Fragment>
+                      );
+                    })}
+                  </tr>
                 );
               })}
             </tbody>

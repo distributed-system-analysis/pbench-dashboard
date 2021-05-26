@@ -92,9 +92,12 @@ export default {
       };
     },
     removeSeenResults(state, { payload }) {
+      const newSeenResults = state.seenResults.filter(function(obj) {
+        return !this.has(obj.original.key);
+      }, new Set(payload.map(obj => obj.original.key)));
       return {
         ...state,
-        seenResults: state.seenResults.filter(item => payload.includes(item.id)),
+        seenResults: newSeenResults,
       };
     },
   },

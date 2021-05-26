@@ -153,6 +153,12 @@ export default {
         payload,
       });
     },
+    *updateResults({ payload }, { put }) {
+      yield put({
+        type: 'modifyResults',
+        payload,
+      });
+    },
   },
 
   reducers: {
@@ -196,6 +202,12 @@ export default {
       return {
         ...state,
         iterationParams: payload,
+      };
+    },
+    modifyResults(state, { payload }) {
+      return {
+        ...state,
+        results: payload,
       };
     },
   },

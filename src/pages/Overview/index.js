@@ -12,15 +12,10 @@ import {
   ProgressSize,
   ProgressMeasureLocation,
   ProgressVariant,
-  Dropdown,
-  DropdownToggle,
-  DropdownItem,
-  DropdownSeparator,
   Tooltip,
 } from '@patternfly/react-core';
 import { Icon } from 'antd';
 import { connect } from 'dva';
-import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { OutlinedClockIcon, UndoAltIcon, EllipsisVIcon } from '@patternfly/react-icons';
 import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
@@ -43,11 +38,9 @@ class Overview extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isManageRunDropdownOpen: false,
       totalResultData: [],
       newData: [],
       unlabledData: [],
-      newRunsSelectedRows: [],
     };
   }
 
@@ -64,21 +57,18 @@ class Overview extends React.Component {
         controller: selectedControllers,
       },
     }).then(() => {
-      this.getSeperatedResults();
+      const { results } = this.props;
+      this.getSeperatedResults(results[selectedControllers[0]]);
     });
   }
 
-  getSeperatedResults() {
-    const { results, selectedControllers } = this.props;
-    let { totalResultData } = this.state;
-    totalResultData =
-      totalResultData.length === 0 ? results[selectedControllers[0]] : totalResultData;
-    const unlabledData = totalResultData.filter(x => x.saved === true);
-    const newData = totalResultData.filter(x => x.saved !== true);
+  getSeperatedResults(data) {
+    const unlabledData = data.filter(x => x.saved === true);
+    const newData = data.filter(x => x.saved !== true);
     this.setState({
       newData,
       unlabledData,
-      totalResultData,
+      totalResultData: data,
     });
   }
 
@@ -113,55 +103,30 @@ class Overview extends React.Component {
     }
   };
 
-  saveRuns = keys => {
+  saveRuns = rows => {
+    const keys = rows.map(({ original }) => original.key);
     const { totalResultData } = this.state;
     const { dispatch } = this.props;
     keys.forEach(function(key) {
       totalResultData.filter(item => item.key === key)[0].saved = true;
     });
-    this.setState(
-      {
-        totalResultData,
-      },
-      () => {
-        dispatch({
-          type: 'dashboard/getPrivateResults',
-          payload: totalResultData,
-        });
-        this.getSeperatedResults();
-      }
-    );
+    dispatch({
+      type: 'dashboard/updateResults',
+      payload: totalResultData,
+    });
+    this.getSeperatedResults(totalResultData);
   };
 
-  deleteResult = keys => {
+  deleteResult = rows => {
+    const keys = rows.map(({ original }) => original.key);
     const { totalResultData } = this.state;
     const { dispatch } = this.props;
     const updatedResult = totalResultData.filter(item => !keys.includes(item.key));
-    this.setState(
-      {
-        totalResultData: updatedResult,
-      },
-      () => {
-        dispatch({
-          type: 'global/updateResults',
-          payload: totalResultData,
-        });
-        this.getSeperatedResults();
-      }
-    );
-  };
-
-  onToggleManageRunDropdown = isManageRunDropdownOpen => {
-    this.setState({
-      isManageRunDropdownOpen,
+    dispatch({
+      type: 'dashboard/updateResults',
+      payload: updatedResult,
     });
-  };
-
-  onSelectManageRunDropdown = () => {
-    const { isManageRunDropdownOpen } = this.state;
-    this.setState({
-      isManageRunDropdownOpen: !isManageRunDropdownOpen,
-    });
+    this.getSeperatedResults(updatedResult);
   };
 
   retrieveResults = row => {
@@ -198,6 +163,7 @@ class Overview extends React.Component {
   };
 
   removeResultFromSeen = controller => {
+    console.log(controller);
     const { dispatch } = this.props;
     dispatch({
       type: 'user/removeResultFromSeen',
@@ -220,32 +186,11 @@ class Overview extends React.Component {
     );
   };
 
-  onMultiNewRowSelection = newRunsSelectedRowKeys => {
-    console.log(newRunsSelectedRowKeys);
-  };
-
   render() {
-    const {
-      newData,
-      unlabledData,
-      isManageRunDropdownOpen,
-      newRunsSelectedRows,
-      newRunsSelectedRowKeys,
-    } = this.state;
+    const { newData, unlabledData } = this.state;
 
     const { favoriteControllers, seenResults } = this.props;
     const newDataColumns = [
-      {
-        // Make an expander cell
-        Header: () => null, // No header
-        id: 'expander', // It needs an ID
-        Cell: ({ row }) => (
-          // Use Cell to render an expander for each row.
-          // We can use the getToggleRowExpandedProps prop-getter
-          // to build the expander.
-          <span {...row.getToggleRowExpandedProps()}>{row.isExpanded ? '-' : '+'}</span>
-        ),
-      },
       {
         Header: 'Result',
         accessor: 'result',
@@ -285,7 +230,9 @@ class Overview extends React.Component {
                 style={{ marginBottom: '8px' }}
                 onClick={() => this.retrieveResults(cell.row)}
               >
-                <i>{cell.value}</i>
+                <b>
+                  <i>{cell.value}</i>
+                </b>
               </Button>
               <br />
               <Text component={TextVariants.p} className={styles.subText}>
@@ -374,18 +321,21 @@ class Overview extends React.Component {
                 onClick={() => this.showDrowpdown(`newrun${row.key}`)}
                 className="dropbtn"
               />
-              <div className={styles.dropdown} id={`newrun${row.key}`} style={{ display: 'none' }}>
+              <div id={`newrun${row.key}`} style={{ display: 'none' }}>
                 <div className={styles.dropdownContent}>
-                  <div className={styles.dropdownLink} onClick={() => this.saveRuns([row.key])}>
+                  <div className={styles.dropdownLink} onClick={() => this.saveRuns([cell.row])}>
                     Save Runs
                   </div>
                   <div
                     className={styles.dropdownLink}
-                    onClick={() => this.removeResultFromSeen([row.key])}
+                    onClick={() => this.removeResultFromSeen([cell.row])}
                   >
                     Mark unread
                   </div>
-                  <div className={styles.dropdownLink} onClick={() => this.deleteResult([row.key])}>
+                  <div
+                    className={styles.dropdownLink}
+                    onClick={() => this.deleteResult([cell.row])}
+                  >
                     Delete
                   </div>
                 </div>
@@ -447,7 +397,9 @@ class Overview extends React.Component {
                 style={{ marginBottom: '8px' }}
                 onClick={() => this.retrieveResults(cell.row)}
               >
-                <b>{cell.value}</b>
+                <b>
+                  <i>{cell.value}</i>
+                </b>
               </Button>
               <br />
               <Text component={TextVariants.p} className={styles.subText}>
@@ -544,11 +496,14 @@ class Overview extends React.Component {
                 <div className={styles.dropdownContent}>
                   <div
                     className={styles.dropdownLink}
-                    onClick={() => this.removeResultFromSeen([row.key])}
+                    onClick={() => this.removeResultFromSeen([cell.row])}
                   >
                     Mark unread
                   </div>
-                  <div className={styles.dropdownLink} onClick={() => this.deleteResult([row.key])}>
+                  <div
+                    className={styles.dropdownLink}
+                    onClick={() => this.deleteResult([cell.row])}
+                  >
                     Delete
                   </div>
                 </div>
@@ -613,40 +568,6 @@ class Overview extends React.Component {
       },
     ];
 
-    const manageRunDropdown = [
-      <DropdownItem
-        key="save"
-        className={styles.ulclass}
-        onClick={() => this.saveRuns(newRunsSelectedRowKeys)}
-      >
-        {' '}
-        Save Runs
-      </DropdownItem>,
-      <DropdownItem
-        key="unread"
-        className={styles.ulclass}
-        onClick={() => this.removeResultFromSeen(newRunsSelectedRowKeys)}
-      >
-        {' '}
-        Mark as unread
-      </DropdownItem>,
-      <DropdownItem
-        key="favourite"
-        className={styles.ulclass}
-        onClick={e => this.favoriteRecord(e, null, newRunsSelectedRows)}
-      >
-        Mark Favourited
-      </DropdownItem>,
-      <DropdownSeparator key="separator" />,
-      <DropdownItem
-        key="delete"
-        className={styles.ulclass}
-        onClick={() => this.deleteResult(newRunsSelectedRowKeys)}
-      >
-        Delete runs
-      </DropdownItem>,
-    ];
-
     return (
       <div className={styles.paddingBig}>
         <TextContent className={styles.paddingSmall}>
@@ -703,21 +624,6 @@ class Overview extends React.Component {
                       >
                         Refresh results
                       </Button>
-                      <Dropdown
-                        onSelect={this.onSelectManageRunDropdown}
-                        toggle={
-                          <DropdownToggle
-                            onToggle={this.onToggleManageRunDropdown}
-                            toggleIndicator={CaretDownIcon}
-                            isPrimary
-                            id="toggle-id-4"
-                          >
-                            Manage runs
-                          </DropdownToggle>
-                        }
-                        isOpen={isManageRunDropdownOpen}
-                        dropdownItems={manageRunDropdown}
-                      />
                     </span>
                   </Text>
                 </TextContent>
@@ -730,11 +636,13 @@ class Overview extends React.Component {
                     onRowClick={record => {
                       this.retrieveResults(record);
                     }}
-                    renderRowSubComponent={record => <p>{record.row.original.config}</p>}
                     data={newData}
-                    onMultiNewRowSelection={selectedRowIds =>
-                      this.onMultiNewRowSelection(selectedRowIds)
+                    saveRuns={selectedRowIds => this.saveRuns(selectedRowIds)}
+                    removeResultFromSeen={selectedRowIds =>
+                      this.removeResultFromSeen(selectedRowIds)
                     }
+                    favoriteRecord={selectedRowIds => this.favoriteRecord(selectedRowIds)}
+                    deleteResult={selectedRowIds => this.deleteResult(selectedRowIds)}
                     isCheckable
                   />
                 </div>
@@ -760,7 +668,6 @@ class Overview extends React.Component {
                     onRowClick={record => {
                       this.retrieveResults(record);
                     }}
-                    renderRowSubComponent={record => <p>{record.row.original.config}</p>}
                     data={unlabledData}
                     isCheckable
                   />
