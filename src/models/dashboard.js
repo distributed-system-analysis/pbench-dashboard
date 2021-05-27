@@ -42,8 +42,60 @@ export default {
       });
     },
     *fetchResults({ payload }, { call, put }) {
-      const results = yield call(queryResults, payload);
+      const response = yield call(queryResults, payload);
+      const runs = [];
+      console.log(response);
+      response.hits.hits.forEach(result => {
+        const { _source } = result;
+        const { run } = _source;
+        const {
+          name,
+          controller,
+          key,
+          id,
+          start,
+          end,
+          deletion,
+          config,
+          seen,
+          saved,
+          status,
+        } = run;
+        const metadata = _source['@metadata'];
 
+        const record = {
+          key,
+          result: name,
+          controller,
+          start,
+          end,
+          deletion,
+          config,
+          seen,
+          saved,
+          status,
+          id,
+        };
+
+        if (typeof run.config !== 'undefined') {
+          record.config = run.config;
+        }
+        if (typeof run.prefix !== 'undefined') {
+          record['run.prefix'] = run.prefix;
+        }
+        if (typeof metadata !== 'undefined') {
+          if (typeof metadata.controller_dir !== 'undefined') {
+            record['@metadata.controller_dir'] = metadata.controller_dir;
+          }
+          if (typeof metadata.satellite !== 'undefined') {
+            record['@metadata.satellite'] = metadata.satellite;
+          }
+        }
+        runs.push(record);
+      });
+
+      const results = {};
+      results[payload.controller[0]] = runs;
       yield put({
         type: 'getResults',
         payload: results,
