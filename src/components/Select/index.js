@@ -5,11 +5,18 @@ import {
   SelectOption,
   SelectVariant,
   SelectDirection,
+  ChipGroup,
+  Chip,
 } from '@patternfly/react-core';
 
 export default class Select extends PureComponent {
   static propTypes = {
     options: PropTypes.array.isRequired,
+    selected: PropTypes.array,
+  };
+
+  static defaultProps = {
+    selected: [],
   };
 
   constructor(props) {
@@ -54,12 +61,34 @@ export default class Select extends PureComponent {
     }
   };
 
+  chipGroupComponent = () => {
+    const { onSelect, category, selected } = this.props;
+    return (
+      <ChipGroup>
+        {selected.map(currentChip => {
+          return (
+            <Chip
+              isReadOnly={false}
+              key={currentChip}
+              onClick={event => onSelect(event, currentChip, category)}
+            >
+              {currentChip}
+            </Chip>
+          );
+        })}
+      </ChipGroup>
+    );
+  };
+
   render() {
     const { options, onSelect, selected } = this.props;
     const { isOpen, isDisabled, direction } = this.state;
 
     return (
       <PFSelect
+        chipGroupProps={{
+          numChips: 1,
+        }}
         variant={SelectVariant.typeaheadMulti}
         placeholderText="Select"
         onToggle={this.onToggle}
@@ -69,6 +98,7 @@ export default class Select extends PureComponent {
         isOpen={isOpen}
         isDisabled={isDisabled}
         direction={direction}
+        chipGroupComponent={this.chipGroupComponent()}
       >
         {options.map(option => (
           <SelectOption key={option} value={option} />
