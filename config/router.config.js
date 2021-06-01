@@ -75,6 +75,16 @@ module.exports = [
         component: './Profile',
       },
       {
+        path: '/result',
+        name: 'result',
+        component: './Result',
+      },
+      {
+        path: '/expiringresults',
+        name: 'expiringresults',
+        component: './ExpiringResults',
+      },
+      {
         path: '/exception/403',
         name: 'exception-403',
         component: './Exception/403',

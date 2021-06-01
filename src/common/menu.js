@@ -28,9 +28,9 @@ const menuData = [
     ],
   },
   {
-    name: 'Controllers',
-    icon: 'controllers',
-    path: '/',
+    name: 'Overview',
+    icon: 'overview',
+    path: '/overview',
   },
   {
     name: 'Search',

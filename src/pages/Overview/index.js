@@ -139,7 +139,7 @@ class Overview extends React.Component {
     }).then(() => {
       dispatch(
         routerRedux.push({
-          pathname: 'private/result',
+          pathname: '/result',
         })
       );
     });
@@ -149,7 +149,7 @@ class Overview extends React.Component {
     const { dispatch } = this.props;
     dispatch(
       routerRedux.push({
-        pathname: 'private/expiringresults',
+        pathname: '/expiringresults',
       })
     );
   };
