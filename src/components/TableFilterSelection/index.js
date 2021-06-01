@@ -31,14 +31,16 @@ export default class TableFilterSelection extends Component {
 
   onFilterChange = (event, value, category) => {
     const { selectedFilters } = this.state;
-
-    if (value) {
-      selectedFilters[category] = value;
+    if (selectedFilters[category] === undefined) {
+      selectedFilters[category] = [value];
+      this.setState({ selectedFilters });
+    } else if (!selectedFilters[category].includes(value)) {
+      selectedFilters[category].push(value);
+      this.setState({ selectedFilters });
     } else {
-      delete selectedFilters[category];
+      selectedFilters[category] = selectedFilters[category].filter(item => item !== value);
+      this.setState({ selectedFilters });
     }
-
-    this.setState({ selectedFilters });
     this.setState({ updateFiltersDisabled: false });
   };
 
@@ -71,6 +73,7 @@ export default class TableFilterSelection extends Component {
                   key={category}
                   selected={selectedFilters[category]}
                   options={filters[category]}
+                  category={category}
                   onSelect={(event, value) => this.onFilterChange(event, value, category)}
                 />
               </FlexItem>
