@@ -6,41 +6,24 @@ const DEFAULT_SIZE = 100;
 export const mockIndices = new Array(DEFAULT_SIZE).fill().map(() => moment().format('YYYY-MM'));
 
 export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-  controller: casual.word + index,
-  key: casual.word + index,
-  last_modified_string: moment.utc() + index,
+  controller: `${casual.word}.${casual.word}.com`,
+  key: casual.ip,
+  last_modified_string: moment().valueOf(moment.utc()),
   last_modified_value: moment.utc() + index,
   results: casual.integer(1, DEFAULT_SIZE),
 }));
 
-export const mockResults = {
-  took: DEFAULT_SIZE,
-  hits: {
-    total: {
-      value: DEFAULT_SIZE,
-    },
-    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-      _index: moment().format('YYYY-MM'),
-      _type: casual.word,
-      _id: casual.uuid,
-      _score: null,
-      _source: {
-        '@metadata': {
-          controller_dir: casual.word,
-        },
-        run: {
-          controller: casual.word + index,
-          name: casual.word,
-          start: moment.utc() + index,
-          end: moment.utc() + index,
-          id: casual.uuid,
-          config: casual.word,
-        },
-      },
-      sort: [casual.unix_time],
-    })),
-  },
-};
+export const mockResults = hostname =>
+  new Array(DEFAULT_SIZE).fill().map(() => ({
+    '@metadata.controller_dir': hostname,
+    config: casual.word,
+    controller: hostname,
+    end: moment.utc(),
+    // Since dataset id is a long hex string, removed "-" characters here to make it look like real data
+    id: casual.uuid.replace(/-/g, ''),
+    result: casual.word,
+    start: moment.utc(),
+  }));
 
 export const mockSamples = {
   _scroll_id: casual.uuid,
@@ -150,42 +133,46 @@ export const mockSamples = {
   },
 };
 
-export const mockDetail = {
-  hits: {
-    hits: [
-      {
-        _source: {
-          run: {
-            id: 'test_id',
-            controller: 'test_controller',
-            name: 'test_result',
-            script: casual.random_element(['fio', 'uperf']),
-            date: moment.utc(),
-            start: moment.utc(),
-            end: moment.utc(),
-            user: casual.username,
-          },
-          host_tools_info: [
-            {
-              hostname: 'test_host',
-              tools: {
-                iostat: '--interval=3',
-                mpstat: '--interval=3',
-                perf: "--record-opts='record -a --freq=100'",
-                pidstat: '--interval=30',
-                'proc-interrupts': '--interval=3',
-                'proc-vmstat': '--interval=3',
-                sar: '--interval=3',
-                turbostat: '--interval=3',
-              },
-            },
-          ],
-        },
-      },
-    ],
+export const mockDetail = hostname => ({
+  hostTools: new Array(DEFAULT_SIZE).fill().map(() => ({
+    hostname: hostname.split('.')[0],
+    'hostname-f': hostname,
+    tools: {
+      'hostname-alias': '',
+      'hostname-all-fqdns': hostname,
+      'hostname-all-ip-addresses': casual.ip,
+      'hostname-domain': `${casual.word}.${casual.word}.com`,
+      'hostname-fqdn': hostname,
+      'hostname-ip-address': casual.ip,
+      'hostname-nis': 'hostname: Local domain name not set',
+      'hostname-short': hostname.split('.')[0],
+      'rpm-version': `v0.+${casual.integer}`,
+      tools: casual.word,
+      vmstat: '',
+    },
+  })),
+  runMetadata: {
+    config: casual.word,
+    controller: hostname,
+    controller_dir: 'gprfc056.sbu.lab.eng.bos.redhat.com',
+    date: moment.utc(),
+    end: moment.utc(),
+    start: moment.utc(),
+    'file-date': moment.utc(),
+    'file-name': `/${casual.work}/${casual.work}/${casual.work}`,
+    'file-size': casual.building_number,
+    id: casual.uuid.replace(/-/g, ''),
+    iterations: casual.word,
+    md5: casual.uuid.replace(/-/g, ''),
+    name: casual.word,
+    'pbench-agent-version': `v0.+${casual.integer}`,
+    raw_size: casual.building_number,
+    script: casual.word,
+    'tar-ball-creation-timestamp': moment.utc,
+    'toc-prefix': casual.word,
+    toolsgroup: 'default',
   },
-};
-
+});
 export const mockTableContents = {
   hits: {
     total: DEFAULT_SIZE,
@@ -297,8 +284,14 @@ export const mockSession = {
 export default {
   'GET /controllers/months': mockIndices,
   'POST /controllers/list': mockControllers,
-  'POST /datasets/list': mockResults,
-  'POST /datasets/detail': mockDetail,
+  'POST /datasets/list': (req, res) => {
+    const data = {};
+    data[req.body.controller] = mockResults(req.body.controller);
+    res.send(data);
+  },
+  'POST /datasets/detail': (req, res) => {
+    res.send(mockDetail(req.body.name));
+  },
   'POST /datasets/toc': mockTableContents,
   'POST /datasets/samples': mockSamples,
   'POST /mappings': mockMappings,
