@@ -24,7 +24,12 @@ export default class SearchBar extends PureComponent {
   }
 
   onChange = value => {
+    const { onSearch } = this.props;
     this.setState({ searchValue: value });
+
+    // filters the Table as
+    // the input component changes
+    onSearch(value);
   };
 
   onEnter = event => {
