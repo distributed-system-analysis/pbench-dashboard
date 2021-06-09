@@ -117,6 +117,14 @@ $ yarn build
 
 This will generate the `dist` folder in the root directory, which contains packaged files such as `***.js`, `***.css`, and `index.html`.
 
+## Releases
+
+The release targets, `yarn prerelease`, `yarn release-patch`, `yarn release-minor`, and `yarn release-major` leverage the `npm version` behavior of running the `preversion` and `version` scripts during the course of its execution.
+
+The `preversion` script runs a set of tests to double check nothing is broken.  Then the `version` script is run which actually performs the build, which includes the auto-increment version string as provided by the `prerelease` and `release-*` targets.
+
+We do not use the `npm version` feature of auto-tagging and commit of the `package.json` changes.
+
 ## UI Tests
 
 Run All UI Unit Tests and E2E Tests
