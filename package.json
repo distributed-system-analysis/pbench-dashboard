@@ -1,6 +1,6 @@
 {
   "name": "pbench_dashboard",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "UI solution for scalable visualization of benchmark data.",
   "private": true,
   "scripts": {
