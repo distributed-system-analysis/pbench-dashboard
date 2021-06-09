@@ -16,3 +16,16 @@
 
 - name: initialize dashboard config file
   template: src=config.json.j2 dest=/var/www/html/dashboard/config.json mode=0644 owner=pbench group=pbench
+
+- name: fetch SHA1
+  command: git describe --tags --long
+  delegate_to: localhost
+  register: sha1
+
+- name: record SHA1 hash remotely
+  copy:
+    content: "{{ sha1.stdout }}\n"
+    dest: /var/www/html/dashboard/SHA1
+    mode: 0644
+    owner: pbench
+    group: pbench
