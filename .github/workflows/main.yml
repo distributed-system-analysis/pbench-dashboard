@@ -1,0 +1,14 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Unit Tests
+        shell: bash
+        run: ./unittests
+      - name: Run E2E Tests
+        shell: bash
+        run: ./e2etests
