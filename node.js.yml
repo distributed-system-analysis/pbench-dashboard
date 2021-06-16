@@ -1,0 +1,24 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install # will run `yarn install` command
+      - name: Run Unit Tests
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: test # will run `yarn test` command
+      - name: Run App in Background
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: start:mock & # will run `yarn start:mock` command in background
+      - name: Run E2E Tests
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: test:e2e # will run `yarn test:e2e` command
