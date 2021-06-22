@@ -90,7 +90,19 @@ class Summary extends React.Component {
   }
 
   componentDidMount() {
-    const { dispatch, username, selectedDateRange, selectedResults } = this.props;
+    const { dispatch, selectedDateRange, selectedResults, username } = this.props;
+    const { match } = this.props;
+
+    if (match.params) {
+      dispatch({
+        type: 'global/updateSelectedControllers',
+        payload: [match.params.controller],
+      });
+      dispatch({
+        type: 'global/updateSelectedResults',
+        payload: [match.params.result],
+      });
+    }
 
     dispatch({
       type: 'dashboard/fetchIterationSamples',

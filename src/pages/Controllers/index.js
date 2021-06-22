@@ -111,16 +111,16 @@ class Controllers extends Component {
     });
   };
 
-  retrieveResults = controller => {
+  retrieveResults = selectedRow => {
     const { dispatch } = this.props;
 
     dispatch({
       type: 'global/updateSelectedControllers',
-      payload: [controller],
+      payload: [selectedRow.original.controller],
     }).then(() => {
       dispatch(
         routerRedux.push({
-          pathname: '/results',
+          pathname: `/controllers/${selectedRow.original.controller}`,
         })
       );
     });
@@ -151,7 +151,11 @@ class Controllers extends Component {
       {
         Header: 'Controller',
         accessor: 'controller',
-        Cell: row => <span>{row.value}</span>,
+        Cell: row => (
+          <span>
+            <a onClick={() => this.retrieveResults(row.cell.row)}>{row.value}</a>
+          </span>
+        ),
       },
       {
         Header: 'Last Modified',

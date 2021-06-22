@@ -48,10 +48,19 @@ class ComparisonSelect extends React.Component {
   componentDidMount() {
     const { selectedResults, selectedDateRange, dispatch } = this.props;
 
-    dispatch({
-      type: 'dashboard/fetchIterationSamples',
-      payload: { selectedResults, selectedDateRange },
-    });
+    if (window.location.href.includes('?')) {
+      const urlParams = new URLSearchParams(window.location.href.split('?').pop());
+      const selectedRuns = urlParams.get('runs').split(',');
+      dispatch({
+        type: 'dashboard/fetchIterationSamples',
+        payload: { selectedResults: selectedRuns, selectedDateRange },
+      });
+    } else {
+      dispatch({
+        type: 'dashboard/fetchIterationSamples',
+        payload: { selectedResults, selectedDateRange },
+      });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -105,6 +114,7 @@ class ComparisonSelect extends React.Component {
   render() {
     const { resultIterations } = this.state;
     const { iterationParams, selectedControllers, loadingIterations } = this.props;
+
     return (
       <React.Fragment>
         <PageSection variant={PageSectionVariants.light}>

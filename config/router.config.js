@@ -1,28 +1,23 @@
 module.exports = [
   {
     path: '/auth',
-    name: 'auth',
     component: '../components/AuthLayout',
   },
   {
     path: '/login',
-    name: 'login',
-    component: './LoginHandler',
+    component: 'LoginHandler',
   },
   {
     path: '/signup',
-    name: 'signup',
-    component: './SignupHandler',
+    component: 'SignupHandler',
   },
   {
     path: '/password',
-    name: 'password',
-    component: './PasswordHandler',
+    component: 'PasswordHandler',
   },
   {
     path: '/share/:id',
-    name: 'share',
-    component: './SessionPlaceholder',
+    component: 'SessionPlaceholder',
   },
   {
     path: '/',
@@ -30,63 +25,54 @@ module.exports = [
     routes: [
       {
         path: '/',
-        name: 'dashboard',
-        icon: 'dashboard',
-        component: './Controllers',
+        component: 'Controllers',
       },
       {
-        path: '/results',
-        name: 'results',
-        component: './Results',
+        path: '/controllers',
+        component: 'Controllers',
       },
       {
-        path: '/summary',
-        name: 'summary',
-        component: './Summary',
+        path: '/controllers/:controller',
+        component: 'Results',
       },
       {
-        path: '/comparison-select',
-        name: 'comparison-select',
-        component: './ComparisonSelect',
+        path: '/controllers/:controller/:result/summary',
+        component: 'Summary',
+      },
+      {
+        path: '/comparison-select/',
+        component: 'ComparisonSelect',
       },
       {
         path: '/comparison',
-        name: 'comparison',
-        component: './RunComparison',
+        component: 'RunComparison',
       },
       {
         path: '/search',
-        name: 'search',
-        component: './Search',
+        component: 'Search',
       },
       {
         path: '/sessions',
-        name: 'sessions',
-        component: './Sessions',
+        component: 'Sessions',
       },
       {
         path: '/overview',
-        name: 'overview',
-        component: './Overview',
+        component: 'Overview',
       },
       {
         path: '/profile',
-        name: 'profile',
-        component: './Profile',
+        component: 'Profile',
       },
       {
         path: '/exception/403',
-        name: 'exception-403',
         component: './Exception/403',
       },
       {
         path: '/exception/404',
-        name: 'exception-404',
         component: './Exception/404',
       },
       {
         path: '/exception/500',
-        name: 'exception-500',
         component: './Exception/500',
       },
     ],
