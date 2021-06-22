@@ -27,7 +27,6 @@ import {
   AlertActionCloseButton,
 } from '@patternfly/react-core';
 import NavigationDrawer from '../components/NavigationDrawer';
-import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
 
 const redirectData = [];
@@ -154,7 +153,6 @@ class BasicLayout extends React.PureComponent {
       sessionId,
       children,
       location: { pathname },
-      username,
       errorMessage,
     } = this.props;
 
@@ -206,7 +204,6 @@ class BasicLayout extends React.PureComponent {
                 </DescriptionList>
               </Alert>
             )}
-            {username ? '' : <LoginHint />}
             <Modal
               variant={ModalVariant.small}
               title="Confirm session exit"

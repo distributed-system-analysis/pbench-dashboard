@@ -1,25 +1,5 @@
 module.exports = [
   {
-    path: '/auth',
-    name: 'auth',
-    component: '../components/AuthLayout',
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: './LoginHandler',
-  },
-  {
-    path: '/signup',
-    name: 'signup',
-    component: './SignupHandler',
-  },
-  {
-    path: '/password',
-    name: 'password',
-    component: './PasswordHandler',
-  },
-  {
     path: '/share/:id',
     name: 'share',
     component: './SessionPlaceholder',
@@ -68,11 +48,6 @@ module.exports = [
         path: '/overview',
         name: 'overview',
         component: './Overview',
-      },
-      {
-        path: '/profile',
-        name: 'profile',
-        component: './Profile',
       },
       {
         path: '/exception/403',
