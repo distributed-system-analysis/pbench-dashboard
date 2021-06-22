@@ -36,7 +36,15 @@ class Results extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, username, results, selectedDateRange, selectedControllers } = this.props;
+    const { dispatch, results, selectedDateRange, selectedControllers, username } = this.props;
+    const { match } = this.props;
+
+    if (match.params) {
+      dispatch({
+        type: 'global/updateSelectedControllers',
+        payload: [match.params.controller],
+      });
+    }
 
     if (results.length === 0) {
       dispatch({
@@ -103,31 +111,34 @@ class Results extends Component {
   };
 
   compareResults = selectedRows => {
-    const { dispatch } = this.props;
+    const { dispatch, selectedControllers } = this.props;
+    const selectedRowIds = selectedRows.map(row => row.original.id);
 
     dispatch({
       type: 'global/updateSelectedResults',
-      payload: selectedRows.map(row => row.original.result),
+      payload: selectedRowIds,
     });
 
     dispatch(
       routerRedux.push({
-        pathname: '/comparison-select',
+        pathname: `/comparison-select/?controllers=${
+          selectedControllers[0]
+        }&runs=${selectedRowIds.join(',')}`,
       })
     );
   };
 
-  retrieveResults = params => {
-    const { dispatch } = this.props;
+  retrieveSummary = selectedRow => {
+    const { dispatch, selectedControllers } = this.props;
 
     dispatch({
       type: 'global/updateSelectedResults',
-      payload: [params],
+      payload: [selectedRow.original.id],
     });
 
     dispatch(
       routerRedux.push({
-        pathname: '/summary',
+        pathname: `/controllers/${selectedControllers[0]}/${selectedRow.original.id}/summary`,
       })
     );
   };
@@ -159,7 +170,7 @@ class Results extends Component {
         accessor: 'result',
         Cell: row => (
           <span>
-            <a onClick={() => this.retrieveResults(row.cell.row)}>{row.value}</a>
+            <a onClick={() => this.retrieveSummary(row.cell.row)}>{row.value}</a>
           </span>
         ),
       },
@@ -214,7 +225,7 @@ class Results extends Component {
                 columns={columns}
                 data={results}
                 onRowClick={record => {
-                  this.retrieveResults(record);
+                  this.retrieveSummary(record);
                 }}
                 loadingData={loading}
                 isCheckable
