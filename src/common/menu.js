@@ -1,3 +1,5 @@
+import memoizeOne from 'memoize-one';
+
 export const menuData = [
   {
     name: 'Dashboard',
@@ -68,4 +70,4 @@ const flattenRoutes = routes =>
 
 const getMenuData = () => flattenRoutes(setupParents(buildPaths(menuData)));
 
-export default getMenuData;
+export default memoizeOne(getMenuData);
