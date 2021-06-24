@@ -43,7 +43,6 @@ export default {
     },
     *fetchResults({ payload }, { call, put }) {
       const results = yield call(queryResults, payload);
-
       yield put({
         type: 'getResults',
         payload: results,
@@ -153,6 +152,12 @@ export default {
         payload,
       });
     },
+    *updateResults({ payload }, { put }) {
+      yield put({
+        type: 'modifyResults',
+        payload,
+      });
+    },
   },
 
   reducers: {
@@ -192,22 +197,16 @@ export default {
         iterations: payload,
       };
     },
-    modifySelectedControllers(state, { payload }) {
-      return {
-        ...state,
-        selectedControllers: payload,
-      };
-    },
-    modifySelectedResults(state, { payload }) {
-      return {
-        ...state,
-        selectedResults: payload,
-      };
-    },
     modifyConfigCategories(state, { payload }) {
       return {
         ...state,
         iterationParams: payload,
+      };
+    },
+    modifyResults(state, { payload }) {
+      return {
+        ...state,
+        results: payload,
       };
     },
   },

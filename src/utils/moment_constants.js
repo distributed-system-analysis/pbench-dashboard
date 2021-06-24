@@ -37,6 +37,25 @@ export function getAllMonthsWithinRange(endpoints, index, selectedDateRange) {
   return queryString;
 }
 
+export const formatDate = (format, givenDate) => {
+  switch (format) {
+    case 'utc':
+      return moment(givenDate).format();
+    case 'without time':
+      return moment(givenDate).format('Do MMMM YYYY');
+    case 'with time':
+      return moment(givenDate).format('Do MMMM YYYY, h:mm:ss a');
+    default:
+      return givenDate;
+  }
+};
+
 export const getDiffDate = givenDate => {
   return moment(givenDate).fromNow();
+};
+
+export const getDiffDays = givenDate => {
+  const futureDate = moment(givenDate);
+  const currDate = moment(new Date());
+  return futureDate.diff(currDate, 'days');
 };

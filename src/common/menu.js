@@ -28,6 +28,11 @@ const menuData = [
     ],
   },
   {
+    name: 'Overview',
+    icon: 'overview',
+    path: '/overview',
+  },
+  {
     name: 'Search',
     path: '/search',
   },

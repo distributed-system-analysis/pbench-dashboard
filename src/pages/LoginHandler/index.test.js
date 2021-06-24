@@ -4,9 +4,8 @@ import Adapter from 'enzyme-adapter-react-16';
 import AuthLayout from '@/components/AuthLayout';
 import LoginHandler from './index';
 
-const mockDispatch = jest.fn();
 configure({ adapter: new Adapter() });
-const wrapper = shallow(<LoginHandler.WrappedComponent dispatch={mockDispatch} />, {
+const wrapper = shallow(<LoginHandler />, {
   disableLifecycleMethods: true,
 });
 

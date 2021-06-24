@@ -13,34 +13,19 @@ export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index)
   results: casual.integer(1, DEFAULT_SIZE),
 }));
 
-export const mockResults = {
-  took: DEFAULT_SIZE,
-  hits: {
-    total: {
-      value: DEFAULT_SIZE,
-    },
-    hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-      _index: moment().format('YYYY-MM'),
-      _type: casual.word,
-      _id: casual.uuid,
-      _score: null,
-      _source: {
-        '@metadata': {
-          controller_dir: casual.word,
-        },
-        run: {
-          controller: casual.word + index,
-          name: casual.word,
-          start: moment.utc() + index,
-          end: moment.utc() + index,
-          id: casual.uuid,
-          config: casual.word,
-        },
-      },
-      sort: [casual.unix_time],
-    })),
-  },
-};
+export const mockResults = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
+  '@metadata.controller_dir': casual.word,
+  key: casual.uuid,
+  id: casual.uuid,
+  config: casual.word,
+  controller: casual.word + index,
+  deletion: moment.utc().add('days', 30),
+  end: moment.utc() + index,
+  result: casual.word,
+  seen: false,
+  saved: Math.random() < 0.5,
+  status: 'published',
+}));
 
 export const mockSamples = {
   _scroll_id: casual.uuid,
@@ -297,7 +282,11 @@ export const mockSession = {
 export default {
   'GET /controllers/months': mockIndices,
   'POST /controllers/list': mockControllers,
-  'POST /datasets/list': mockResults,
+  'POST /datasets/list': (req, res) => {
+    const data = {};
+    data[req.body.controller] = mockResults;
+    res.send(data);
+  },
   'POST /datasets/detail': mockDetail,
   'POST /datasets/toc': mockTableContents,
   'POST /datasets/samples': mockSamples,

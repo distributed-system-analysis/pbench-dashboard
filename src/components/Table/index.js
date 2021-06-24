@@ -62,7 +62,17 @@ function fuzzyTextFilterFn(rows, id, filterValue) {
 
 fuzzyTextFilterFn.autoRemove = val => !val;
 
-function Table({ columns, data, isCheckable, onCompare, loadingData }) {
+function Table({
+  columns,
+  data,
+  isCheckable,
+  onCompare,
+  saveRuns,
+  removeResultFromSeen,
+  favoriteRecord,
+  deleteResult,
+  loadingData,
+}) {
   const filterTypes = React.useMemo(
     () => ({
       fuzzyText: fuzzyTextFilterFn,
@@ -164,6 +174,10 @@ function Table({ columns, data, isCheckable, onCompare, loadingData }) {
           selectedItems={Object.keys(selectedRowIds).length}
           compareActionName="Compare"
           onCompare={() => onCompare(selectedFlatRows)}
+          saveRuns={() => saveRuns(selectedFlatRows)}
+          removeResultFromSeen={() => removeResultFromSeen(selectedFlatRows)}
+          favoriteRecord={() => favoriteRecord(selectedFlatRows)}
+          deleteResult={() => deleteResult(selectedFlatRows)}
         />
       )}
       {loadingData ? (
