@@ -1,6 +1,4 @@
-import { isUrl } from '../utils/utils';
-
-const menuData = [
+export const menuData = [
   {
     name: 'Dashboard',
     path: '/',
@@ -37,39 +35,37 @@ const menuData = [
   },
 ];
 
-// Generates a configuration of type { Path: Name }
-// from menuData. A level is used to distinguish
-// root paths from other paths.
-function formatter(data, parentPath = '', parentName = '', level = 1) {
-  return data.map(item => {
-    let { path, name } = item;
-    if (!isUrl(path)) {
-      path = parentPath + item.path;
-    }
-    // For all non root paths,
-    // append the parent name with
-    // current name.
-    if (level !== 1) {
-      name = `${parentName}/${name}`;
-    }
-    let result = {};
-    if (item.routes) {
-      result = {
-        ...item,
-        path,
-        name,
-      };
-      result.routes = formatter(item.routes, `${parentPath}${item.path}`, name, level + 1);
-    } else {
-      result = {
-        ...item,
-        path,
-        name,
-      };
-    }
-    return result;
-  });
-}
+const combinePaths = (parent, child) => `${parent.replace(/\/$/, '')}/${child.replace(/^\//, '')}`;
 
-const getMenuData = () => formatter(menuData);
+const buildPaths = (navigation, parentPath = '') =>
+  navigation.map(route => {
+    const path = combinePaths(parentPath, route.path);
+
+    return {
+      ...route,
+      path,
+      ...(route.routes && { routes: buildPaths(route.routes, path) }),
+    };
+  });
+
+const setupParents = (routes, parentRoute = null) =>
+  routes.map(route => {
+    const withParent = {
+      ...route,
+      ...(parentRoute && { parent: parentRoute }),
+    };
+
+    return {
+      ...withParent,
+      ...(withParent.routes && {
+        routes: setupParents(withParent.routes, withParent),
+      }),
+    };
+  });
+
+const flattenRoutes = routes =>
+  routes.map(route => [route.routes ? flattenRoutes(route.routes) : [], route]).flat(Infinity);
+
+const getMenuData = () => flattenRoutes(setupParents(buildPaths(menuData)));
+
 export default getMenuData;

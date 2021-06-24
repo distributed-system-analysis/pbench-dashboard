@@ -6,7 +6,6 @@ import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
 import memoizeOne from 'memoize-one';
-import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
 import { getDvaApp } from 'umi';
 import {
@@ -31,38 +30,7 @@ import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
 import getMenuData from '../common/menu';
 import RenderBreadcrumb from '@/components/Breadcrumb';
-import { isRootPath } from '@/utils/utils';
 
-const redirectData = [];
-const getRedirect = item => {
-  if (item && item.children) {
-    if (item.children[0] && item.children[0].path) {
-      redirectData.push({
-        from: `${item.path}`,
-        to: `${item.children[0].path}`,
-      });
-      item.children.forEach(children => {
-        getRedirect(children);
-      });
-    }
-  }
-};
-getMenuData().forEach(getRedirect);
-
-const getBreadcrumbNameMap = memoizeOne(menu => {
-  const routerMap = {};
-  const mergeMeunAndRouter = menuData => {
-    menuData.forEach(menuItem => {
-      if (menuItem.routes) {
-        mergeMeunAndRouter(menuItem.routes);
-      }
-      // Reduce memory usage
-      routerMap[menuItem.path] = menuItem;
-    });
-  };
-  mergeMeunAndRouter(menu);
-  return routerMap;
-}, deepEqual);
 @connect(({ sessions, loading, auth }) => ({
   sessionBannerVisible: sessions.sessionBannerVisible,
   sessionDescription: sessions.sessionDescription,
@@ -75,7 +43,8 @@ class BasicLayout extends React.PureComponent {
   constructor(props) {
     super(props);
     this.getPageTitle = memoizeOne(this.getPageTitle);
-    this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
+    this.breadcrumbNameMap = getMenuData();
+
     // eslint-disable-next-line no-underscore-dangle
     const app = getDvaApp();
     this.persistor = persistStore(app._store);
@@ -91,14 +60,12 @@ class BasicLayout extends React.PureComponent {
     const {
       location: { pathname },
     } = this.props;
-    let exactPath = {};
-    Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
-      if (routeMap.endsWith(pathname)) {
-        exactPath = this.breadcrumbNameMap[routeMap];
-      }
-    });
+
+    // find the current route from menuData.
+    const currRouteMap = this.breadcrumbNameMap.find(route => route.path === pathname);
+
     this.setState({
-      breadcrumb: exactPath,
+      breadcrumb: currRouteMap,
     });
   }
 
@@ -108,14 +75,11 @@ class BasicLayout extends React.PureComponent {
       location: { pathname },
     } = this.props;
     if (prevProps.location.pathname !== pathname) {
-      let exactPath = {};
-      Object.keys(this.breadcrumbNameMap).forEach(routeMap => {
-        if (routeMap.endsWith(pathname)) {
-          exactPath = this.breadcrumbNameMap[routeMap];
-        }
-      });
+      // find the current route from menuData.
+      const currRouteMap = this.breadcrumbNameMap.find(route => route.path === pathname);
+
       this.setState({
-        breadcrumb: exactPath,
+        breadcrumb: currRouteMap,
       });
     }
   }
@@ -255,9 +219,7 @@ class BasicLayout extends React.PureComponent {
                 style={showLoginBanner ? { paddingBottom: 0 } : { marginTop: 0, paddingBottom: 0 }}
                 variant={PageSectionVariants.light}
               >
-                {!isRootPath(pathname) && (
-                  <RenderBreadcrumb context={breadcrumb} currLocation={pathname} />
-                )}
+                {breadcrumb.parent && <RenderBreadcrumb context={breadcrumb} />}
               </PageSection>
               {children}
             </PersistGate>

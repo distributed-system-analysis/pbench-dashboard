@@ -104,38 +104,3 @@ export const isLoggedInUser = username => {
   }
   return false;
 };
-
-export const isRootPath = pathname => {
-  if (pathname === '/' || pathname === '/search' || pathname === '/sessions') {
-    return true;
-  }
-  return false;
-};
-
-// Converts breadcrumb data into array
-// of name and path pairs to be rendered
-// as Patternfly breadcrumb items.
-export const getFullPathMap = breadcrumbData => {
-  const { name, path } = breadcrumbData;
-  const arr = [];
-  const splitPathName = name.split('/');
-  // removes base '/'.
-  const pathCrumbs = path.slice(1).split('/');
-  pathCrumbs.forEach((item, idx) => {
-    // handle empty string
-    // case on "/" path.
-    if (!item) {
-      arr.push({
-        name: splitPathName[idx],
-        path: '/',
-      });
-    } else {
-      arr.push({
-        name: splitPathName[idx],
-        path: `/${item}`,
-      });
-    }
-  });
-
-  return arr;
-};
