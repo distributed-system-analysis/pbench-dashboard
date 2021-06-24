@@ -1,5 +1,6 @@
 import { routerRedux } from 'dva/router';
-import { queryRegisterUser, queryLoginUser, queryLogoutUser } from '../services/auth.js';
+import { queryRegisterUser, requestLoginUser, queryLogoutUser } from '../services/auth.js';
+import generateAlertMessage from '@/utils/codeMessages';
 
 export default {
   namespace: 'auth',
@@ -19,59 +20,76 @@ export default {
     },
     /* eslint-disable camelcase */
     *loginUser({ payload }, { call, put, all }) {
-      try {
-        const response = yield call(queryLoginUser, payload);
-        const { auth_token, username } = response;
-        localStorage.setItem('token', auth_token);
-        yield all([
-          yield put({
-            type: 'loginSuccess',
-            payload: {
-              username,
-            },
-          }),
-          yield put(routerRedux.push('/overview')),
-        ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
-        yield put({
-          type: 'loginFailure',
-          payload: errortext,
-        });
-      }
+      // TODO: rename queryLoginUser -> postLogin
+      const response = yield call(requestLoginUser, payload);
+      console.log(response);
+      // yield all([
+      //   yield put({ type: 'loginSuccess', payload: { username }}),
+      //   yield put(routerRedux.push('/private'))
+      // ])
+      // const { ok, response, error } = yield call(requestLoginUser, payload);
+      // if (response && ok) {
+      //   const {
+      //     body: { auth_token, username },
+      //   } = response;
+      //   localStorage.setItem('token', auth_token);
+      //   yield all([
+      //     yield put({ type: 'loginSuccess', payload: { username } }),
+      //     // context pointing to where the user was before he logged in.
+      //     yield put(routerRedux.push('/private')),
+      //   ]);
+      // } else yield put({
+      //   type: 'error/updateAlertMessage',
+      //   payload: {
+      //     type: 'error',
+      //     error: error || response,
+      //   },
+      // });
     },
     *registerUser({ payload }, { call, put, all }) {
       try {
-        const response = yield call(queryRegisterUser, payload);
-        const { message } = response;
-        yield all([
+        const {
+          status,
+          ok,
+          body: { message },
+        } = yield call(queryRegisterUser, payload);
+        if (ok) {
+          yield all([
+            yield put({
+              type: 'registerSuccess',
+              payload: {
+                type: 'success',
+                message: generateAlertMessage(message, status),
+              },
+            }),
+            yield put(routerRedux.push('/login')),
+          ]);
+        } else {
           yield put({
-            type: 'registerSuccess',
-            payload: message,
-          }),
-          yield put(routerRedux.push('/login')),
-        ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
+            type: 'error/updateAlertMessage',
+            payload: {
+              type: 'error',
+              message: generateAlertMessage(message, status),
+            },
+          });
         }
+      } catch (errorResponse) {
+        const {
+          body: { message },
+          status,
+        } = errorResponse;
         yield put({
-          type: 'registerFailure',
-          payload: errortext,
+          type: 'error/updateAlertMessage',
+          payload: {
+            type: 'error',
+            message: generateAlertMessage(message, status),
+          },
         });
       }
     },
     *logoutUser({ payload }, { call, put, all }) {
       try {
-        yield call(queryLogoutUser, payload);
+        const response = yield call(queryLogoutUser, payload);
         localStorage.removeItem('token');
         yield all([
           yield put({
@@ -79,16 +97,14 @@ export default {
           }),
           yield put(routerRedux.push('/')),
         ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
+      } catch (errorResponse) {
+        const {
+          body: { message },
+          status,
+        } = errorResponse;
         yield put({
           type: 'logoutFailure',
-          payload: errortext,
+          payload: message || codeMessages[status],
         });
       }
     },
@@ -119,12 +135,6 @@ export default {
         ...state,
         errorMessage: '',
         username,
-      };
-    },
-    loginFailure(state, { payload }) {
-      return {
-        ...state,
-        errorMessage: payload,
       };
     },
     registerSuccess(state, { payload }) {

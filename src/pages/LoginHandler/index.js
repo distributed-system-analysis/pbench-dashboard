@@ -35,6 +35,8 @@ const LoginHandler = props => {
     });
   };
 
+  // TODO: add context to persist where user
+  // was before he logged in.
   const handleLoginSubmit = () => {
     const { dispatch } = props;
     dispatch({

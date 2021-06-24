@@ -34,28 +34,20 @@ export default {
       });
     },
     *fetchControllers({ payload }, { call, put }) {
-      try {
-        const controllers = yield call(queryControllers, payload);
-
+      const { ok, response, error } = yield call(queryControllers, payload);
+      if (ok && response) {
+        const { body } = response;
         yield put({
           type: 'fetchControllersSuccess',
-          payload: controllers,
+          payload: body,
         });
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'An unexpected error occurred while fetching controllers.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
-        yield put({
-          type: 'error/updateAlertMessage',
-          payload: {
-            messageType: 'error',
-            message: errortext,
-          },
-        });
-      }
+      } else yield put({
+        type: 'error/updateAlertMessage',
+        payload: {
+          type: 'error',
+          error: error || response,
+        },
+      });
     },
     *fetchResults({ payload }, { call, put }) {
       try {

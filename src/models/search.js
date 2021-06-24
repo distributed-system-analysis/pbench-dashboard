@@ -20,6 +20,7 @@ export default {
     *fetchIndexMapping({ payload }, { call, put, all }) {
       try {
         const response = yield call(queryIndexMapping, payload);
+        console.log(response);
         const { indices } = payload;
         const { endpoints } = window;
 

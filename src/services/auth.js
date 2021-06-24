@@ -3,7 +3,7 @@ import request from '../utils/request';
 const { endpoints } = window;
 
 export const queryRegisterUser = async params => {
-  const endpoint = `${endpoints.pbench_server}/register`;
+  const endpoint = `http://localhost:5000/register`;
   const { username, password, email, firstName, lastName } = params;
   return request.post(endpoint, {
     data: {
@@ -20,8 +20,15 @@ export const queryRegisterUser = async params => {
   });
 };
 
-export const queryLoginUser = params => {
-  const endpoint = `${endpoints.pbench_server}/login`;
+/**
+ * Queries pbench server for a login action
+ *
+ * @param {username} username
+ * @param {password} password
+ * @return { ok, response, error }
+ */
+export const requestLoginUser = async params => {
+  const endpoint = `http://localhost:5000/login`;
   const { username, password } = params;
   return request.post(endpoint, {
     data: {

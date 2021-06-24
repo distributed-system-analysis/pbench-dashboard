@@ -1,5 +1,6 @@
 import { routerRedux } from 'dva/router';
 import query from '../services/error';
+import generateAlertMessage from '@/utils/codeMessages';
 
 export default {
   namespace: 'error',
@@ -21,6 +22,7 @@ export default {
       });
     },
     *updateAlertMessage({ payload }, { put }) {
+      console.log(payload);
       yield put({
         type: 'addAlertMessage',
         payload,
@@ -42,17 +44,21 @@ export default {
       };
     },
     addAlertMessage(state, { payload }) {
-      const { messageType, message } = payload;
-      if (messageType === 'error') {
-        return {
-          ...state,
-          errorMessage: message,
-        };
+      console.log("called");
+      const { type, error, response } = payload;
+      console.log(payload);
+      switch (type) {
+        case 'error':
+          return {
+            ...state,
+            errorMessage: generateAlertMessage(error),
+          };
+        case 'success':
+          return {
+            ...state,
+            successMessage: generateAlertMessage(response),
+          };
       }
-      return {
-        ...state,
-        successMessage: message,
-      };
     },
     removeAlertMesage(state, { payload }) {
       if (payload === 'error') {

@@ -27,36 +27,60 @@ function scrollUntilEmpty(data) {
 }
 
 export async function queryControllers(params) {
-  try {
-    const { selectedDateRange, username } = params;
+  const { selectedDateRange, username } = params;
 
-    return request.post(`${endpoints.pbench_server}/controllers/list`, {
-      data: {
-        user: username,
-        start: selectedDateRange.start,
-        end: selectedDateRange.end,
-      },
-    });
-  } catch (err) {
-    throw err;
-  }
+  return request.post(`${endpoints.pbench_server}/controllers/list`, {
+    data: {
+      user: username,
+      start: selectedDateRange.start,
+      end: selectedDateRange.end,
+    },
+  });
 }
 
 export async function queryResults(params) {
-  try {
-    const { selectedDateRange, username, controller } = params;
+  const { selectedDateRange, controller } = params;
 
-    return request.post(`${endpoints.pbench_server}/datasets/list`, {
-      data: {
-        user: username,
-        controller: controller[0],
-        start: selectedDateRange.start,
-        end: selectedDateRange.end,
+  const indices = `${getAllMonthsWithinRange(
+    endpoints,
+    endpoints.run_index,
+    selectedDateRange
+  )}/_search`;
+  const endpoint = MOCK_UI
+    ? `${endpoints.pbench_server}/datasets/list`
+    : `${endpoints.pbench_server}/elasticsearch`;
+
+  return request.post(endpoint, {
+    data: {
+      indices,
+      payload: {
+        _source: {
+          includes: [
+            '@metadata.controller_dir',
+            '@metadata.satellite',
+            'run.controller',
+            'run.start',
+            'run.end',
+            'run.name',
+            'run.config',
+            'run.prefix',
+            'run.id',
+          ],
+        },
+        sort: {
+          'run.end': {
+            order: 'desc',
+          },
+        },
+        query: {
+          match: {
+            'run.controller': controller[0],
+          },
+        },
+        size: 5000,
       },
-    });
-  } catch (error) {
-    throw error;
-  }
+    },
+  });
 }
 
 export async function queryResult(params) {
