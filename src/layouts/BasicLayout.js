@@ -6,9 +6,6 @@ import { connect } from 'dva';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
 import { getDvaApp } from 'umi';
-import pathToRegexp from 'path-to-regexp';
-import memoizeOne from 'memoize-one';
-import deepEqual from 'lodash/isEqual';
 import GlobalHeader from '@/components/GlobalHeader';
 import {
   Page,
@@ -28,38 +25,6 @@ import {
 } from '@patternfly/react-core';
 import NavigationDrawer from '../components/NavigationDrawer';
 import LoginHint from '../components/LoginHint';
-import getMenuData from '../common/menu';
-
-const redirectData = [];
-const getRedirect = item => {
-  if (item && item.children) {
-    if (item.children[0] && item.children[0].path) {
-      redirectData.push({
-        from: `${item.path}`,
-        to: `${item.children[0].path}`,
-      });
-      item.children.forEach(children => {
-        getRedirect(children);
-      });
-    }
-  }
-};
-getMenuData().forEach(getRedirect);
-
-const getBreadcrumbNameMap = memoizeOne(menu => {
-  const routerMap = {};
-  const mergeMeunAndRouter = menuData => {
-    menuData.forEach(menuItem => {
-      if (menuItem.routes) {
-        mergeMeunAndRouter(menuItem.routes);
-      }
-      // Reduce memory usage
-      routerMap[menuItem.path] = menuItem;
-    });
-  };
-  mergeMeunAndRouter(menu);
-  return routerMap;
-}, deepEqual);
 
 @connect(({ sessions, loading, auth }) => ({
   sessionBannerVisible: sessions.sessionBannerVisible,
@@ -72,16 +37,12 @@ const getBreadcrumbNameMap = memoizeOne(menu => {
 class BasicLayout extends React.PureComponent {
   static childContextTypes = {
     location: PropTypes.object,
-    breadcrumbNameMap: PropTypes.object,
     routes: PropTypes.array,
     params: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
-    this.getPageTitle = memoizeOne(this.getPageTitle);
-    this.breadcrumbNameMap = getBreadcrumbNameMap(getMenuData());
-    // eslint-disable-next-line no-underscore-dangle
     const app = getDvaApp();
     this.persistor = persistStore(app._store);
 
@@ -89,30 +50,6 @@ class BasicLayout extends React.PureComponent {
       sessionExitModalVisible: false,
     };
   }
-
-  getChildContext() {
-    const { location } = this.props;
-    const { route } = this.props;
-    return {
-      location,
-      breadcrumbNameMap: this.breadcrumbNameMap,
-      routes: route.routes,
-    };
-  }
-
-  getPageTitle = pathname => {
-    let currRouterData = null;
-    // match params path
-    Object.keys(this.breadcrumbNameMap).forEach(key => {
-      if (pathToRegexp(key).test(pathname)) {
-        currRouterData = this.breadcrumbNameMap[key];
-      }
-    });
-    if (!currRouterData) {
-      return 'Pbench Dashboard';
-    }
-    return `${currRouterData.name} - Pbench Dashboard`;
-  };
 
   exitSession = () => {
     const { dispatch } = this.props;
@@ -162,7 +99,7 @@ class BasicLayout extends React.PureComponent {
 
     return (
       <React.Fragment>
-        <DocumentTitle title={this.getPageTitle(pathname)}>
+        <DocumentTitle title="Pbench Dashboard">
           <Page
             header={<GlobalHeader savingSession={savingSession} />}
             sidebar={<NavigationDrawer location={pathname} />}
