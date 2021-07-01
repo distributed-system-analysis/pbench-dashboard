@@ -205,7 +205,7 @@ function Table({ columns, data, isCheckable, onCompare, loadingData, onRowClick 
                   <tr
                     className="pf-m-hoverable"
                     {...row.getRowProps()}
-                    onClick={onRowClick && onRowClick(row.original)}
+                    onClick={() => onRowClick && onRowClick(row.original)}
                   >
                     {row.cells.map(cell => {
                       return (
