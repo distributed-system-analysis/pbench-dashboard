@@ -101,14 +101,14 @@ class Summary extends React.Component {
       payload: {
         selectedDateRange,
         username,
-        result: selectedResults[0].values.result,
+        result: selectedResults[0].result,
       },
     });
     dispatch({
       type: 'dashboard/fetchTocResult',
       payload: {
         selectedDateRange,
-        id: selectedResults[0].original.id,
+        id: selectedResults[0].id,
       },
     });
   }
@@ -148,7 +148,7 @@ class Summary extends React.Component {
         <PageSection variant={PageSectionVariants.light}>
           <TextContent>
             <Text component="h1">{selectedControllers.join(', ')}</Text>
-            <Text component="h2">{selectedResults[0]}</Text>
+            <Text component="h2">{selectedResults[0].result}</Text>
           </TextContent>
         </PageSection>
         <PageSection padding="noPadding" isFilled>
