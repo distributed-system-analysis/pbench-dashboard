@@ -216,8 +216,7 @@ class Results extends Component {
                 columns={columns}
                 data={results}
                 onRowClick={row => {
-                  const { result } = row;
-                  this.retrieveResults(result);
+                  this.retrieveResults(row);
                 }}
                 loadingData={loading}
                 isCheckable
