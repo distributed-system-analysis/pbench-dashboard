@@ -19,26 +19,16 @@ const RenderBreadcrumb = ({ context, dispatch }) => {
 
   return (
     <Breadcrumb>
-      {pathTo(context).map((crumb, index, breadcrumbs) => {
-        return (
-          <>
-            {index < breadcrumbs.length - 1 && (
-              <BreadcrumbItem
-                className={styles.active}
-                key={crumb.path}
-                onClick={() => navigateToCrumb(crumb.path)}
-              >
-                {crumb.name}
-              </BreadcrumbItem>
-            )}
-            {index === breadcrumbs.length - 1 && (
-              <BreadcrumbItem key={crumb.path} isActive>
-                {crumb.name}
-              </BreadcrumbItem>
-            )}
-          </>
-        );
-      })}
+      {pathTo(context).map((crumb, index, breadcrumbs) => (
+        <BreadcrumbItem
+          className={index < breadcrumbs.length - 1 ? styles.active : ''}
+          key={crumb.path}
+          onClick={() => navigateToCrumb(crumb.path)}
+          isActive={index === breadcrumbs.length - 1}
+        >
+          {crumb.name}
+        </BreadcrumbItem>
+      ))}
     </Breadcrumb>
   );
 };

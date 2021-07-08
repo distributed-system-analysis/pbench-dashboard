@@ -60,9 +60,8 @@ class BasicLayout extends React.PureComponent {
     const {
       location: { pathname },
     } = this.props;
-
     // find the current route from menuData.
-    const currRouteMap = this.breadcrumbNameMap.find(route => route.path === pathname);
+    const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
 
     this.setState({
       breadcrumb: currRouteMap,
@@ -76,7 +75,7 @@ class BasicLayout extends React.PureComponent {
     } = this.props;
     if (prevProps.location.pathname !== pathname) {
       // find the current route from menuData.
-      const currRouteMap = this.breadcrumbNameMap.find(route => route.path === pathname);
+      const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
 
       this.setState({
         breadcrumb: currRouteMap,
