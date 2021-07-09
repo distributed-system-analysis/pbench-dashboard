@@ -79,15 +79,13 @@ Both the production and development builds of the dashboard require API endpoint
 
 ```JavaScript
 window.endpoints = {
-  elasticsearch: 'http://test_domain.com',
-  results: 'http://test_domain.com',
-  graphql: 'http://test_domain.com',
-  pbench_server: 'http://test_domain.com:8001/api/v1',
+  pbench_server: 'http://test_domain.com/api/v1',
   prefix: 'test_prefix.',
-  result_index: 'v.result-data-sample.',
-  result_data_index: 'v.result-data.',
-  run_index: 'v.run-data.',
-  run_toc_index: 'v.run-toc.'
+  result_index: 'vn.result-data-sample.',
+  result_data_index: 'vn.result-data.',
+  results: 'http://test_domain.com',
+  run_index: 'vn.run-data.',
+  run_toc_index: 'vn.run-toc.',
 };
 ```
 
