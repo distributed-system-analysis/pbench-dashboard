@@ -1,6 +1,6 @@
-import { isUrl } from '../utils/utils';
+import memoizeOne from 'memoize-one';
 
-const menuData = [
+export const menuData = [
   {
     name: 'Dashboard',
     path: '/',
@@ -37,23 +37,37 @@ const menuData = [
   },
 ];
 
-function formatter(data, parentPath = '', parentAuthority) {
-  return data.map(item => {
-    let { path } = item;
-    if (!isUrl(path)) {
-      path = parentPath + item.path;
-    }
-    const result = {
-      ...item,
-      path,
-      authority: item.authority || parentAuthority,
-    };
-    if (item.routes) {
-      result.routes = formatter(item.routes, `${parentPath}${item.path}`, item.authority);
-    }
-    return result;
-  });
-}
+const combinePaths = (parent, child) => `${parent.replace(/\/$/, '')}/${child.replace(/^\//, '')}`;
 
-const getMenuData = () => formatter(menuData);
-export default getMenuData;
+const buildPaths = (navigation, parentPath = '') =>
+  navigation.map(route => {
+    const path = combinePaths(parentPath, route.path);
+
+    return {
+      ...route,
+      path,
+      ...(route.routes && { routes: buildPaths(route.routes, path) }),
+    };
+  });
+
+const setupParents = (routes, parentRoute = null) =>
+  routes.map(route => {
+    const withParent = {
+      ...route,
+      ...(parentRoute && { parent: parentRoute }),
+    };
+
+    return {
+      ...withParent,
+      ...(withParent.routes && {
+        routes: setupParents(withParent.routes, withParent),
+      }),
+    };
+  });
+
+const flattenRoutes = routes =>
+  routes.map(route => [route.routes ? flattenRoutes(route.routes) : [], route]).flat(Infinity);
+
+const getMenuData = () => flattenRoutes(setupParents(buildPaths(menuData)));
+
+export default memoizeOne(getMenuData);
