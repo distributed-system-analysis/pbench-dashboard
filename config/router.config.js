@@ -15,9 +15,14 @@ module.exports = [
     component: './SignupHandler',
   },
   {
-    path: '/password',
-    name: 'password',
-    component: './PasswordHandler',
+    path: '/recovery_email',
+    name: 'recovery_email',
+    component: './RecoveryEmail',
+  },
+  {
+    path: '/recovery/:hash',
+    name: 'recovery',
+    component: './PasswordRecovery',
   },
   {
     path: '/share/:id',
