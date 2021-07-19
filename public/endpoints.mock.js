@@ -1,5 +1,5 @@
 window.endpoints = {
-  pbench_server: 'http://test_domain.com/api/v1',
+  pbench_server: window.origin,
   prefix: 'test_prefix.',
   result_data_index: 'vn.result-data.',
   result_index: 'vn.result-data-sample.',
