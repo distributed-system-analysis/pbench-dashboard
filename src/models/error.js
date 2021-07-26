@@ -1,23 +1,49 @@
-import { routerRedux } from 'dva/router';
-import query from '../services/error';
-
 export default {
   namespace: 'error',
 
   state: {
-    error: '',
+    errorMessage: '',
+    successMessage: '',
     isloading: false,
   },
 
   effects: {
-    *query({ payload }, { call, put }) {
-      yield call(query, payload.code);
-      // redirect on client when network broken
-      yield put(routerRedux.push(`/exception/${payload.code}`));
-      yield put({
-        type: 'trigger',
-        payload: payload.code,
-      });
+    *updateAlertMessage({ payload }, { put }) {
+      // fan out error message based on its type
+      const { type, message } = payload;
+      switch (type) {
+        case 'error':
+          yield put({
+            type: 'addAlertErrorMessage',
+            payload: message,
+          });
+          break;
+        case 'success':
+          yield put({
+            type: 'addAlertSuccessMessage',
+            payload: message,
+          });
+          break;
+        default:
+          break;
+      }
+    },
+    *clearAlertMessage({ payload }, { put }) {
+      const { type } = payload;
+      switch (type) {
+        case 'error':
+          yield put({
+            type: 'removeErrorAlertMessage',
+          });
+          break;
+        case 'success':
+          yield put({
+            type: 'removeSuccessAlertMessage',
+          });
+          break;
+        default:
+          break;
+      }
     },
   },
 
@@ -25,6 +51,32 @@ export default {
     trigger(state, action) {
       return {
         error: action.payload,
+      };
+    },
+    addAlertErrorMessage(state, { payload }) {
+      return {
+        ...state,
+        successMessage: '',
+        errorMessage: payload,
+      };
+    },
+    addAlertSuccessMessage(state, { payload }) {
+      return {
+        ...state,
+        errorMessage: '',
+        successMessage: payload,
+      };
+    },
+    removeErrorAlertMessage(state) {
+      return {
+        ...state,
+        errorMessage: '',
+      };
+    },
+    removeErrorSuccessMessage(state) {
+      return {
+        ...state,
+        successMessage: '',
       };
     },
   },

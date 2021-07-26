@@ -17,10 +17,10 @@ import { routerRedux } from 'dva/router';
 import styles from './index.less';
 import logo from '../../assets/white.svg';
 
-@connect(({ user, auth }) => ({
+@connect(({ user, error }) => ({
   user: user.user,
-  errorMessage: auth.errorMessage,
-  successMessage: auth.successMessage,
+  errorMessage: error.errorMessage,
+  successMessage: error.successMessage,
 }))
 class AuthLayout extends Component {
   constructor(props) {
@@ -57,16 +57,20 @@ class AuthLayout extends Component {
   closeErrorAlert = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'auth/removeErrorMessage',
-      payload: '',
+      type: 'error/clearAlertMessage',
+      payload: {
+        type: 'error',
+      },
     });
   };
 
   closeSuccessAlert = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'auth/removeSuccessMessage',
-      payload: '',
+      type: 'error/clearAlertMessage',
+      payload: {
+        type: 'success',
+      },
     });
   };
 

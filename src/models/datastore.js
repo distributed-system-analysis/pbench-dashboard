@@ -10,16 +10,18 @@ export default {
 
   effects: {
     *fetchMonthIndices({ payload }, { call, put }) {
-      const response = yield call(queryMonthIndices, payload);
+      const { response, data } = yield call(queryMonthIndices, payload);
 
-      yield put({
-        type: 'getMonthIndices',
-        payload: response,
-      });
-      yield put({
-        type: 'global/updateSelectedDateRange',
-        payload: getDefaultDateRange(response[0]),
-      });
+      if (response.ok) {
+        yield put({
+          type: 'getMonthIndices',
+          payload: data,
+        });
+        yield put({
+          type: 'global/updateSelectedDateRange',
+          payload: getDefaultDateRange(data[0]),
+        });
+      }
     },
   },
 

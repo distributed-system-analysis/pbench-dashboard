@@ -2,7 +2,7 @@ import request from '../utils/request';
 
 const { endpoints } = window;
 
-export const queryRegisterUser = async params => {
+export const postRegisterUser = async params => {
   const endpoint = `${endpoints.api.register}`;
   const { username, password, email, firstName, lastName } = params;
   return request.post(endpoint, {
@@ -20,7 +20,7 @@ export const queryRegisterUser = async params => {
   });
 };
 
-export const queryLoginUser = params => {
+export const postLoginUser = params => {
   const endpoint = `${endpoints.api.login}`;
   const { username, password } = params;
   return request.post(endpoint, {
@@ -35,7 +35,7 @@ export const queryLoginUser = params => {
   });
 };
 
-export const queryLogoutUser = () => {
+export const postLogoutUser = () => {
   const endpoint = `${endpoints.api.logout}`;
   return request.post(endpoint, {
     data: {},

@@ -113,9 +113,10 @@ export async function queryIterationSamples(params) {
 
   const endpoint = MOCK_UI ? endpoints.api.datasets_samples : endpoints.api.elasticsearch;
   const iterationSampleRequests = [];
-  selectedResults.forEach(run => {
-    iterationSampleRequests.push(
-      request.post(endpoint, {
+
+  await Promise.all(
+    selectedResults.map(async run => {
+      const { response, data } = await request.post(endpoint, {
         data: {
           indices,
           payload: {
@@ -173,9 +174,13 @@ export async function queryIterationSamples(params) {
             ],
           },
         },
-      })
-    );
-  });
+      });
+
+      if (response.ok) {
+        iterationSampleRequests.push(data);
+      }
+    })
+  );
 
   return Promise.all(iterationSampleRequests).then(async iterations => {
     return Promise.all(

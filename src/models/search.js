@@ -18,86 +18,92 @@ export default {
       });
     },
     *fetchIndexMapping({ payload }, { call, put }) {
-      const response = yield call(queryIndexMapping, payload);
-      const { indices } = payload;
-      const { endpoints } = window;
+      const { response, data } = yield call(queryIndexMapping, payload);
 
-      // eslint-disable-next-line no-undef
-      const index = MOCK_UI ? 'test_index' : endpoints.prefix + endpoints.run_index + indices[0];
-      const mapping = response[index].mappings.properties;
-      let fields = [];
-      const filters = {};
+      if (response.ok) {
+        const { indices } = payload;
+        const { endpoints } = window;
 
-      Object.entries(mapping).forEach(([key, value]) => {
-        if (typeof value.properties !== 'undefined') {
-          filters[key] = Object.keys(value.properties);
-          fields = fields.concat(Object.keys(value.properties));
-        }
-      });
+        // eslint-disable-next-line no-undef
+        const index = MOCK_UI ? 'test_index' : endpoints.prefix + endpoints.run_index + indices[0];
+        const mapping = data[index].mappings.properties;
+        let fields = [];
+        const filters = {};
 
-      yield put({
-        type: 'getIndexMapping',
-        payload: filters,
-      });
-      yield put({
-        type: 'getIndexFields',
-        payload: fields,
-      });
-      yield put({
-        type: 'global/modifySelectedFields',
-        payload: ['run.name', 'run.config', 'run.controller', '@metadata.controller_dir'],
-      });
-    },
-    *fetchSearchResults({ payload }, { call, put }) {
-      const response = yield call(searchQuery, payload);
-      const { selectedFields } = payload;
-
-      const searchResults = {};
-      searchResults.resultCount = response.hits.total.value;
-      const parsedResults = [];
-
-      const getValue = (data, keys) => {
-        let value;
-        if (typeof data[keys[0]] === 'undefined') {
-          value = undefined;
-        } else if (keys.length === 1) {
-          value = data[keys[0]];
-        } else {
-          value = getValue(data[keys[0]], keys.slice(1));
-        }
-        return value;
-      };
-
-      response.hits.hits.forEach(result => {
-        const parsedResult = {};
-        selectedFields.forEach(field => {
-          const value = getValue(result._source, field.split('.'));
-          if (typeof value !== 'undefined') {
-            parsedResult[field] = value;
+        Object.entries(mapping).forEach(([key, value]) => {
+          if (typeof value.properties !== 'undefined') {
+            filters[key] = Object.keys(value.properties);
+            fields = fields.concat(Object.keys(value.properties));
           }
         });
 
-        /*
-         * NOTE: these make the output of searchQuery compatible with the
-         * expectations of fetchIterationSamples, as it would normally get
-         * from fetchResults
-         */
-        if (typeof result._id !== 'undefined') {
-          parsedResult.id = result._id;
-        }
-        if (typeof result._source.run.name !== 'undefined') {
-          parsedResult.key = result._source.run.name;
-        }
+        yield put({
+          type: 'getIndexMapping',
+          payload: filters,
+        });
+        yield put({
+          type: 'getIndexFields',
+          payload: fields,
+        });
+        yield put({
+          type: 'global/modifySelectedFields',
+          payload: ['run.name', 'run.config', 'run.controller', '@metadata.controller_dir'],
+        });
+      }
+    },
+    *fetchSearchResults({ payload }, { call, put }) {
+      const { response, data: searchQueryResponse } = yield call(searchQuery, payload);
 
-        parsedResults.push(parsedResult);
-      });
+      if (response.ok) {
+        const { selectedFields } = payload;
 
-      searchResults.results = parsedResults;
+        const searchResults = {};
+        searchResults.resultCount = searchQueryResponse.hits.total.value;
+        const parsedResults = [];
 
-      yield put({
-        type: 'getSearchResults',
-        payload: searchResults,
-      });
+        const getValue = (data, keys) => {
+          let value;
+          if (typeof data[keys[0]] === 'undefined') {
+            value = undefined;
+          } else if (keys.length === 1) {
+            value = data[keys[0]];
+          } else {
+            value = getValue(data[keys[0]], keys.slice(1));
+          }
+          return value;
+        };
+
+        searchQueryResponse.hits.hits.forEach(result => {
+          const parsedResult = {};
+          selectedFields.forEach(field => {
+            const value = getValue(result._source, field.split('.'));
+            if (typeof value !== 'undefined') {
+              parsedResult[field] = value;
+            }
+          });
+
+          /*
+          * NOTE: these make the output of searchQuery compatible with the
+          * expectations of fetchIterationSamples, as it would normally get
+          * from fetchResults
+          */
+          if (typeof result._id !== 'undefined') {
+            parsedResult.id = result._id;
+          }
+          if (typeof result._source.run.name !== 'undefined') {
+            parsedResult.key = result._source.run.name;
+          }
+
+          parsedResults.push(parsedResult);
+        });
+
+        searchResults.results = parsedResults;
+
+        yield put({
+          type: 'getSearchResults',
+          payload: searchResults,
+        });
+      }
     },
   },
 

@@ -1,13 +1,11 @@
 import { routerRedux } from 'dva/router';
-import { queryRegisterUser, queryLoginUser, queryLogoutUser } from '../services/auth.js';
+import { postRegisterUser, postLoginUser, postLogoutUser } from '../services/auth.js';
 
 export default {
   namespace: 'auth',
 
   state: {
     username: '',
-    errorMessage: '',
-    successMessage: '',
   },
 
   effects: {
@@ -19,9 +17,9 @@ export default {
     },
     /* eslint-disable camelcase */
     *loginUser({ payload }, { call, put, all }) {
-      try {
-        const response = yield call(queryLoginUser, payload);
-        const { auth_token, username } = response;
+      const { response, data } = yield call(postLoginUser, payload);
+      if (response.ok) {
+        const { auth_token, username } = data;
         localStorage.setItem('token', auth_token);
         yield all([
           yield put({
@@ -32,81 +30,38 @@ export default {
           }),
           yield put(routerRedux.push('/overview')),
         ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
-        yield put({
-          type: 'loginFailure',
-          payload: errortext,
-        });
       }
     },
     *registerUser({ payload }, { call, put, all }) {
-      try {
-        const response = yield call(queryRegisterUser, payload);
-        const { message } = response;
+      const { response, data } = yield call(postRegisterUser, payload);
+      if (response.ok) {
         yield all([
           yield put({
-            type: 'registerSuccess',
-            payload: message,
+            type: 'error/updateAlertMessage',
+            payload: {
+              type: 'success',
+              message: data || 'Successfully registered',
+            },
           }),
           yield put(routerRedux.push('/login')),
         ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
-        yield put({
-          type: 'registerFailure',
-          payload: errortext,
-        });
       }
     },
     *logoutUser({ payload }, { call, put, all }) {
-      try {
-        yield call(queryLogoutUser, payload);
-        localStorage.removeItem('token');
-        yield all([
-          yield put({
-            type: 'logoutSuccess',
-          }),
-          yield put(routerRedux.push('/')),
-        ]);
-      } catch (error) {
-        const { data } = error;
-        let errortext = 'Something went wrong. Please try again.';
-        if (data) {
-          const { message } = data;
-          errortext = message;
-        }
+      yield call(postLogoutUser, payload);
+      // even when the request fails,
+      // we need to remove credentials and user.
+      localStorage.removeItem('token');
+      yield all([
         yield put({
-          type: 'logoutFailure',
-          payload: errortext,
-        });
-      }
+          type: 'logoutSuccess',
+        }),
+        yield put(routerRedux.push('/')),
+      ]);
     },
     *removeUserFromStore({ payload }, { put }) {
       yield put({
         type: 'modifyUser',
-        payload,
-      });
-    },
-    *removeErrorMessage({ payload }, { put }) {
-      yield put({
-        type: 'modifyErrorMessage',
-        payload,
-      });
-    },
-    *removeSuccessMessage({ payload }, { put }) {
-      yield put({
-        type: 'modifySuccessMessage',
         payload,
       });
     },
@@ -117,48 +72,23 @@ export default {
       const { username } = payload;
       return {
         ...state,
-        errorMessage: '',
         username,
-      };
-    },
-    loginFailure(state, { payload }) {
-      return {
-        ...state,
-        errorMessage: payload,
-      };
-    },
-    registerSuccess(state, { payload }) {
-      return {
-        ...state,
-        successMessage: payload,
-        errorMessage: '',
-      };
-    },
-    registerFailure(state, { payload }) {
-      return {
-        ...state,
-        errorMessage: payload,
-        successMessage: '',
       };
     },
     logoutSuccess(state) {
       return {
         ...state,
         username: '',
-        errorMessage: '',
-        successMessage: '',
       };
     },
     // A failure in logout also removes
     // the user from the Redux store.
     // We do not want users to be blocked
     // on log out failures.
-    logoutFailure(state, { payload }) {
+    logoutFailure(state) {
       return {
         ...state,
         username: '',
-        errorMessage: payload,
-        successMessage: '',
       };
     },
     modifyUser(state, { payload }) {
@@ -171,18 +101,6 @@ export default {
       return {
         ...state,
         username: '',
-      };
-    },
-    modifyErrorMessage(state, { payload }) {
-      return {
-        ...state,
-        errorMessage: payload,
-      };
-    },
-    modifySuccessMessage(state, { payload }) {
-      return {
-        ...state,
-        successMessage: payload,
       };
     },
   },

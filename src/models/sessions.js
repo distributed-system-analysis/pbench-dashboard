@@ -18,32 +18,40 @@ export default {
 
   effects: {
     *fetchSession({ payload }, { call }) {
-      const response = yield call(getSession, payload);
-      const { config } = response.data.session;
-      const parsedSessionConfig = JSON.parse(config);
-      return {
-        sessionConfig: parsedSessionConfig,
-        sessionMetadata: response.data.session,
-      };
+      const { response, data } = yield call(getSession, payload);
+
+      if (response.ok) {
+        const { config } = data.data.createSession;
+        const parsedSessionConfig = JSON.parse(config);
+        return {
+          sessionConfig: parsedSessionConfig,
+          sessionMetadata: data.data,
+        };
+      }
+
+      return {};
     },
     *fetchAllSessions({ payload }, { call, put }) {
-      const response = yield call(getAllSessions, payload);
-      yield put({
-        type: 'getAllSessions',
-        payload: response.data.sessions,
-      });
+      const { response, data } = yield call(getAllSessions, payload);
+
+      if (response.ok) {
+        yield put({
+          type: 'getAllSessions',
+          payload: data.data.sessions,
+        });
+      }
     },
     *saveSession({ payload }, { call }) {
-      const response = yield call(saveSession, payload);
-      return response;
+      const { data } = yield call(saveSession, payload);
+      return data;
     },
     *deleteSession({ payload }, { call }) {
-      const response = yield call(deleteSession, payload);
-      return response;
+      const { data } = yield call(deleteSession, payload);
+      return data;
     },
     *updateSessionDescription({ payload }, { call }) {
-      const response = yield call(updateSessionDescription, payload);
-      return response;
+      const { data } = yield call(updateSessionDescription, payload);
+      return data;
     },
     *startSession({ payload }, { put }) {
       yield put({
