@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { Link } from 'dva/router';
 import { PageSidebar, Nav, NavList, NavItem } from '@patternfly/react-core';
 import getMenuData from '../../common/menu';
+import './index.less';
 
 export default class NavigationDrawer extends PureComponent {
   constructor(props) {

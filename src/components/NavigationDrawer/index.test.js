@@ -1,11 +1,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import SiderMenu from './index';
+import NavigationDrawer from './index';
 
 const mockDispatch = jest.fn();
-const wrapper = shallow(<SiderMenu dispatch={mockDispatch} />);
+const wrapper = shallow(<NavigationDrawer dispatch={mockDispatch} />);
 
-describe('test rendering of Button component', () => {
+describe('test rendering of Navigation Drawer component', () => {
   it('render SiderMenu with empty props', () => {
     expect(wrapper).toMatchSnapshot();
   });
