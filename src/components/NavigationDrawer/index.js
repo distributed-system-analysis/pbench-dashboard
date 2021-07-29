@@ -25,7 +25,11 @@ export default class NavigationDrawer extends PureComponent {
       <Nav onSelect={this.onNavSelect} theme="dark">
         <NavList>
           {this.rootPages.map(page => (
-            <NavItem itemId={page.path} isActive={activeItem === page.path}>
+            <NavItem
+              itemId={page.path}
+              isActive={activeItem === page.path}
+              key={page.path + page.name}
+            >
               <Link to={page.path}>{page.name}</Link>
             </NavItem>
           ))}
