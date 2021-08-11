@@ -289,30 +289,30 @@ export const mockSession = {
 
 export const mockEndpoints = {
   api: {
-    controllers_list: '/controllers/list',
-    controllers_months: '/controllers/months',
-    datasets_list: '/datasets/list',
-    datasets_detail: '/datasets/detail',
+    controllers_list: '/api/v1/controllers/list',
+    controllers_months: '/api/v1/controllers/months',
+    datasets_list: '/api/v1/datasets/list',
+    datasets_detail: '/api/v1/datasets/detail',
 
     // NOTE: these are not implemented in the server yet, but are defined
     // below as mocks for testing
-    datasets_toc: '/datasets/toc',
-    datasets_samples: '/datasets/samples',
-    datasets_timeseries: '/datasets/timeseries',
-    mappings: '/mappings',
-    search: '/search',
+    datasets_toc: '/api/v1/datasets/toc',
+    datasets_samples: '/api/v1/datasets/samples',
+    datasets_timeseries: '/api/v1/datasets/timeseries',
+    mappings: '/api/v1/index/mappings',
+    search: '/api/v1/index/search',
     // END test-only mock endpoints
 
-    elasticsearch: '/elasticsearch',
-    endpoints: '/endpoints',
-    graphql: '/graphql',
-    host_info: '/host_info',
-    login: '/login',
-    logout: '/logout',
-    register: '/register',
-    results: '/results',
-    upload_ctrl: '/upload/ctrl/',
-    user: '/user/',
+    elasticsearch: '/api/v1/elasticsearch',
+    endpoints: '/api/v1/endpoints',
+    graphql: '/api/v1/graphql',
+    host_info: '/api/v1/host_info',
+    login: '/api/v1/login',
+    logout: '/api/v1/logout',
+    register: '/api/v1/register',
+    results: '/api/v1/results',
+    upload_ctrl: '/api/v1/upload/ctrl/',
+    user: '/api/v1/user/',
   },
   identification: 'Pbench MOCK server 0.71.0-xxxxx',
   indices: {
@@ -325,21 +325,21 @@ export const mockEndpoints = {
 
 export default {
   'GET /api/v1/endpoints': mockEndpoints,
-  'GET /controllers/months': mockIndices,
-  'POST /controllers/list': mockControllers,
-  'POST /datasets/list': (req, res) => {
+  'GET /api/v1/controllers/months': mockIndices,
+  'POST /api/v1/controllers/list': mockControllers,
+  'POST /api/v1/datasets/list': (req, res) => {
     const data = {};
     data[req.body.controller] = mockResults(req.body.controller);
     res.send(data);
   },
-  'POST /datasets/detail': (req, res) => {
+  'POST /api/v1/datasets/detail': (req, res) => {
     res.send(mockDetail(req.body.name));
   },
-  'POST /datasets/toc': mockTableContents,
-  'POST /datasets/samples': mockSamples,
-  'POST /datasets/timeseries': mockTimeseries,
-  'POST /mappings': mockMappings,
-  'POST /search': mockSearch,
+  'POST /api/v1/datasets/toc': mockTableContents,
+  'POST /api/v1/datasets/samples': mockSamples,
+  'POST /api/v1/datasets/timeseries': mockTimeseries,
+  'POST /api/v1/index/mappings': mockMappings,
+  'POST /api/v1/index/search': mockSearch,
   'POST /sessions/list': mockSessions,
   'POST /sessions/create': mockSession,
 };
