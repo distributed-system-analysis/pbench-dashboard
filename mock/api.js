@@ -1,12 +1,13 @@
 import moment from 'moment';
 import casual from 'casual';
+import createUniqueKey from '../src/utils/uniqueKey_generator';
 
 const DEFAULT_SIZE = 100;
 
 export const mockIndices = new Array(1).fill().map(() => moment().format('YYYY-MM'));
 
 export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-  controller: `${casual.word}.${casual.word}.com`,
+  controller: `${createUniqueKey()}.com`,
   key: casual.ip,
   last_modified_string: moment().valueOf(moment.utc()),
   last_modified_value: moment.utc() + index,
@@ -21,7 +22,7 @@ export const mockResults = hostname =>
     end: moment.utc(),
     // Since dataset id is a long hex string, removed "-" characters here to make it look like real data
     id: casual.uuid.replace(/-/g, ''),
-    result: casual.word,
+    result: createUniqueKey(),
     start: moment.utc(),
   }));
 
