@@ -73,13 +73,13 @@ export default {
     removeFavoriteController(state, { payload }) {
       return {
         ...state,
-        favoriteControllers: state.favoriteControllers.filter(item => item.key !== payload.key),
+        favoriteControllers: state.favoriteControllers.filter(item => item !== payload),
       };
     },
     removeFavoriteResult(state, { payload }) {
       return {
         ...state,
-        favoriteResults: state.favoriteResults.filter(item => item.key !== payload.key),
+        favoriteResults: state.favoriteResults.filter(item => item !== payload),
       };
     },
   },
