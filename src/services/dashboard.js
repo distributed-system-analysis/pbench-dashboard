@@ -28,13 +28,16 @@ function scrollUntilEmpty(data) {
 export async function queryControllers(params) {
   try {
     const { selectedDateRange, username } = params;
+    const payload = {
+      start: selectedDateRange.start,
+      end: selectedDateRange.end,
+    };
+    if (username !== '') {
+      payload.user = username;
+    }
 
     return request.post(endpoints.api.controllers_list, {
-      data: {
-        user: username,
-        start: selectedDateRange.start,
-        end: selectedDateRange.end,
-      },
+      data: payload,
     });
   } catch (err) {
     throw err;
@@ -44,14 +47,17 @@ export async function queryControllers(params) {
 export async function queryResults(params) {
   try {
     const { selectedDateRange, username, controller } = params;
+    const payload = {
+      controller: controller[0],
+      start: selectedDateRange.start,
+      end: selectedDateRange.end,
+    };
+    if (username !== '') {
+      payload.user = username;
+    }
 
     return request.post(endpoints.api.datasets_list, {
-      data: {
-        user: username,
-        controller: controller[0],
-        start: selectedDateRange.start,
-        end: selectedDateRange.end,
-      },
+      data: payload,
     });
   } catch (error) {
     throw error;
@@ -60,13 +66,17 @@ export async function queryResults(params) {
 
 export async function queryResult(params) {
   const { selectedDateRange, username, result } = params;
+  const payload = {
+    name: result,
+    start: selectedDateRange.start,
+    end: selectedDateRange.end,
+  };
+  if (username !== '') {
+    payload.user = username;
+  }
+
   return request.post(endpoints.api.datasets_detail, {
-    data: {
-      user: username,
-      name: result,
-      start: selectedDateRange.start,
-      end: selectedDateRange.end,
-    },
+    data: payload,
   });
 }
 

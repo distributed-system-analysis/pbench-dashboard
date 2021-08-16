@@ -7,7 +7,7 @@ export async function getSession(params) {
   const { sessionId } = params;
   const endpoint = MOCK_UI
     ? `${endpoints.pbench_server}/sessions/create`
-    : `${endpoints.pbench_server}/graphql`;
+    : `${endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -29,7 +29,7 @@ export async function getSession(params) {
 export async function getAllSessions() {
   const endpoint = MOCK_UI
     ? `${endpoints.pbench_server}/sessions/list`
-    : `${endpoints.pbench_server}/graphql`;
+    : `${endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -48,7 +48,7 @@ export async function getAllSessions() {
 
 export async function saveSession(params) {
   const { sessionConfig, description } = params;
-  const endpoint = `${endpoints.pbench_server}/graphql`;
+  const endpoint = `${endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -72,7 +72,7 @@ export async function saveSession(params) {
 export async function updateSessionDescription(params) {
   const { sessionId, description } = params;
 
-  const endpoint = `${endpoints.pbench_server}/graphql`;
+  const endpoint = `${endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -99,7 +99,7 @@ export async function updateSessionDescription(params) {
 export async function deleteSession(params) {
   const { sessionId } = params;
 
-  const endpoint = `${endpoints.pbench_server}/graphql`;
+  const endpoint = `${endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
