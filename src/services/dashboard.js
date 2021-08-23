@@ -4,12 +4,12 @@
 import request from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
-function scrollUntilEmpty(datastoreConfig, data) {
+async function scrollUntilEmpty(datastoreConfig, data) {
   const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
 
   if (allData.hits.total !== allData.hits.hits.length) {
-    const scroll = request.post(`${endpoint}&scroll_id=${allData._scroll_id}`);
+    const scroll = Promise.resolve(request.post(`${endpoint}&scroll_id=${allData._scroll_id}`));
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;

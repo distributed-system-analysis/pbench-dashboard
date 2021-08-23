@@ -189,26 +189,31 @@ export default {
 
       response.forEach(timeseriesResponse => {
         const timeseriesCollection = [];
-        const firstResponse = timeseriesResponse.hits.hits[0]._source;
-        const runId = firstResponse.run.id;
-        const primaryMetric = firstResponse.sample.measurement_title;
-        const iterationName = firstResponse.iteration.name;
-        const sampleName = firstResponse.sample.name;
-        timeseriesResponse.hits.hits.forEach(timeseries => {
-          timeseriesCollection.push({
-            x: timeseries._source['@timestamp_original'],
-            [`y-${runId}_${iterationName}_${sampleName}`]: timeseries._source.result.value,
-          });
-        });
-
-        Object.entries(clusteredIterations[primaryMetric]).forEach(([clusterId, cluster]) => {
+        // gets firstResponse only when there is a
+        // non empty array of hits and the response is not undefined.
+        if (timeseriesResponse && timeseriesResponse.hits.hits.length > 0) {
+          const firstResponse = timeseriesResponse.hits.hits[0]._source;
+          const runId = firstResponse.run.id;
+          const primaryMetric = firstResponse.sample.measurement_title;
+          const iterationName = firstResponse.iteration.name;
+          const sampleName = firstResponse.sample.name;
           const clusterKey = `${runId}_${iterationName}_${sampleName}`;
-          if (clusterKey in cluster) {
-            clusteredIterations[primaryMetric][clusterId][
-              clusterKey
-            ].timeseries = timeseriesCollection;
-          }
-        });
+
+          timeseriesResponse.hits.hits.forEach(timeseries => {
+            timeseriesCollection.push({
+              x: timeseries._source['@timestamp_original'],
+              [`y-${runId}_${iterationName}_${sampleName}`]: timeseries._source.result.value,
+            });
+          });
+
+          Object.entries(clusteredIterations[primaryMetric]).forEach(([clusterId, cluster]) => {
+            if (clusterKey in cluster) {
+              clusteredIterations[primaryMetric][clusterId][
+                clusterKey
+              ].timeseries = timeseriesCollection;
+            }
+          });
+        }
       });
 
       Object.entries(clusteredIterations).forEach(([primaryMetric, clusters]) => {
