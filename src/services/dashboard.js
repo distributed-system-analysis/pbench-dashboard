@@ -4,20 +4,6 @@
 import request from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
-function parseMonths(datastoreConfig, index, selectedIndices) {
-  let indices = '';
-
-  selectedIndices.forEach(value => {
-    if (index === datastoreConfig.result_index) {
-      indices += `${datastoreConfig.prefix + index + value}-*,`;
-    } else {
-      indices += `${datastoreConfig.prefix + index + value},`;
-    }
-  });
-
-  return indices;
-}
-
 function scrollUntilEmpty(datastoreConfig, data) {
   const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
@@ -270,7 +256,7 @@ export async function queryIterationSamples(params) {
 export async function queryTimeseriesData(payload) {
   const { datastoreConfig, selectedDateRange, selectedIterations } = payload;
 
-  const endpoint = `${datastoreConfig.elasticsearch}/${parseMonths(
+  const endpoint = `${datastoreConfig.elasticsearch}/${getAllMonthsWithinRange(
     datastoreConfig,
     datastoreConfig.result_index,
     selectedDateRange
