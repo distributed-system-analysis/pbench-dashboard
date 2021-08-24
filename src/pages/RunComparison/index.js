@@ -54,7 +54,7 @@ class RunComparison extends React.Component {
     } = this.props;
 
     const clusters = generateClusters(selectedIterations, iterationParams);
-    this.setState({ paramKeys: clusters.paramKeys });
+    this.setState({ paramKeys: clusters.paramKeys, loadingClusters: true });
 
     dispatch({
       type: 'dashboard/fetchTimeseriesData',
@@ -62,6 +62,7 @@ class RunComparison extends React.Component {
     }).then(timeseriesClusters => {
       this.setState({
         clusters: timeseriesClusters,
+        loadingClusters: false,
       });
     });
   }
