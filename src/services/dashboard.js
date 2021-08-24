@@ -1,15 +1,35 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
-import request from '../utils/request';
+import { notification } from 'antd';
+import request, { codeMessage } from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
 async function scrollUntilEmpty(datastoreConfig, data) {
   const endpoint = `${datastoreConfig.elasticsearch}/_search/scroll?scroll=1m`;
   const allData = data;
-
   if (allData.hits.total !== allData.hits.hits.length) {
-    const scroll = Promise.resolve(request.post(`${endpoint}&scroll_id=${allData._scroll_id}`));
+    const scroll = Promise.resolve(
+      request.post(`${endpoint}&scroll_id=${allData._scroll_id}`, {
+        errorHandler: error => {
+          // override default errorhandler
+          // at @/utils/request.js.
+          // does not break the page on a 502 response,
+          // but throws the error with a notification
+          // so that the dashboard can function normally.
+          const { response = {} } = error;
+          const errortext = codeMessage[response.status] || response.statusText;
+          const { status } = response;
+
+          notification.error({
+            message: `Request Error ${status}`,
+            description: errortext,
+          });
+
+          throw error;
+        },
+      })
+    );
     scroll.then(response => {
       allData._scroll_id = response._scroll_id;
       allData.hits.total = response.hits.total;
@@ -17,6 +37,7 @@ async function scrollUntilEmpty(datastoreConfig, data) {
       return scrollUntilEmpty(datastoreConfig, allData);
     });
   }
+
   return allData;
 }
 

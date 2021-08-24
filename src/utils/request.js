@@ -2,7 +2,7 @@ import { extend } from 'umi-request';
 import { notification } from 'antd';
 import router from 'umi/router';
 
-const codeMessage = {
+export const codeMessage = {
   200: 'The server successfully returned the requested data. ',
   201: 'New or modified data is successful. ',
   202: 'A request has entered the background queue (asynchronous task). ',
