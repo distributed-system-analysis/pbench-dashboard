@@ -15,14 +15,14 @@ export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index)
 }));
 
 export const mockResults = hostname =>
-  new Array(DEFAULT_SIZE).fill().map(() => ({
+  new Array(DEFAULT_SIZE).fill().map((value, index) => ({
     '@metadata.controller_dir': hostname,
     config: casual.word,
     controller: hostname,
     end: moment.utc(),
     // Since dataset id is a long hex string, removed "-" characters here to make it look like real data
     id: casual.uuid.replace(/-/g, ''),
-    result: createUniqueKey(),
+    result: `${index}${hostname.slice(0, -6)}${index}`,
     start: moment.utc(),
   }));
 
