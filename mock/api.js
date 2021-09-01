@@ -342,4 +342,15 @@ export default {
   'POST /api/v1/index/search': mockSearch,
   'POST /sessions/list': mockSessions,
   'POST /sessions/create': mockSession,
+  'POST /api/v1/login': (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin@admin.com' && password === 'admin') {
+      res.status(200).send({
+        username,
+        // signed using username admin@admin.com at https://jwt.io/
+        auth_token:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluQGFkbWluLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.83vIC55sFwKjMjUOFl2xUWpXHDgBuC4p3wm9Po02rLk',
+      });
+    } else res.status(404).send({ message: 'No such user exists' });
+  },
 };
