@@ -90,8 +90,8 @@
       "^@/(.*)$": "<rootDir>/src/$1"
     },
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/d3",
-      "<rootDir>/node_modules/casual"
+      "<rootDir>/node_modules/casual",
+      "<rootDir>/node_modules/(?!d3-interpolate/|@patternfly/react-core/node_modules/@patternfly/react-styles/|@patternfly/patternfly/|jschart/)"
     ]
   },
   "optionalDependencies": {
