@@ -8,6 +8,7 @@ import { persistStore } from 'redux-persist';
 import memoizeOne from 'memoize-one';
 import GlobalHeader from '@/components/GlobalHeader';
 import { getDvaApp } from 'umi';
+import Footer from '@/components/Footer';
 import {
   Page,
   Bullseye,
@@ -173,11 +174,7 @@ class BasicLayout extends React.PureComponent {
                   </React.Fragment>
                 }
               >
-                <DescriptionList
-                  columnModifier={{
-                    default: '2Col',
-                  }}
-                >
+                <DescriptionList columnModifier={{ default: '2Col' }}>
                   <DescriptionListGroup>
                     <DescriptionListTerm>ID</DescriptionListTerm>
                     <DescriptionListDescription>{sessionId}</DescriptionListDescription>
@@ -222,6 +219,7 @@ class BasicLayout extends React.PureComponent {
               </PageSection>
               {children}
             </PersistGate>
+            <Footer />
           </Page>
         </DocumentTitle>
       </React.Fragment>
