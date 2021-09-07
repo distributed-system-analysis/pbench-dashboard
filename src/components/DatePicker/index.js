@@ -1,82 +1,66 @@
-import React, { Component } from 'react';
-import { DatePicker } from 'antd';
+import React, { useState } from 'react';
+import {
+  Split,
+  SplitItem,
+  DatePicker,
+  Button,
+  isValidDate,
+  yyyyMMddFormat,
+} from '@patternfly/react-core';
 import { connect } from 'dva';
-import moment from 'moment';
-import PropTypes from 'prop-types';
-import './index.less';
 
-const { RangePicker } = DatePicker;
+const PFDatePicker = props => {
+  const { dispatch, onChangeCallback } = props;
+  const [from, setFrom] = useState('');
 
-@connect(({ global, datastore }) => ({
-  indices: datastore.indices,
-  selectedDateRange: global.selectedDateRange,
-}))
-class AntdDatePicker extends Component {
-  static propTypes = {
-    onChangeCallback: PropTypes.func,
+  const toValidator = date =>
+    isValidDate(from) && date >= from
+      ? ''
+      : '"To" date must be greater than or equal to the "From" date';
+
+  const onFromChange = (_str, date) => {
+    setFrom(date);
   };
 
-  static defaultProps = {
-    onChangeCallback: () => {},
-  };
-
-  handleChange = (dates, dateStrings) => {
-    const { dispatch, onChangeCallback } = this.props;
+  const getDataOnChange = (fromDate, toDate) => {
     dispatch({
       type: 'global/updateSelectedDateRange',
       payload: {
-        start: dateStrings[0],
-        end: dateStrings[1],
+        start: String(yyyyMMddFormat(fromDate)),
+        end: String(yyyyMMddFormat(toDate)),
       },
-    }).then(() => {
-      onChangeCallback();
     });
   };
 
-  // Since we have no data before or after a certain
-  // time range, we need to refrain user from selecting
-  // such dates in the date picker.
-  disabledDate = current => {
-    const { indices } = this.props;
-    if (indices.length === 0) {
-      return false;
+  const onToChange = (_str, date) => {
+    if (isValidDate(date)) {
+      getDataOnChange(from, date);
     }
-    if (current.isBefore(moment(indices[indices.length - 1]).startOf('month'))) {
-      return true;
-    }
-    if (current.isAfter(moment().endOf('day'))) {
-      return true;
-    }
-    return false;
   };
 
-  render() {
-    const { selectedDateRange, style } = this.props;
+  return (
+    <>
+      <Split style={{ marginBottom: '15px' }}>
+        <SplitItem>
+          <DatePicker onChange={onFromChange} aria-label="Start date" placeholder="YYYY-MM-DD" />
+        </SplitItem>
+        <SplitItem style={{ padding: '6px 12px 0 12px' }}>to</SplitItem>
+        <SplitItem>
+          <DatePicker
+            onChange={onToChange}
+            isDisabled={!isValidDate(from)}
+            rangeStart={from}
+            validators={[toValidator]}
+            aria-label="End date"
+            placeholder="YYYY-MM-DD"
+          />
+        </SplitItem>
+        <SplitItem style={{ marginLeft: '8px' }}>
+          <Button onClick={() => onChangeCallback()}>Filter</Button>
+        </SplitItem>
+      </Split>
+    </>
+  );
+};
 
-    return (
-      <RangePicker
-        separator="to"
-        style={style}
-        onChange={this.handleChange}
-        value={[
-          selectedDateRange.start ? moment(selectedDateRange.start) : moment().subtract(7, 'day'),
-          selectedDateRange.end ? moment(selectedDateRange.end) : moment(),
-        ]}
-        disabledDate={this.disabledDate}
-        size="default"
-        ranges={{
-          Today: [moment(), moment()],
-          'Last week': [moment().subtract(7, 'day'), moment()],
-          'Last month': [
-            moment()
-              .subtract(1, 'month')
-              .startOf('month'),
-            moment().startOf('month'),
-          ],
-        }}
-      />
-    );
-  }
-}
-
-export default AntdDatePicker;
+export default connect()(PFDatePicker);

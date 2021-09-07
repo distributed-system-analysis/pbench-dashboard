@@ -120,6 +120,7 @@ describe('controller page component', () => {
   });
 
   test('should sort last modified column chronologically ascending', async () => {
+    await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
     await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
@@ -133,6 +134,9 @@ describe('controller page component', () => {
   });
 
   test('should sort last modified column chronologically descending', async () => {
+    await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
+    await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
+    await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
     await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
@@ -218,16 +222,27 @@ describe('controller page component', () => {
   });
 
   test('should display the date picker component on click', async () => {
-    await page.waitForSelector('article > div > span > span > input:nth-child(1)');
-    await page.click('article > div > span > span > input:nth-child(1)');
+    await page.waitForSelector(
+      '.pf-l-split__item:nth-child(1) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button > svg > path'
+    );
+    await page.click(
+      '.pf-l-split__item:nth-child(1) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button > svg > path'
+    );
   });
 
   test('should change the selected dates after picking them from the calendar', async () => {
     await page.waitForSelector(
-      'div.ant-calendar-footer.ant-calendar-range-bottom > div > div > span:nth-child(2)'
+      '.pf-l-split__item:nth-child(1) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button'
     );
     await page.click(
-      'div.ant-calendar-footer.ant-calendar-range-bottom > div > div > span:nth-child(2)'
+      '.pf-l-split__item:nth-child(1) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button'
+    );
+
+    await page.waitForSelector(
+      '.pf-l-split__item:nth-child(3) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button > svg'
+    );
+    await page.click(
+      '.pf-l-split__item:nth-child(3) > .pf-c-date-picker > .pf-c-date-picker__input > .pf-c-input-group > .pf-c-button > svg'
     );
   });
 });

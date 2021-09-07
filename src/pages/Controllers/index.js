@@ -14,7 +14,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 
-import AntdDatePicker from '@/components/DatePicker';
+import PFDatePicker from '@/components/DatePicker';
 import Table from '@/components/Table';
 import { getDiffDate } from '@/utils/moment_constants';
 
@@ -24,8 +24,7 @@ import { getDiffDate } from '@/utils/moment_constants';
   selectedDateRange: global.selectedDateRange,
   favoriteControllers: user.favoriteControllers,
   username: auth.username,
-  loadingControllers:
-    loading.effects['dashboard/fetchControllers'] || loading.effects['datastore/fetchMonthIndices'],
+  loadingControllers: loading.effects['datastore/fetchMonthIndices'],
 }))
 class Controllers extends Component {
   constructor(props) {
@@ -205,7 +204,7 @@ class Controllers extends Component {
               />
             ) : (
               <CardBody>
-                <AntdDatePicker
+                <PFDatePicker
                   style={{ width: 400, marginBottom: 16 }}
                   onChangeCallback={this.fetchControllers}
                 />
