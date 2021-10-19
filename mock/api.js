@@ -7,8 +7,8 @@ const DEFAULT_SIZE = 100;
 export const mockIndices = new Array(1).fill().map(() => moment().format('YYYY-MM'));
 
 export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-  controller: `${createUniqueKey()}.com`,
-  key: casual.ip,
+  controller: `${casual.word}.${casual.word}.com`,
+  key: createUniqueKey(),
   last_modified_string: moment().valueOf(moment.utc()),
   last_modified_value: moment.utc() + index,
   results: casual.integer(1, DEFAULT_SIZE),
