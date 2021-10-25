@@ -46,8 +46,8 @@ export default class RowSelection extends React.Component {
         {' '}
         Mark as unread
       </DropdownItem>,
-      <DropdownItem key="favourite" onClick={favoriteResult}>
-        Mark Favourited
+      <DropdownItem key="favorite" onClick={favoriteResult}>
+        Mark Favorited
       </DropdownItem>,
       <DropdownSeparator key="separator" />,
       <DropdownItem key="delete" onClick={deleteResult}>

@@ -109,7 +109,7 @@ class ExpiringResults extends Component {
     });
   };
 
-  showDrowpdown = (e, id) => {
+  showDropdown = (e, id) => {
     // Stop propagation from going to the next page
     e.stopPropagation();
 
@@ -251,7 +251,7 @@ class ExpiringResults extends Component {
           return (
             <div>
               <EllipsisVIcon
-                onClick={e => this.showDrowpdown(e, `newrun${row.result}`)}
+                onClick={e => this.showDropdown(e, `newrun${row.result}`)}
                 className="dropbtn"
               />
               <div id={`newrun${row.result}`} style={{ display: 'none' }}>

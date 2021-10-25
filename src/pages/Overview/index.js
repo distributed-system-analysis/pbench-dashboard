@@ -18,7 +18,6 @@ import {
   AccordionContent,
   AccordionToggle,
   Label,
-  Switch,
   Modal,
   Alert,
   AlertGroup,
@@ -30,6 +29,8 @@ import { OutlinedClockIcon, UndoAltIcon, EllipsisVIcon } from '@patternfly/react
 import { formatDate, getDiffDays, getDiffDate } from '../../utils/moment_constants';
 import Table from '@/components/Table';
 import styles from './index.less';
+
+const expiringLimit = 15;
 
 @connect(({ global, user, loading, dashboard }) => ({
   selectedDateRange: global.selectedDateRange,
@@ -84,7 +85,7 @@ class Overview extends React.Component {
     const savedData = totalResultData.filter(x => x.serverMetadata.dashboard.saved === true);
     const newData = totalResultData.filter(x => x.serverMetadata.dashboard.saved !== true);
     const expiringData = totalResultData.filter(
-      x => getDiffDays(x.serverMetadata['server.deletion']) < 15
+      x => getDiffDays(x.serverMetadata['server.deletion']) < expiringLimit
     );
     this.setState({ newData, savedData, expiringData });
   }
@@ -142,7 +143,7 @@ class Overview extends React.Component {
     });
   };
 
-  showDrowpdown = (e, id) => {
+  showDropdown = (e, id) => {
     // Stop propagation from going to the next page
     e.stopPropagation();
 
@@ -236,19 +237,6 @@ class Overview extends React.Component {
       }).then(() => this.getRunResult());
     } else {
       this.getRunResult();
-    }
-  }
-
-  handleChange() {
-    const { expiringData, newData } = this.state;
-    if (expiringData.length > 0) {
-      this.setState({
-        expiringData: [],
-      });
-    } else {
-      this.setState({
-        expiringData: newData.filter(x => getDiffDays(x.serverMetadata['server.deletion']) < 15),
-      });
     }
   }
 
@@ -366,7 +354,7 @@ class Overview extends React.Component {
           return (
             <div>
               <EllipsisVIcon
-                onClick={e => this.showDrowpdown(e, `newrun${row.result}`)}
+                onClick={e => this.showDropdown(e, `newrun${row.result}`)}
                 className="dropbtn"
               />
               <div id={`newrun${row.result}`} style={{ display: 'none' }}>
@@ -496,7 +484,7 @@ class Overview extends React.Component {
           return (
             <div>
               <EllipsisVIcon
-                onClick={e => this.showDrowpdown(e, `newrun${row.result}`)}
+                onClick={e => this.showDropdown(e, `newrun${row.result}`)}
                 className="dropbtn"
               />
               <div
@@ -598,17 +586,6 @@ class Overview extends React.Component {
               <TextContent className={styles.paddingBig}>
                 <Text component={TextVariants.h1}> Overview</Text>
               </TextContent>
-            </GridItem>
-            <GridItem style={{ textAlign: 'right' }}>
-              {' '}
-              <Switch
-                id="simple-switch"
-                label="Has expiring runs"
-                labelOff="Doesn't have expiring runs"
-                isChecked={expiringData.length > 0}
-                onChange={() => this.handleChange()}
-                className={styles.paddingBig}
-              />
             </GridItem>
           </Grid>
         </Grid>

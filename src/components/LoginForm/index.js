@@ -10,7 +10,6 @@ import {
 } from '@patternfly/react-core';
 import { connect } from 'dva';
 import styles from './index.less';
-import { validateEmail } from '@/utils/validator';
 
 const mapStateToProps = state => {
   const { auth } = state;
@@ -27,10 +26,8 @@ const LoginForm = props => {
 
   const handleUsernameChange = val => {
     setUsername(val);
-    const validEmail = validateEmail(val);
     setErrors({
       ...errors,
-      ...validEmail,
     });
   };
 
@@ -72,7 +69,7 @@ const LoginForm = props => {
   const form = (
     <div className={styles.section}>
       <Form className={styles.section}>
-        <FormGroup label="Email address" isRequired fieldId="horizontal-form-name">
+        <FormGroup label="Username" isRequired fieldId="horizontal-form-name">
           <TextInput
             isRequired
             type="text"
