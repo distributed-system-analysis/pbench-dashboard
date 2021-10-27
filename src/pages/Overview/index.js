@@ -163,7 +163,7 @@ class Overview extends React.Component {
     const { totalResultData } = this.state;
     const { dispatch } = this.props;
     const keys = rows.map(({ original }) => original.result);
-    keys.forEach(function(key) {
+    keys.forEach(key => {
       totalResultData.filter(item => item.result === key)[0].serverMetadata.dashboard.saved = true;
     });
     dispatch({
@@ -573,12 +573,10 @@ class Overview extends React.Component {
 
     return (
       <div className={styles.paddingBig}>
-        {actionMessage !== '' ? (
+        {actionMessage !== '' && (
           <AlertGroup isToast style={{ display: 'block' }}>
             <Alert title={actionMessage} variant="success" />
           </AlertGroup>
-        ) : (
-          <></>
         )}
         <Grid hasGutter span={12}>
           <Grid hasGutter span={6}>

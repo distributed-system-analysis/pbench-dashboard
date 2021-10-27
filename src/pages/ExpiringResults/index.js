@@ -292,7 +292,7 @@ class ExpiringResults extends Component {
           <Grid hasGutter style={{ marginTop: '16px' }}>
             <GridItem span={12}>
               <Card>
-                <div>
+                <div className={styles.paddingBig}>
                   <Table
                     columns={seenDataColumns}
                     data={totalResultData}
