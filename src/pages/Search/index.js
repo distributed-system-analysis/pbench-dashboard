@@ -19,7 +19,7 @@ import Button from '@/components/Button';
 import Table from '@/components/Table';
 import SearchBar from '@/components/SearchBar';
 import Select from '@/components/Select';
-import AntdDatePicker from '@/components/DatePicker';
+import PFDatePicker from '@/components/DatePicker';
 
 @connect(({ search, global, datastore, loading }) => ({
   mapping: search.mapping,
@@ -260,7 +260,7 @@ class SearchList extends Component {
                 <Flex>
                   <FlexItem style={{ marginRight: 16, marginBottom: 16 }}>
                     <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 600 }}>months</p>
-                    <AntdDatePicker />
+                    <PFDatePicker onChangeCallback={this.fetchSearchQuery} />
                   </FlexItem>
                   {Object.keys(mapping).map(field => (
                     <FlexItem key={field} style={{ marginRight: 16, marginBottom: 16 }}>
