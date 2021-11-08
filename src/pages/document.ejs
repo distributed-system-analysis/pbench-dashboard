@@ -7,18 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pbench Dashboard</title>
   <link rel="icon" href="<%= context.config.publicPath +'favicon.ico'%>" type="image/x-icon">
-  
-  <!-- runtime endpoints config -->
-  <script type="text/javascript">
-    fetch( '/api/v1/endpoints' )
-      .then(response => {
-        if (response.ok) {
-          response.text().then(data => {
-            window.endpoints = JSON.parse(data);
-          })
-        }
-      });
-  </script>
 </head>
 
 <body>

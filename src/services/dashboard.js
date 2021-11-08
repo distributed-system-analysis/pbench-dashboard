@@ -5,14 +5,12 @@
 import request from '../utils/request';
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 
-const { endpoints } = window;
-
 function scrollUntilEmpty(data) {
   const allData = data;
 
   if (allData.hits.total.value < allData.hits.hits.length && allData._scroll_id) {
     const indices = `_search/scroll?scroll=1m&scroll_id=${allData._scroll_id}`;
-    const scroll = request.post(endpoints.api.elasticsearch, {
+    const scroll = request.post(window.endpoints.api.elasticsearch, {
       data: { indices },
     });
     scroll.then(response => {
@@ -36,7 +34,7 @@ export async function queryControllers(params) {
       payload.user = username;
     }
 
-    return request.post(endpoints.api.controllers_list, {
+    return request.post(window.endpoints.api.controllers_list, {
       data: payload,
     });
   } catch (err) {
@@ -56,7 +54,7 @@ export async function queryResults(params) {
       payload.user = username;
     }
 
-    return request.post(endpoints.api.datasets_list, {
+    return request.post(window.endpoints.api.datasets_list, {
       data: payload,
     });
   } catch (error) {
@@ -75,7 +73,7 @@ export async function queryResult(params) {
     payload.user = username;
   }
 
-  return request.post(endpoints.api.datasets_detail, {
+  return request.post(window.endpoints.api.datasets_detail, {
     data: payload,
   });
 }
@@ -84,12 +82,12 @@ export async function queryTocResult(params) {
   const { selectedDateRange, id } = params;
 
   const indices = `${getAllMonthsWithinRange(
-    endpoints,
-    endpoints.indices.run_toc_index,
+    window.endpoints,
+    window.endpoints.indices.run_toc_index,
     selectedDateRange
   )}/_search`;
 
-  const endpoint = MOCK_UI ? endpoints.api.datasets_toc : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? window.endpoints.api.datasets_toc : window.endpoints.api.elasticsearch;
 
   return request.post(endpoint, {
     data: {
@@ -111,7 +109,7 @@ export async function queryIterationSamples(params) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = MOCK_UI ? endpoints.api.datasets_samples : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? window.endpoints.api.datasets_samples : endpoints.api.elasticsearch;
   const iterationSampleRequests = [];
 
   await Promise.all(
@@ -202,7 +200,9 @@ export async function queryTimeseriesData(payload) {
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = MOCK_UI ? endpoints.api.datasets_timeseries : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI
+    ? window.endpoints.api.datasets_timeseries
+    : window.endpoints.api.elasticsearch;
 
   const timeseriesRequests = [];
   Object.entries(selectedIterations).forEach(([runId, run]) => {

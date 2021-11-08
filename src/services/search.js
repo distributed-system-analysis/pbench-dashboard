@@ -2,16 +2,12 @@
 import { getAllMonthsWithinRange } from '../utils/moment_constants';
 import request from '../utils/request';
 
-const { endpoints } = window;
-
 export async function queryIndexMapping(params) {
   const { indices } = params;
 
-  const mappings = `${endpoints.indices.run_index}${indices[0]}/_mappings`;
+  const mappings = `${window.endpoints.indices.run_index}${indices[0]}/_mappings`;
 
-  const endpoint = MOCK_UI
-    ? endpoints.api.mappings
-    : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? endpoints.api.mappings : endpoints.api.elasticsearch;
 
   return request.post(endpoint, { data: { indices: mappings } });
 }
@@ -21,14 +17,12 @@ export async function searchQuery(params) {
     const { selectedFields, selectedDateRange, query } = params;
 
     const indices = `${getAllMonthsWithinRange(
-      endpoints,
-      endpoints.run_index,
+      window.endpoints,
+      window.endpoints.run_index,
       selectedDateRange
     )}/_search`;
 
-    const endpoint = MOCK_UI
-      ? endpoints.api.search
-      : endpoints.api.elasticsearch;
+    const endpoint = MOCK_UI ? window.endpoints.api.search : window.endpoints.api.elasticsearch;
 
     return request.post(endpoint, {
       data: {

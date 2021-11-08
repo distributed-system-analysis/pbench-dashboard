@@ -1,10 +1,8 @@
 import request from '../utils/request';
 
-const { endpoints } = window;
-
 export async function saveUserSession(params) {
   const { sessionConfig, description } = params;
-  const endpoint = `${endpoints.api.graphql}`;
+  const endpoint = `${window.endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -26,7 +24,7 @@ export async function saveUserSession(params) {
 
 export async function queryUserSession(params) {
   const { id } = params;
-  const endpoint = `${endpoints.api.graphql}`;
+  const endpoint = `${window.endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `

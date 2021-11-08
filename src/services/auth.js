@@ -1,9 +1,7 @@
 import request from '../utils/request';
 
-const { endpoints } = window;
-
 export const postRegisterUser = async params => {
-  const endpoint = `${endpoints.api.register}`;
+  const endpoint = `${window.endpoints.api.register}`;
   const { username, password, email, firstName, lastName } = params;
   return request.post(endpoint, {
     data: {
@@ -21,7 +19,7 @@ export const postRegisterUser = async params => {
 };
 
 export const postLoginUser = params => {
-  const endpoint = `${endpoints.api.login}`;
+  const endpoint = `${window.endpoints.api.login}`;
   const { username, password } = params;
   return request.post(endpoint, {
     data: {
@@ -36,7 +34,7 @@ export const postLoginUser = params => {
 };
 
 export const postLogoutUser = () => {
-  const endpoint = `${endpoints.api.logout}`;
+  const endpoint = `${window.endpoints.api.logout}`;
   return request.post(endpoint, {
     data: {},
     headers: {

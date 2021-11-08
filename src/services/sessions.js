@@ -1,13 +1,11 @@
 /* eslint-disable no-undef */
 import request from '../utils/request';
 
-const { endpoints } = window;
-
 export async function getSession(params) {
   const { sessionId } = params;
   const endpoint = MOCK_UI
-    ? `${endpoints.pbench_server}/sessions/create`
-    : `${endpoints.api.graphql}`;
+    ? `${window.endpoints.pbench_server}/sessions/create`
+    : `${window.endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -28,8 +26,8 @@ export async function getSession(params) {
 // queries all the available shared sessions from the database to display
 export async function getAllSessions() {
   const endpoint = MOCK_UI
-    ? `${endpoints.pbench_server}/sessions/list`
-    : `${endpoints.api.graphql}`;
+    ? `${window.endpoints.pbench_server}/sessions/list`
+    : `${window.endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -48,7 +46,7 @@ export async function getAllSessions() {
 
 export async function saveSession(params) {
   const { sessionConfig, description } = params;
-  const endpoint = `${endpoints.api.graphql}`;
+  const endpoint = `${window.endpoints.api.graphql}`;
   return request.post(endpoint, {
     data: {
       query: `
@@ -72,7 +70,7 @@ export async function saveSession(params) {
 export async function updateSessionDescription(params) {
   const { sessionId, description } = params;
 
-  const endpoint = `${endpoints.api.graphql}`;
+  const endpoint = `${window.endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
@@ -99,7 +97,7 @@ export async function updateSessionDescription(params) {
 export async function deleteSession(params) {
   const { sessionId } = params;
 
-  const endpoint = `${endpoints.api.graphql}`;
+  const endpoint = `${window.endpoints.api.graphql}`;
 
   return request.post(endpoint, {
     data: {
