@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { routerRedux } from 'dva/router';
@@ -54,6 +53,7 @@ class BasicLayout extends React.PureComponent {
       sessionExitModalVisible: false,
       breadcrumb: {},
       showLoginBanner: true,
+      loadingEndpoints: true,
     };
   }
 
@@ -63,6 +63,21 @@ class BasicLayout extends React.PureComponent {
     } = this.props;
     // find the current route from menuData.
     const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
+
+    if (!window.endpoints) {
+      // eslint-disable-next-line no-undef
+      fetch(`${ENDPOINT}`).then(response => {
+        if (response.ok) {
+          response.text().then(data => {
+            window.endpoints = JSON.parse(data);
+          });
+        }
+
+        this.setState({
+          loadingEndpoints: false,
+        });
+      });
+    }
 
     this.setState({
       breadcrumb: currRouteMap,
@@ -142,7 +157,15 @@ class BasicLayout extends React.PureComponent {
       errorMessage,
     } = this.props;
 
-    const { sessionExitModalVisible, breadcrumb, showLoginBanner } = this.state;
+    const { sessionExitModalVisible, breadcrumb, showLoginBanner, loadingEndpoints } = this.state;
+
+    if (loadingEndpoints) {
+      return (
+        <Bullseye>
+          <Spinner />
+        </Bullseye>
+      );
+    }
 
     return (
       <React.Fragment>
@@ -216,8 +239,8 @@ class BasicLayout extends React.PureComponent {
                 variant={PageSectionVariants.light}
               >
                 {breadcrumb.parent && <RenderBreadcrumb context={breadcrumb} />}
+                {children}
               </PageSection>
-              {children}
             </PersistGate>
             <Footer />
           </Page>
