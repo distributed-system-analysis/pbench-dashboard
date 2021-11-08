@@ -31,4 +31,5 @@ package-lock.json
 __snapshots__
 
 # config
-#public/endpoints.js
+config/config.prod.js
+config/config.staging.js
