@@ -66,7 +66,7 @@ class BasicLayout extends React.PureComponent {
 
     if (!window.endpoints) {
       // eslint-disable-next-line no-undef
-      fetch(`${ENDPOINT}`).then(response => {
+      fetch(ENDPOINT).then(response => {
         if (response.ok) {
           response.text().then(data => {
             window.endpoints = JSON.parse(data);
