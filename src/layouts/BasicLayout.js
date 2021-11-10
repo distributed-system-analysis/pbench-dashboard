@@ -64,9 +64,9 @@ class BasicLayout extends React.PureComponent {
     // find the current route from menuData.
     const currRouteMap = this.breadcrumbNameMap.find(route => route.path.endsWith(pathname));
 
-    if (!window.endpoints) {
-      // eslint-disable-next-line no-undef
-      fetch(ENDPOINT).then(response => {
+    // eslint-disable-next-line no-undef
+    fetch(ENDPOINT)
+      .then(response => {
         if (response.ok) {
           response.text().then(data => {
             window.endpoints = JSON.parse(data);
@@ -76,8 +76,14 @@ class BasicLayout extends React.PureComponent {
         this.setState({
           loadingEndpoints: false,
         });
+      })
+      .catch(() => {
+        const { dispatch } = this.props;
+        dispatch(routerRedux.push('/exception/500'));
+        this.setState({
+          loadingEndpoints: false,
+        });
       });
-    }
 
     this.setState({
       breadcrumb: currRouteMap,
@@ -235,10 +241,19 @@ class BasicLayout extends React.PureComponent {
               }
             >
               <PageSection
-                style={showLoginBanner ? { paddingBottom: 0 } : { marginTop: 0, paddingBottom: 0 }}
+                style={
+                  showLoginBanner
+                    ? { paddingBottom: 0, minHeight: '85vh' }
+                    : { marginTop: 0, paddingBottom: 0, minHeight: '85vh' }
+                }
                 variant={PageSectionVariants.light}
               >
-                {breadcrumb.parent && <RenderBreadcrumb context={breadcrumb} />}
+                {/* 
+                  Handles the case where breadcrumbs will be
+                  undefined for routes which do not
+                  exist in the sidermenu.
+                */}
+                {breadcrumb && breadcrumb.parent && <RenderBreadcrumb context={breadcrumb} />}
                 {children}
               </PageSection>
             </PersistGate>
