@@ -7,7 +7,7 @@ export async function queryIndexMapping(params) {
 
   const mappings = `${window.endpoints.indices.run_index}${indices[0]}/_mappings`;
 
-  const endpoint = MOCK_UI ? endpoints.api.mappings : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI ? window.endpoints.api.mappings : window.endpoints.api.elasticsearch;
 
   return request.post(endpoint, { data: { indices: mappings } });
 }
