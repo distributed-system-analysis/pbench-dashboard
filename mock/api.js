@@ -259,7 +259,7 @@ export const mockTimeseries = {
 
 export const mockSearch = {
   hits: {
-    total: DEFAULT_SIZE,
+    total: { value: DEFAULT_SIZE },
     hits: new Array(DEFAULT_SIZE).fill().map((value, index) => ({
       _id: index + 1,
       _source: {
@@ -268,6 +268,7 @@ export const mockSearch = {
           name: casual.word,
           script: casual.word,
           user: casual.name,
+          controller: casual.word,
         },
         '@metadata.controller_dir': casual.word,
       },

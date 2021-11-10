@@ -231,7 +231,19 @@ class SearchList extends Component {
     selectedFields.forEach(field => {
       columns.push({
         Header: field,
-        accessor: field,
+        // Note: The accessor finds it difficult
+        // to compare fields with '.' operator in its name.
+        // (for example: run.name is not same as "run.name" string)
+        // Hence, we select the accessor directly from the accessor row property
+        accessor: row => {
+          if (field in row) {
+            return field;
+          }
+          return null;
+        },
+        Cell: row => {
+          return row.cell.row.original[field] || '--';
+        },
       });
     });
 
