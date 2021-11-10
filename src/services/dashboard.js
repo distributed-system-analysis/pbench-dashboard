@@ -104,12 +104,14 @@ export async function queryIterationSamples(params) {
   const { selectedDateRange, selectedResults } = params;
 
   const indices = `${getAllMonthsWithinRange(
-    endpoints,
-    endpoints.indices.result_index,
+    window.endpoints,
+    window.endpoints.indices.result_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
-  const endpoint = MOCK_UI ? window.endpoints.api.datasets_samples : endpoints.api.elasticsearch;
+  const endpoint = MOCK_UI
+    ? window.endpoints.api.datasets_samples
+    : window.endpoints.api.elasticsearch;
   const iterationSampleRequests = [];
 
   await Promise.all(
@@ -195,8 +197,8 @@ export async function queryTimeseriesData(payload) {
   const { selectedDateRange, selectedIterations } = payload;
 
   const indices = `${getAllMonthsWithinRange(
-    endpoints,
-    endpoints.indices.result_data_index,
+    window.endpoints,
+    window.endpoints.indices.result_data_index,
     selectedDateRange
   )}/_search?scroll=1m`;
 
