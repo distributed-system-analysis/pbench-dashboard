@@ -15,6 +15,7 @@ const SignupHandler = props => {
   const [errors, setErrors] = useState({
     firstName: '',
     lastName: '',
+    username: '',
     email: '',
     passwordConstraints: '',
     passwordConfirm: '',
@@ -29,6 +30,7 @@ const SignupHandler = props => {
   // Form fields
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -40,6 +42,7 @@ const SignupHandler = props => {
     if (
       firstName.trim() === '' ||
       lastName.trim() === '' ||
+      username.trim() === '' ||
       email.trim() === '' ||
       password.trim() === '' ||
       confirmPassword.trim() === ''
@@ -71,7 +74,7 @@ const SignupHandler = props => {
         setEnableSubmitButton(false);
       }
     },
-    [firstName, lastName, email, password, confirmPassword]
+    [firstName, lastName, username, email, password, confirmPassword]
   );
 
   const handleFirstNameInputChange = val => {
@@ -80,6 +83,10 @@ const SignupHandler = props => {
 
   const handleLastNameInputChange = val => {
     setLastName(val);
+  };
+
+  const handleUsernameInputChange = val => {
+    setUsername(val);
   };
 
   const handleEmailInputChange = val => {
@@ -125,9 +132,9 @@ const SignupHandler = props => {
       payload: {
         firstName,
         lastName,
-        username: email,
-        password,
+        username,
         email,
+        password,
       },
     });
   };
@@ -152,6 +159,17 @@ const SignupHandler = props => {
           name="horizontal-form-name"
           onChange={handleLastNameInputChange}
         />
+      </FormGroup>
+      <FormGroup label="Username" isRequired fieldId="horizontal-form-username">
+        <TextInput
+          isRequired
+          type="text"
+          id="horizontal-form-username"
+          aria-describedby="horizontal-form-name-helper"
+          name="horizontal-form-name"
+          onChange={handleUsernameInputChange}
+        />
+        <p className={styles.error}>{errors.username}</p>
       </FormGroup>
       <FormGroup label="Email address" isRequired fieldId="horizontal-form-email">
         <TextInput
