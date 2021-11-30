@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import moment from 'moment';
 import { mockControllers, mockIndices } from '../../mock/api';
 
 jest.setTimeout(30000);
@@ -132,18 +133,21 @@ describe('controller page component', () => {
         mockControllers.length - 1
       ].controller
     );
+
+    // reset the table to default.
+    await page.click('table > thead > tr > th:nth-child(1) > div:nth-child(1) > span');
   });
 
   test('should sort results column numerically ascending', async () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
-    const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
-      elem => elem.innerHTML
+    const testControllerResults = await page.$eval(
+      'table > tbody > tr:nth-child(1) > td:nth-child(3)',
+      elem => parseInt(elem.innerHTML, 10)
     );
-    expect(testController).toBe(
-      mockControllers.sort((a, b) => a.results - b.results)[0].controller
+    expect(testControllerResults).toBe(
+      mockControllers.sort((a, b) => a.results - b.results)[0].results
     );
   });
 
@@ -151,12 +155,51 @@ describe('controller page component', () => {
     await page.waitForSelector('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.click('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
     await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
+    const testControllerResults = await page.$eval(
+      'table > tbody > tr:nth-child(1) > td:nth-child(3)',
+      elem => parseInt(elem.innerHTML, 10)
+    );
+    expect(testControllerResults).toBe(
+      mockControllers.sort((a, b) => a.results - b.results)[mockControllers.length - 1].results
+    );
+
+    // reset the table to default
+    await page.click('table > thead > tr > th:nth-child(3) > div:nth-child(1) > span');
+  });
+
+  test('should sort last modified column chronologically ascending', async () => {
+    await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
+    await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
+
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
+
     const testController = await page.$eval(
-      'table > tbody > tr:nth-child(1) > td:nth-child(1) > span',
+      'table > tbody > tr:nth-child(1) > td:nth-child(2) > span',
+      elem => elem.innerHTML
+    );
+
+    expect(testController).toBe(
+      moment(
+        mockControllers.sort((a, b) => a.last_modified_value - b.last_modified_value)[0]
+          .last_modified_value
+      ).fromNow()
+    );
+  });
+
+  test('should sort last modified column chronologically descending', async () => {
+    await page.waitForSelector('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
+    await page.click('table > thead > tr > th:nth-child(2) > div:nth-child(1) > span');
+    await page.waitForSelector('table > tbody > tr:nth-child(1) > td:nth-child(1) > span');
+    const testController = await page.$eval(
+      'table > tbody > tr:nth-child(1) > td:nth-child(2) > span',
       elem => elem.innerHTML
     );
     expect(testController).toBe(
-      mockControllers.sort((a, b) => a.results - b.results)[mockControllers.length - 1].controller
+      moment(
+        mockControllers.sort((a, b) => a.last_modified_value - b.last_modified_value)[
+          mockControllers.length - 1
+        ].last_modified_value
+      ).fromNow()
     );
   });
 

@@ -6,13 +6,15 @@ const DEFAULT_SIZE = 100;
 
 export const mockIndices = new Array(1).fill().map(() => moment().format('YYYY-MM'));
 
-export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => ({
-  controller: `${casual.word}.${casual.word}.com`,
-  key: createUniqueKey(),
-  last_modified_string: moment().valueOf(moment.utc()),
-  last_modified_value: moment.utc() + index,
-  results: casual.integer(1, DEFAULT_SIZE),
-}));
+export const mockControllers = new Array(DEFAULT_SIZE).fill().map((value, index) => {
+  return {
+    controller: `${casual.word}.${casual.word}.com`,
+    key: createUniqueKey(),
+    last_modified_string: moment(casual.date('YYYY-MM-DD')).valueOf(moment.utc()),
+    last_modified_value: moment(casual.date('YYYY-MM-DD')).utc() + index,
+    results: casual.integer(1, DEFAULT_SIZE),
+  };
+});
 
 export const mockResults = hostname =>
   new Array(DEFAULT_SIZE).fill().map(() => ({
