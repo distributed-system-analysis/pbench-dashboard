@@ -45,3 +45,20 @@ export const postLogoutUser = () => {
     },
   });
 };
+
+export const putUpdateNewPassword = params => {
+  const { temporaryToken, password } = params;
+  const endpoint = `${endpoints.api.reset_password}`;
+  return request.put(endpoint, {
+    data: {
+      // First name is expected
+      // on the server side.
+      password,
+    },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${temporaryToken}`,
+    },
+  });
+};

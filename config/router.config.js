@@ -20,8 +20,8 @@ module.exports = [
     component: './RecoveryEmail',
   },
   {
-    path: '/recovery/:hash',
-    name: 'recovery',
+    path: '/reset_password/:hash',
+    name: 'reset_password',
     component: './PasswordRecovery',
   },
   {

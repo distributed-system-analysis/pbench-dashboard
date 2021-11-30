@@ -92,13 +92,13 @@ const PasswordRecovery = props => {
     }
   };
 
-  const sendTempPasword = temporaryPassword => {
+  const updateNewPassword = temporaryToken => {
     const { dispatch } = props;
     dispatch({
-      type: 'auth/recoverPassword',
+      type: 'auth/putUpdateNewPassword',
       payload: {
         password,
-        temporaryPassword,
+        temporaryToken,
       },
     });
   };
@@ -122,7 +122,7 @@ const PasswordRecovery = props => {
         </FormGroup>
         <PasswordConstraints constraints={constraints} />
         <ActionGroup>
-          <Button isBlock onClick={() => sendTempPasword(token)} isDisabled={!enableSubmitBtn}>
+          <Button isBlock onClick={() => updateNewPassword(token)} isDisabled={!enableSubmitBtn}>
             <Title
               headingLevel="h4"
               size="xl"
