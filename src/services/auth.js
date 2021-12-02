@@ -51,8 +51,11 @@ export const putUpdateNewPassword = params => {
   const endpoint = `${endpoints.api.reset_password}`;
   return request.put(endpoint, {
     data: {
-      // First name is expected
-      // on the server side.
+      /*
+      First name is expected on the server side.
+      Refer to
+      https://github.com/distributed-system-analysis/pbench-dashboard/issues/211
+      */
       password,
     },
     headers: {
