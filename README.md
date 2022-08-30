@@ -1,3 +1,11 @@
+# Archived!
+
+The `pbench-dashboard` repository has been archived and replaced by https://github.com/distributed-system-analysis/pbench/tree/main/dashboard.
+
+Please file PRs and issues against https://github.com/distributed-system-analysis/pbench.
+
+----
+
 ## Foreword
 
 Pbench Dashboard is a web-based platform for consuming indexed performance benchmark data. The platform provides a consolidated view of benchmark data within tables, charts, and other powerful visualizations. Users are able to quickly navigate through benchmark data and tune analytics through comparison tools for in-depth analysis.
